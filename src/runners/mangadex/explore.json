@@ -1,0 +1,44 @@
+[
+    {
+        "id": "391b0423-d847-456f-aff0-8b0cfc03066b",
+        "label": "Action",
+        "adultContent": false,
+        "imageUrl": "https://dwgkfo5b3odmw.cloudfront.net/img/manga_series_link_img/540-th-WSJ_JuJutsuKaisen_400x320.jpg"
+    },
+    {
+        "id": "e5301a23-ebd9-49dd-a0cb-2add944c7fe9",
+        "label": "Slice of Life",
+        "adultContent": false,
+        "imageUrl": "https://uploads.mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/ee2b3b20-9a67-45a0-9777-d00b95bae4e2.png.256.jpg"
+    },
+    {
+        "id": "ace04997-f6bd-436e-b261-779182193d3d",
+        "label": "Isekai",
+        "adultContent": false,
+        "imageUrl": "https://uploads.mangadex.org/covers/0f237a5f-07ad-4e43-bbd9-2a320694434d/db984f48-cf2a-4359-85ca-cc256c66d659.jpg.256.jpg"
+    },
+    {
+        "id": "7064a261-a137-4d3a-8848-2d385de3a99c",
+        "label": "Superhero",
+        "adultContent": false,
+        "imageUrl": "https://uploads.mangadex.org/covers/4f3bcae4-2d96-4c9d-932c-90181d9c873e/8f980e57-7c0e-4c2b-afdb-404d782fb4c2.jpg.256.jpg"
+    },
+    {
+        "id": "07251805-a27e-4d59-b488-f0bfbec15168",
+        "label": "Thriller",
+        "adultContent": false,
+        "imageUrl": "https://uploads.mangadex.org/covers/b5b21ca1-bba5-4b9a-8cd1-6248f731650b/331c54cb-f1bb-4a46-8792-f94916a76f33.png.256.jpg"
+    },
+    {
+        "id": "b9af3a63-f058-46de-a9a0-e0c13906197a",
+        "label": "Drama",
+        "adultContent": false,
+        "imageUrl": "https://uploads.mangadex.org/covers/30196491-8fc2-4961-8886-a58f898b1b3e/a3b8e228-a9d2-48df-8ae6-2014d01a2d8f.jpg.256.jpg"
+    },
+    {
+        "id": "0a39b5a1-b235-4886-a747-1d05d216532d",
+        "label": "Award Winning",
+        "adultContent": false,
+        "imageUrl": "https://uploads.mangadex.org/covers/304ceac3-8cdb-4fe7-acf7-2b6ff7a60613/badf78c9-cf96-4fb5-919e-5892f552e8ba.png.256.jpg"
+    }
+]
