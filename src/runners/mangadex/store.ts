@@ -28,4 +28,30 @@ export class MDStore {
     const value = await this.store.get("lang");
     return value?.split(", ") ?? ["en"];
   }
+
+  // Recommendations
+  async getMimasEnabled() {
+    const value = await this.store.get("mimas_recs");
+
+    if ((value && value == "true") || value == "1") {
+      return true;
+    }
+    return false;
+  }
+
+  async getMimasTargets() {
+    const value = await this.store.get("mimas_targets");
+    return value?.split(", ") ?? [];
+  }
+
+  async saveToMimasTargets(id: string) {
+    const targets = await this.getMimasTargets();
+    targets.push(id);
+    const newTargets = Array.from(new Set(targets))
+      .filter((v) => !!v.trim())
+      .slice(-5);
+
+    const value = newTargets.join(", ");
+    await this.store.set("mimas_targets", value);
+  }
 }

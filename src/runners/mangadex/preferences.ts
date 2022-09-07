@@ -78,9 +78,25 @@ export const getPreferenceList = (): PreferenceGroup[] => {
     children: [epCR],
   };
 
-  // TODO: Should Show Seasonal List
-  // TODO: Recommendations
   groups.push(exploreGroup);
+
+  // TODO: Should Show Seasonal List
+
+  //
+  const recommendations: Preference = {
+    key: "mimas_recs",
+    label: "Mimas Recommendations",
+    type: PreferenceType.toggle,
+    defaultValue: "false",
+  };
+
+  const mimasGroup: PreferenceGroup = {
+    id: "mimas",
+    header: "Recommendations",
+    children: [recommendations],
+  };
+
+  groups.push(mimasGroup);
 
   return groups;
 };

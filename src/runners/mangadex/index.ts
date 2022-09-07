@@ -32,9 +32,9 @@ import {
 } from "@suwatte/daisuke";
 import explore_tags from "./explore.json";
 import { decode, encode } from "he";
-import { groupBy, capitalize } from "lodash";
+import { groupBy, capitalize, sample } from "lodash";
 import { MDStore } from "./store";
-import { languageISO, languageLabel } from "./utils";
+import { languageISO, languageLabel, MimasRecommendation } from "./utils";
 import { getPreferenceList } from "./preferences";
 
 export class Target extends Source {
@@ -411,6 +411,7 @@ export class Target extends Source {
 
   // * Explore
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
+    const injectMimasRecs = await this.STORE.getMimasEnabled();
     const sections: CollectionExcerpt[] = [
       {
         id: "followedCount",
@@ -447,6 +448,39 @@ export class Target extends Source {
         style: CollectionStyle.UPDATE_LIST,
       },
     ];
+
+    if (injectMimasRecs) {
+      const ids = await this.STORE.getMimasTargets();
+      const shuffle = <T>(array: T[]) => {
+        var currentIndex = array.length,
+          temporaryValue,
+          randomIndex;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex -= 1;
+
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+      };
+      const recSections = ids.map(
+        (v): CollectionExcerpt => ({
+          id: `mimas|${v}`,
+          title: "Recommendation",
+          style: CollectionStyle.NORMAL,
+        })
+      );
+
+      const merged = shuffle(sections.concat(recSections));
+      return merged;
+    }
     return sections;
   }
 
@@ -464,27 +498,46 @@ export class Target extends Source {
           highlights: await this.getMDUpdates(1),
         };
       default:
-        const sort = (await this.getSearchSorters()).find(
-          (v) => v.id === excerpt.id
-        );
-        const tags = (await this.STORE.getContentRatings()).map(
-          (v) => `cr|${v}`
-        );
-        const query: SearchRequest = {
-          page: 1,
-          includedTags: tags,
-          excludedTags: [],
-          sort,
-        };
+        if (excerpt.id.includes("mimas")) {
+          const id = excerpt.id.split("|").pop();
+          if (!id) throw "Improper Rec Config";
+          const name =
+            sample(["More Like", "Because you read", "Similar to"]) ??
+            "More Like";
 
-        const overrides = {
-          limit: 20,
-          getStats: ["followedCount", "rating"].includes(excerpt.id),
-        };
-        return {
-          ...excerpt,
-          highlights: (await this.getMDSearchResults(query, overrides)).results,
-        };
+          const recs = await this.getMimasRecommendations(id);
+          return {
+            highlights: recs.recs.map((v) => ({
+              title: v.title,
+              id: v.contentId,
+              covers: [v.coverImage],
+            })),
+            title: `${name} ${recs.target.title}`,
+          };
+        } else {
+          const sort = (await this.getSearchSorters()).find(
+            (v) => v.id === excerpt.id
+          );
+          const tags = (await this.STORE.getContentRatings()).map(
+            (v) => `cr|${v}`
+          );
+          const query: SearchRequest = {
+            page: 1,
+            includedTags: tags,
+            excludedTags: [],
+            sort,
+          };
+
+          const overrides = {
+            limit: 20,
+            getStats: ["followedCount", "rating"].includes(excerpt.id),
+          };
+          return {
+            ...excerpt,
+            highlights: (await this.getMDSearchResults(query, overrides))
+              .results,
+          };
+        }
     }
   }
   async getExplorePageTags(): Promise<Tag[]> {
@@ -531,6 +584,30 @@ export class Target extends Source {
     }
 
     return filters;
+  }
+
+  // Events
+  async onChaptersCompleted(
+    contentId: string,
+    chapterIds: string[]
+  ): Promise<void> {
+    // Update Recs
+    await this.STORE.saveToMimasTargets(contentId);
+  }
+
+  async getMimasRecommendations(
+    id: string
+  ): Promise<{ recs: MimasRecommendation[]; target: MimasRecommendation }> {
+    const MIMAS_URL = "https://mimas.mantton.com";
+
+    const response = await this.NETWORK_CLIENT.get(
+      `${MIMAS_URL}/similar/org.mangadex/${id}?page=1`
+    );
+    const data = JSON.parse(response.data);
+    return {
+      recs: data.results,
+      target: data.target,
+    };
   }
 
   // Preferences
@@ -851,8 +928,8 @@ export class Target extends Source {
     const getValue = (key: string) => {
       let obj = stats[key];
       return {
-        follows: obj.follows.toString(),
-        rating: obj.rating.average.toString(),
+        follows: obj.follows,
+        rating: obj.rating.average,
         // views: 0,
       };
     };

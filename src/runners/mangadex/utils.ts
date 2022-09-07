@@ -265,3 +265,10 @@ export const languageLabel = (lang: string) => {
 export const languageISO = (lang: string) => {
   return languages.find((v) => v.id === lang)?.iso ?? "UNKNOWN";
 };
+
+export type MimasRecommendation = {
+  sourceId: string;
+  contentId: string;
+  title: string;
+  coverImage: string;
+};
