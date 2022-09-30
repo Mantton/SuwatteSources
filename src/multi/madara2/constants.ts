@@ -86,4 +86,49 @@ export const DEFAULT_CONTEXT: Context = {
   typeSelector: ".post-content_item:contains(Type) .summary-content",
   alternativeTitlesSelector:
     ".post-content_item:contains(Alt) .summary-content",
+
+  forceAdult: false,
+  adultTags: ["mature"],
 };
+
+export const TAG_PREFIX = {
+  author: "author",
+  artist: "artist",
+  hashtag: "hashtag",
+};
+
+export const COMPLETED_STATUS_LIST = [
+  "Completed",
+  "Completo",
+  "Concluído",
+  "Concluido",
+  "Terminé",
+  "Hoàn Thành",
+  "مكتملة",
+  "مكتمل",
+];
+
+export const ONGOING_STATUS_LIST = [
+  "OnGoing",
+  "Продолжается",
+  "Updating",
+  "Em Lançamento",
+  "Em lançamento",
+  "Em andamento",
+  "Em Andamento",
+  "En cours",
+  "Ativo",
+  "Lançando",
+  "Đang Tiến Hành",
+  "Devam Ediyor",
+  "Devam ediyor",
+  "In Corso",
+  "In Arrivo",
+  "مستمرة",
+  "مستمر",
+  "En Curso",
+];
+
+export const HIATUS_STATUS_LIST = ["On Hold"];
+
+export const CANCELLED_STATUS_LIST = ["Canceled"];

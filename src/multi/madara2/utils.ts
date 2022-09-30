@@ -1,6 +1,13 @@
-import { NetworkRequest, SearchRequest } from "@suwatte/daisuke";
-import { AJAX_DIRECTORY } from "./constants";
-import { Context } from "./types";
+import { NetworkRequest, SearchRequest, Status } from "@suwatte/daisuke";
+import { AnyNode, Cheerio, CheerioAPI } from "cheerio";
+import {
+  AJAX_DIRECTORY,
+  CANCELLED_STATUS_LIST,
+  COMPLETED_STATUS_LIST,
+  HIATUS_STATUS_LIST,
+  ONGOING_STATUS_LIST,
+} from "./constants";
+import { AnchorTag, Context } from "./types";
 
 export const AJAXDirectoryRequest = (
   ctx: Context,
@@ -104,17 +111,40 @@ const generateAJAXRequest = (
   return body;
 };
 
-export const imageFromElement = (element: any): string => {
-  const url = (element.attr("data-src") ??
+export const imageFromElement = (element: Cheerio<AnyNode>): string => {
+  const url =
+    element.attr("data-src") ??
     element.attr("data-lazy-src") ??
     element.attr("srcset")?.split(" ")?.[0] ??
     element.attr("src") ??
     element.attr("data-cfsrc") ??
-    "https://aegaeon.mantton.com/ceres.jpeg") as string;
+    "https://aegaeon.mantton.com/ceres.jpeg";
 
   return url
     .replace("-110x150", "")
     .replace("-175x238", "")
     .replace("-193x278", "")
+    .replace("-224x320", "")
     .replace("-350x476", "");
+};
+
+export const notUpdating = (tag: AnchorTag): boolean => {
+  const regex = /Updating|Atualizando/;
+  return !!!tag.title.trim().match(regex);
+};
+
+export const generateAnchorTag = ($: CheerioAPI, node: AnyNode): AnchorTag => {
+  const elem = $(node);
+  const link = elem.attr("href");
+  const title = elem.text().trim();
+  return { link, title };
+};
+
+export const parseStatus = (str: string): Status => {
+  if (COMPLETED_STATUS_LIST.includes(str)) return Status.COMPLETED;
+  if (ONGOING_STATUS_LIST.includes(str)) return Status.ONGOING;
+  if (HIATUS_STATUS_LIST.includes(str)) return Status.HIATUS;
+  if (CANCELLED_STATUS_LIST.includes(str)) return Status.CANCELLED;
+
+  return Status.UNKNOWN;
 };

@@ -30,6 +30,10 @@ export class Target extends MadaraTemplate {
       ...DEFAULT_CONTEXT,
       baseUrl: "https://toonily.com",
       contentPath: "webtoon",
+      tagSelector: ".wp-manga-tags-list > a",
+      filterNonMangaItems: false,
+      chapterUseAJAX: true,
+      searchSelector: "div.page-item-detail.manga",
     });
   }
 }

@@ -26,4 +26,13 @@ export type Context = {
 
   typeSelector: string;
   alternativeTitlesSelector: string;
+
+  // Helpers
+  forceAdult: boolean;
+  adultTags: string[];
+};
+
+export type AnchorTag = {
+  link?: string;
+  title: string;
 };

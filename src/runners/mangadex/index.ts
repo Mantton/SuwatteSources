@@ -1197,7 +1197,10 @@ export class Target extends Source {
       const includedCR = query.includedTags
         .filter((tag) => tag.includes("cr|"))
         .map((tag) => tag.split("|").pop()!);
-      params.contentRating = includedCR;
+      params.contentRating =
+        includedCR.length == 0
+          ? ["safe", "suggestive", "erotica", "pornographic"]
+          : includedCR;
 
       // Publication Demographic
       const includedPD = query.includedTags
