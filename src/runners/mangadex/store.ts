@@ -6,6 +6,13 @@ export class MDStore {
     this.store = store;
   }
 
+  async getSeasonal() {
+    const value = await this.store.get("explore_show_seasonal");
+    if (value === "true") {
+      return true;
+    }
+    return false;
+  }
   async getContentRatings() {
     const ratings = await this.store.get("explore_cr");
     return ratings?.split(", ") ?? ["safe", "suggestive", "erotica"];
@@ -13,7 +20,7 @@ export class MDStore {
   async getDSMode() {
     const value = await this.store.get("data_saver");
 
-    if ((value && value == "true") || value == "1") {
+    if (value === "true") {
       return true;
     }
     return false;
@@ -44,14 +51,24 @@ export class MDStore {
     return value?.split(", ") ?? [];
   }
 
+  async getMimasLimit() {
+    const value = (await this.store.get("mimas_limit")) ?? "5";
+    return parseInt(value) ?? 5;
+  }
+
   async saveToMimasTargets(id: string) {
+    const limit = await this.getMimasLimit();
     const targets = await this.getMimasTargets();
     targets.push(id);
     const newTargets = Array.from(new Set(targets))
       .filter((v) => !!v.trim())
-      .slice(-5);
+      .slice(-limit);
 
     const value = newTargets.join(", ");
     await this.store.set("mimas_targets", value);
+  }
+
+  async clearMimasTargets() {
+    await this.store.remove("mimas_targets");
   }
 }

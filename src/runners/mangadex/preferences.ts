@@ -72,10 +72,16 @@ export const getPreferenceList = (): PreferenceGroup[] => {
     })),
   };
 
+  const showSeasonalLists: Preference = {
+    key: "explore_show_seasonal",
+    label: "Show Seasonal Lists",
+    defaultValue: "true",
+    type: PreferenceType.toggle,
+  };
   const exploreGroup: PreferenceGroup = {
     id: "explore",
     header: "Explore Page",
-    children: [epCR],
+    children: [epCR, showSeasonalLists],
   };
 
   groups.push(exploreGroup);
@@ -85,15 +91,24 @@ export const getPreferenceList = (): PreferenceGroup[] => {
   //
   const recommendations: Preference = {
     key: "mimas_recs",
-    label: "Mimas Recommendations",
+    label: "Enabled",
     type: PreferenceType.toggle,
     defaultValue: "false",
   };
 
+  const recommendationsCount: Preference = {
+    key: "mimas_limit",
+    label: "Limit",
+    type: PreferenceType.stepper,
+    defaultValue: "5",
+    maxStepperValue: 10,
+  };
+
   const mimasGroup: PreferenceGroup = {
     id: "mimas",
-    header: "Recommendations",
-    children: [recommendations],
+    header: "Mimas Recommendations",
+    children: [recommendations, recommendationsCount],
+    footer: "For more info, visit https://github.com/Mantton/SimilarManga",
   };
 
   groups.push(mimasGroup);

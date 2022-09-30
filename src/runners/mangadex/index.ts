@@ -24,11 +24,14 @@ import {
   Source,
   SourceInfo,
   Status,
-  SyncedContent,
   Tag,
   TrackerInfo,
   ExploreCollection,
   User,
+  NonInteractiveProperty,
+  ActionGroup,
+  DownSyncedContent,
+  UpSyncedContent,
 } from "@suwatte/daisuke";
 import explore_tags from "./explore.json";
 import { decode, encode } from "he";
@@ -41,7 +44,7 @@ export class Target extends Source {
   info: SourceInfo = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1,
+    version: 1.1,
     website: "https://mangadex.org",
     supportedLanguages: [],
     primarilyAdultContent: true,
@@ -49,6 +52,7 @@ export class Target extends Source {
     contentSync: true,
     hasExplorePage: true,
     thumbnail: `mangadex.png`,
+    minSupportedAppVersion: "4.1.0",
   };
   private API_URL = "https://api.mangadex.org";
   private COVER_URL = "https://uploads.mangadex.org/covers";
@@ -66,6 +70,7 @@ export class Target extends Source {
     "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
   ];
   private SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
+  private LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
   private RESULT_LIMIT = 30;
   private DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
   private CONTENT_RATINGS = ["safe", "suggestive", "erotica", "pornographic"];
@@ -175,11 +180,12 @@ export class Target extends Source {
     }
 
     // Original Language
-    if (attributes.originalLanguage) {
+    const originalLang = attributes.originalLanguage;
+    if (originalLang) {
       const tags: Tag[] = [];
       const languageTag: Tag = {
-        id: `lang|${attributes.originalLanguage}`,
-        label: languageLabel(attributes.originalLanguage ?? "unknown"),
+        id: `lang|${originalLang}`,
+        label: languageLabel(originalLang ?? "unknown"),
         adultContent: false,
       };
 
@@ -261,23 +267,44 @@ export class Target extends Source {
         style: CollectionStyle.NORMAL,
       });
     }
+    const covers = (await this.getMDCovers([contentId]))[contentId];
+    const stats = (await this.getMDStatistics([contentId]))[contentId];
+    const nonInteractive: NonInteractiveProperty = {
+      id: "base",
+      label: "Additional Info",
+      tags: [
+        `📚 Follows: ${stats.follows.toLocaleString()}`,
+        `⭐️ Rating: ${stats.rating.toFixed(1)} / 10 `,
+      ],
+    };
 
+    let contentType: ContentType = ContentType.UNKNOWN;
+
+    switch (originalLang) {
+      case "jp":
+        contentType = ContentType.MANGA;
+        break;
+      case "ko":
+        contentType = ContentType.MANHWA;
+        break;
+    }
     return {
       title: titles[0],
       additionalTitles: titles,
       adultContent,
-      covers: (await this.getMDCovers([contentId]))[contentId],
+      cover: covers[0],
+      contentId,
+      additionalCovers: covers,
       properties,
       summary,
-      url: `${this.info.website}/title/${contentId}`,
+      webUrl: `${this.info.website}/title/${contentId}`,
       trackerInfo,
-      id: contentId,
       status,
       creators: Array.from(new Set(artists.concat(authors))),
       recommendedReadingMode,
       includedCollections,
-      contentType: ContentType.UNKNOWN,
-      originalLanguage: "", // Deprecated
+      contentType,
+      nonInteractiveProperties: [nonInteractive],
     };
   }
   async getChapters(contentId: string): Promise<Chapter[]> {
@@ -362,7 +389,7 @@ export class Target extends Source {
         }
         chapters.push({
           contentId,
-          id,
+          chapterId: id,
           title,
           number,
           volume,
@@ -401,7 +428,7 @@ export class Target extends Source {
     );
     return {
       contentId,
-      id: chapterId,
+      chapterId,
       pages: urls.map((url) => ({ url })),
     };
   }
@@ -411,7 +438,27 @@ export class Target extends Source {
 
   // * Explore
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
+    const shuffle = <T>(array: T[]) => {
+      var currentIndex = array.length,
+        temporaryValue,
+        randomIndex;
+
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    };
     const injectMimasRecs = await this.STORE.getMimasEnabled();
+    const injectSeasonal = await this.STORE.getSeasonal();
     const sections: CollectionExcerpt[] = [
       {
         id: "followedCount",
@@ -424,12 +471,7 @@ export class Target extends Source {
         title: "Recently Added",
         style: CollectionStyle.NORMAL,
       },
-      {
-        id: "seasonal",
-        title: "Seasonal List",
-        subtitle: "Titles from this anime season.",
-        style: CollectionStyle.GALLERY,
-      },
+
       {
         id: "rating",
         title: "Highly Rated Titles",
@@ -449,28 +491,32 @@ export class Target extends Source {
       },
     ];
 
+    // Seasonal Lists
+    if (injectSeasonal) {
+      sections.push(
+        ...[
+          // Uncomment when list actually changes
+          // {
+          //   id: "seasonal_last",
+          //   title: "Seasonal List",
+          //   subtitle: "Titles from last anime season.",
+          //   style: CollectionStyle.GALLERY,
+          // },
+          {
+            id: "seasonal",
+            title: "Seasonal List",
+            subtitle: "Titles from this anime season.",
+            style: CollectionStyle.GALLERY,
+          },
+        ]
+      );
+    }
+
+    // Mimas Recommendations
     if (injectMimasRecs) {
       const ids = await this.STORE.getMimasTargets();
-      const shuffle = <T>(array: T[]) => {
-        var currentIndex = array.length,
-          temporaryValue,
-          randomIndex;
 
-        // While there remain elements to shuffle...
-        while (0 !== currentIndex) {
-          // Pick a remaining element...
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex -= 1;
-
-          // And swap it with the current element.
-          temporaryValue = array[currentIndex];
-          array[currentIndex] = array[randomIndex];
-          array[randomIndex] = temporaryValue;
-        }
-
-        return array;
-      };
-      const recSections = ids.map(
+      const recommended = ids.map(
         (v): CollectionExcerpt => ({
           id: `mimas|${v}`,
           title: "Recommendation",
@@ -478,10 +524,9 @@ export class Target extends Source {
         })
       );
 
-      const merged = shuffle(sections.concat(recSections));
-      return merged;
+      sections.push(...recommended);
     }
-    return sections;
+    return shuffle(sections);
   }
 
   async resolveExploreCollection(
@@ -489,8 +534,9 @@ export class Target extends Source {
   ): Promise<ExploreCollection> {
     switch (excerpt.id) {
       case "seasonal":
-        const list = await this.getMDList(this.SEASONAL_LIST_ID);
-        return { ...excerpt, highlights: list.highlights, title: list.title };
+        return this.getCollectionForList(this.SEASONAL_LIST_ID, excerpt);
+      case "seasonal_last":
+        return this.getCollectionForList(this.LAST_SEASONAL_LIST_ID, excerpt);
       // Get
       case "recentlyUpdated":
         return {
@@ -500,7 +546,7 @@ export class Target extends Source {
       default:
         if (excerpt.id.includes("mimas")) {
           const id = excerpt.id.split("|").pop();
-          if (!id) throw "Improper Rec Config";
+          if (!id) throw new Error("Improper Config");
           const name =
             sample(["More Like", "Because you read", "Similar to"]) ??
             "More Like";
@@ -509,10 +555,10 @@ export class Target extends Source {
           return {
             highlights: recs.recs.map((v) => ({
               title: v.title,
-              id: v.contentId,
-              covers: [v.coverImage],
+              contentId: v.contentId,
+              cover: v.coverImage,
             })),
-            title: `${name} ${recs.target.title}`,
+            title: `${name} "${recs.target.title}"`,
           };
         } else {
           const sort = (await this.getSearchSorters()).find(
@@ -539,6 +585,14 @@ export class Target extends Source {
           };
         }
     }
+  }
+
+  async getCollectionForList(
+    id: string,
+    excerpt: CollectionExcerpt
+  ): Promise<ExploreCollection> {
+    const list = await this.getMDList(id);
+    return { ...excerpt, highlights: list.highlights, title: list.title };
   }
   async getExplorePageTags(): Promise<Tag[]> {
     return explore_tags;
@@ -587,27 +641,37 @@ export class Target extends Source {
   }
 
   // Events
-  async onChaptersCompleted(
-    contentId: string,
-    chapterIds: string[]
-  ): Promise<void> {
-    // Update Recs
+  async onChapterRead(contentId: string, chapterId: string): Promise<void> {
     await this.STORE.saveToMimasTargets(contentId);
+
+    if (!this.isSignedIn()) return;
+    await this.syncToMD(contentId, [chapterId]);
   }
 
-  async getMimasRecommendations(
-    id: string
-  ): Promise<{ recs: MimasRecommendation[]; target: MimasRecommendation }> {
-    const MIMAS_URL = "https://mimas.mantton.com";
+  async onChaptersMarked(
+    contentId: string,
+    chapterIds: string[],
+    completed: boolean
+  ): Promise<void> {
+    if (!this.isSignedIn()) return;
 
-    const response = await this.NETWORK_CLIENT.get(
-      `${MIMAS_URL}/similar/org.mangadex/${id}?page=1`
-    );
-    const data = JSON.parse(response.data);
-    return {
-      recs: data.results,
-      target: data.target,
-    };
+    if (completed) {
+      await this.syncToMD(contentId, chapterIds);
+    } else {
+      await this.syncToMD(contentId, [], chapterIds);
+    }
+  }
+
+  async onContentsAddedToLibrary(ids: string[]): Promise<void> {
+    if (!this.isSignedIn()) return;
+
+    for (const id of ids) {
+      await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/status`, {
+        body: {
+          status: "reading",
+        },
+      });
+    }
   }
 
   // Preferences
@@ -615,6 +679,30 @@ export class Target extends Source {
     return getPreferenceList();
   }
 
+  async getSourceActions(): Promise<ActionGroup[]> {
+    return [
+      {
+        id: "base",
+        header: "Mimas",
+        children: [
+          {
+            isDestructive: true,
+            systemImage: "trash",
+            title: "Clear Recommendations",
+            key: "mimas_clear",
+          },
+        ],
+      },
+    ];
+  }
+
+  async didTriggerAction(key: string): Promise<void> {
+    switch (key) {
+      case "mimas_clear":
+        await this.STORE.clearMimasTargets();
+        break;
+    }
+  }
   // Auth
   async handleBasicAuth(username: string, password: string) {
     const response = await this.NETWORK_CLIENT.post(
@@ -650,6 +738,7 @@ export class Target extends Source {
       id: mdUser.id,
       username: mdUser.attributes.username,
       avatar: "https://mangadex.org/avatar.png",
+      info: ["Testing"],
     };
 
     return user;
@@ -666,13 +755,55 @@ export class Target extends Source {
   }
 
   // * Syncing
-  async getUserLibrary(): Promise<SyncedContent[]> {
+  async syncUserLibrary(
+    library: UpSyncedContent[]
+  ): Promise<DownSyncedContent[]> {
+    const fetchedLib = await this.fetchUserLibrary();
+
+    // Titles in local but not cloud
+    const toUpSync = library.filter(
+      (v) => !fetchedLib.find((a) => a.id === v.id)
+    );
+    // Titles in cloud but not local
+    const toDownSync = fetchedLib.filter((v) => {
+      const target = library.find((a) => a.id === v.id);
+
+      // Not in library, down sync
+      if (!target) return true;
+
+      // NonMatching Reading Flag
+      if (v.readingFlag && target.flag != v.readingFlag) return true;
+
+      return false;
+    });
+    // Handle UpSync
+    await this.handleUpSync(toUpSync);
+    return toDownSync;
+  }
+
+  async handleUpSync(entries: UpSyncedContent[]) {
+    for (const entry of entries) {
+      await this.NETWORK_CLIENT.post(
+        `${this.API_URL}/manga/${entry.id}/status`,
+        {
+          body: {
+            status:
+              Object.keys(this.READING_STATUS).find(
+                (key) => this.READING_STATUS[key] === entry.flag
+              ) ?? ReadingFlag.PLANNED,
+          },
+        }
+      );
+    }
+  }
+  async fetchUserLibrary() {
+    const library: DownSyncedContent[] = [];
+
     // Fetch Reading Status
     const statuses = await this.getMDUserStatuses();
-    // Fetch Library
     const limit = 100;
     let offset = 0;
-    const library: SyncedContent[] = [];
+
     while (true) {
       const response = await this.NETWORK_CLIENT.get(
         `${this.API_URL}/user/follows/manga`,
@@ -687,18 +818,20 @@ export class Target extends Source {
       const highlights = (
         await this.parsePagedResponse(response, 1, false, false)
       ).results;
-
-      const mapped: SyncedContent[] = highlights.map((v): SyncedContent => {
-        const status = this.getMDReadingStatus(statuses[v.id]);
-        return {
-          id: v.id,
-          title: v.title,
-          covers: v.covers,
-          readingFlag: status,
-        };
-      });
+      // prepare
+      const mapped: DownSyncedContent[] = highlights.map(
+        (v): DownSyncedContent => {
+          const status = this.getMDReadingStatus(statuses[v.contentId]);
+          return {
+            id: v.contentId,
+            title: v.title,
+            cover: v.cover,
+            readingFlag: status,
+          };
+        }
+      );
       library.push(...mapped);
-
+      // Loop Logic
       offset += limit;
       if (highlights.length < limit) {
         break;
@@ -720,6 +853,14 @@ export class Target extends Source {
     return ids ?? [];
   }
 
+  READING_STATUS: Record<string, ReadingFlag> = {
+    reading: ReadingFlag.READING,
+    plan_to_read: ReadingFlag.PLANNED,
+    dropped: ReadingFlag.DROPPED,
+    completed: ReadingFlag.COMPLETED,
+    re_reading: ReadingFlag.REREADING,
+    on_hold: ReadingFlag.PAUSED,
+  };
   // Authenticated User
   getMDReadingStatus(str: string): ReadingFlag {
     switch (str) {
@@ -747,7 +888,6 @@ export class Target extends Source {
       );
       return JSON.parse(response.data).statuses as Record<string, string>;
     } catch (err: any) {
-      // console.log(err);
       console.log(err.response.data);
     }
     return {};
@@ -888,19 +1028,18 @@ export class Target extends Source {
       const highlight: Highlight = {
         title,
         tags,
-        covers: [defaultCover],
-        id: manga.id,
+        cover: defaultCover,
+        contentId: manga.id,
       };
 
       if (fetchCovers) {
-        highlight.covers = (await this.getMDCovers([manga.id]))[manga.id].slice(
-          0,
-          5
-        );
+        highlight.additionalCovers = (await this.getMDCovers([manga.id]))[
+          manga.id
+        ].slice(0, 5);
       }
 
       if (fetchStatistics) {
-        highlight.stats = stats[manga.id]; // Marked for Removal
+        highlight.stats = stats[manga.id];
       }
       return highlight;
     });
@@ -913,7 +1052,7 @@ export class Target extends Source {
     };
   }
 
-  async getMDStatistics(ids: string[]) {
+  async getMDStatistics(ids: string[]): Promise<any> {
     const response = await this.NETWORK_CLIENT.get(
       `${this.API_URL}/statistics/manga`,
       {
@@ -997,13 +1136,14 @@ export class Target extends Source {
     const highlights = (
       await this.parsePagedResponse(response, 1)
     ).results.sort((a, b) => {
-      return ids.indexOf(a.id) - ids.indexOf(b.id);
+      return ids.indexOf(a.contentId) - ids.indexOf(b.contentId);
     });
 
     highlights.forEach((entry) => {
       const chapterObject = chapterListJSON.data.find(
         (json: any) =>
-          entry.id == json.relationships.find((y: any) => y.type == "manga").id
+          entry.contentId ==
+          json.relationships.find((y: any) => y.type == "manga").id
       );
 
       const volume = chapterObject.attributes.volume;
@@ -1017,13 +1157,12 @@ export class Target extends Source {
         array.forEach((v: string) => v === value && count++);
         return count;
       };
-      const chapterCount = getOccurrences(base, entry.id);
+      const chapterCount = getOccurrences(base, entry.contentId);
 
-      entry.chapter = {
+      entry.updates = {
         label: chapterName,
-        id: chapterObject.id,
         date: chapterDate,
-        badge: chapterCount,
+        count: chapterCount,
       };
     });
     return highlights;
@@ -1033,7 +1172,7 @@ export class Target extends Source {
     query: SearchRequest,
     overrides: any = {}
   ): Promise<PagedResult> {
-    const page = query.page;
+    const page = query.page ?? 1;
     const limit = overrides.limit ?? this.RESULT_LIMIT;
     const offset = (page - 1) * limit;
 
@@ -1158,11 +1297,14 @@ export class Target extends Source {
 
     console.log("Refreshed Token");
   }
+
+  async isSignedIn() {
+    return !!(await this.KEYCHAIN.get("session"));
+  }
   async requestHandler(request: NetworkRequest) {
     let token: string | null = null;
     try {
       token = await this.KEYCHAIN.get("session");
-      // console.log(token);
     } catch (error) {
       console.log("Nested Object Reference Error");
       return request;
@@ -1170,11 +1312,10 @@ export class Target extends Source {
 
     if (
       !token ||
-      !["auth/log", "user", "read", "manga/status"].some((v) =>
+      !["auth/log", "user", "read", "/status"].some((v) =>
         request.url.includes(v)
       )
     ) {
-      // console.log(request.url);
       return request;
     }
     if (this.isTokenExpired(token)) {
@@ -1184,7 +1325,6 @@ export class Target extends Source {
         return request;
       }
     }
-    // console.log("Appending Token");
     request.headers = {
       ...request.headers,
       authorization: `Bearer ${token.trim()}`,
@@ -1192,5 +1332,32 @@ export class Target extends Source {
     };
 
     return request;
+  }
+  async getMimasRecommendations(
+    id: string
+  ): Promise<{ recs: MimasRecommendation[]; target: MimasRecommendation }> {
+    const MIMAS_URL = "https://mimas.mantton.com";
+
+    const response = await this.NETWORK_CLIENT.get(
+      `${MIMAS_URL}/similar/org.mangadex/${id}?page=1`
+    );
+    const data = JSON.parse(response.data);
+    return {
+      recs: data.results,
+      target: data.target,
+    };
+  }
+
+  async syncToMD(
+    id: string,
+    chapterIdsRead: string[],
+    chapterIdsUnread: string[] = []
+  ) {
+    await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
+      body: {
+        chapterIdsUnread,
+        chapterIdsRead,
+      },
+    });
   }
 }

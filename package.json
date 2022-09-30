@@ -1,6 +1,6 @@
 {
   "name": "suwatte-runners",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Mangadex Content Source for Suwatte. Used for testing",
   "main": "index.js",
   "scripts": {
@@ -28,11 +28,12 @@
   },
   "dependencies": {
     "@suwatte/cli": "^1.0.3",
-    "@suwatte/daisuke": "^1.0.4",
+    "@suwatte/daisuke": "file:../daisuke/bridge",
     "@suwatte/emulator": "^1.0.3",
     "cheerio": "^1.0.0-rc.12",
     "he": "^1.2.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4"
   },
   "stt": {
     "listName": "Development Runners"
