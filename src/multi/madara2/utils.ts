@@ -1,11 +1,19 @@
 import { NetworkRequest, SearchRequest, Status } from "@suwatte/daisuke";
 import { AnyNode, Cheerio, CheerioAPI } from "cheerio";
+import moment, { Moment } from "moment";
 import {
   AJAX_DIRECTORY,
   CANCELLED_STATUS_LIST,
   COMPLETED_STATUS_LIST,
+  DAY_DATE_LIST,
   HIATUS_STATUS_LIST,
+  HOUR_DATE_LIST,
+  MINUTE_DATE_LIST,
+  MONTH_DATE_LIST,
   ONGOING_STATUS_LIST,
+  SECONDS_DATE_LIST,
+  WEEK_DATE_LIST,
+  YEAR_DATE_LIST,
 } from "./constants";
 import { AnchorTag, Context } from "./types";
 
@@ -147,4 +155,35 @@ export const parseStatus = (str: string): Status => {
   if (CANCELLED_STATUS_LIST.includes(str)) return Status.CANCELLED;
 
   return Status.UNKNOWN;
+};
+
+export const parseDate = (str: string) => {
+  if (["just", "now", "up"].some((v) => str.trim().toLowerCase().includes(v)))
+    return new Date();
+  if (str.trim().toLowerCase() === "yesterday")
+    return moment().subtract(1, "day").toDate();
+  return parseRelativeDate(str)?.toDate() ?? moment(str).toDate();
+};
+export const parseRelativeDate = (str: string) => {
+  const numStr = str.match(/(\d+)/)?.[1];
+  if (!numStr || parseInt(numStr) === NaN) {
+    throw new Error(`Date Parse Failure: ${str}`);
+  }
+  const number = parseInt(numStr);
+
+  let now = moment();
+  if (DAY_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "days");
+  if (HOUR_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "hours");
+  if (MINUTE_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "minutes");
+  if (SECONDS_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "seconds");
+  if (WEEK_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "weeks");
+  if (MONTH_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "months");
+  if (YEAR_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "years");
 };

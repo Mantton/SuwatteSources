@@ -301,6 +301,7 @@ export class Parser {
     }
 
     const cover = this.coverFor(id);
+    const chapters = this.chapters(html, id);
 
     return {
       contentId: id,
@@ -315,6 +316,7 @@ export class Parser {
       properties,
       creators,
       webUrl: `${host}/manga/${id}`,
+      chapters,
     };
   }
 

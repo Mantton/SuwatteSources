@@ -23,6 +23,8 @@ export type Context = {
   thumbnailSelector: string;
   genreSelector: string;
   tagSelector: string;
+  chapterSelector: string;
+  chapterDateSelector: string;
 
   typeSelector: string;
   alternativeTitlesSelector: string;

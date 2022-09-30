@@ -1,4 +1,5 @@
 import {
+  Chapter,
   CollectionExcerpt,
   Content,
   ExploreCollection,
@@ -33,5 +34,13 @@ export class Controller {
     );
 
     return this.parser.content(this.context, response.data, id);
+  }
+
+  // Get Chapters
+  async getChapters(id: string): Promise<Chapter[]> {
+    const response = await this.client.get(
+      `${this.context.baseUrl}/${this.context.contentPath}/${id}/`
+    );
+    return this.parser.chapters(this.context, response.data, id);
   }
 }

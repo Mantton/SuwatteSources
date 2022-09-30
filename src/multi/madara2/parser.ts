@@ -1,4 +1,11 @@
-import { Content, Highlight, Property, Status, Tag } from "@suwatte/daisuke";
+import {
+  Chapter,
+  Content,
+  Highlight,
+  Property,
+  Status,
+  Tag,
+} from "@suwatte/daisuke";
 import { load } from "cheerio";
 import { trim } from "lodash";
 import { TAG_PREFIX } from "./constants";
@@ -7,6 +14,7 @@ import {
   generateAnchorTag,
   imageFromElement,
   notUpdating,
+  parseDate,
   parseStatus,
 } from "./utils";
 
@@ -134,8 +142,6 @@ export class Parser {
       )
       .filter((v) => v.id.replace(TAG_PREFIX.hashtag, ""));
 
-    console.log(genres);
-
     const additionalTitles = $(ctx.alternativeTitlesSelector)
       .first()
       .text()
@@ -165,6 +171,8 @@ export class Parser {
         ],
       },
     ];
+
+    const chapters = this.chapters(ctx, html, contentId);
     return {
       contentId,
       title,
@@ -174,8 +182,49 @@ export class Parser {
       status,
       adultContent,
       properties,
+      chapters,
       additionalTitles:
         additionalTitles.length != 0 ? additionalTitles : undefined,
     };
+  }
+
+  chapters(ctx: Context, html: string, contentId: string): Chapter[] {
+    const $ = load(html);
+    let index = 0;
+    const chapters: Chapter[] = [];
+    for (const node of $(ctx.chapterSelector).toArray()) {
+      const elem = $(node);
+
+      const id = $("a", elem)
+        .first()
+        .attr("href")
+        ?.replace(`${ctx.baseUrl}/${ctx.contentPath}/${contentId}/`, "")
+        .replace(/\/$/, "");
+
+      if (!id) throw new Error("Failed to parse Chapter ID");
+      const title = $("a", elem).first().text().trim();
+
+      const numStr = id
+        .match(/\D*(\d*\-?\d*)\D*$/)
+        ?.pop()
+        ?.replace(/-/g, ".");
+      const number = Number(numStr);
+      const dateStr = $(ctx.chapterDateSelector, elem).first().text().trim();
+      const date = parseDate(dateStr);
+
+      chapters.push({
+        index,
+        contentId,
+        chapterId: id,
+        number,
+        date,
+        title,
+        language: "GB",
+      });
+
+      index++;
+    }
+
+    return chapters;
   }
 }
