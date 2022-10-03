@@ -1,0 +1,561 @@
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.STTPackage = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Target = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const parser_1 = require("./parser");
+class Target extends daisuke_1.Source {
+    info = {
+        id: "mttn.org.lnr",
+        name: "Light Novel Reader",
+        version: 1.0,
+        hasExplorePage: true,
+        supportedLanguages: ["GB"],
+        website: "https://lightnovelreader.org",
+        primarilyAdultContent: false,
+    };
+    CLIENT = new NetworkClient();
+    BASE_URL = "https://lightnovelreader.org";
+    async getContent(contentId) {
+        const response = await this.CLIENT.get(`${this.BASE_URL}/${contentId}`);
+        return (0, parser_1.parseContent)(response.data, contentId);
+    }
+    async getChapters(contentId) {
+        const response = await this.CLIENT.get(`${this.BASE_URL}/${contentId}`);
+        return (0, parser_1.parseChapters)(response.data, contentId);
+    }
+    async getChapterData(contentId, chapterId) {
+        const response = await this.CLIENT.get(`${this.BASE_URL}/${contentId}/${chapterId}`);
+        return (0, parser_1.parseChapterText)(response.data, contentId, chapterId);
+    }
+    getSearchResults(query) {
+        throw new Error("Method not implemented.");
+    }
+    getSourceTags() {
+        throw new Error("Method not implemented.");
+    }
+    // Explore
+    HOMEPAGE = null;
+    async getHomePage() {
+        this.HOMEPAGE = (await this.CLIENT.get(`${this.BASE_URL}`)).data;
+    }
+    async createExploreCollections() {
+        // Parse Homepage
+        try {
+            this.getHomePage();
+        }
+        catch { }
+        return (0, parser_1.getExploreCollections)();
+    }
+    async resolveExploreCollection(excerpt) {
+        if (excerpt.id.includes("top")) {
+            // Make Search Request
+            throw new Error("Not Implemented");
+        }
+        if (!this.HOMEPAGE) {
+            await this.getHomePage();
+        }
+        if (!this.HOMEPAGE) {
+            throw new Error("Could not fetch Homepage");
+        }
+        const highlights = (0, parser_1.parseHomePageSection)(this.HOMEPAGE, excerpt.id);
+        return {
+            ...excerpt,
+            highlights,
+        };
+    }
+}
+exports.Target = Target;
+
+},{"./parser":2,"@suwatte/daisuke":6}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseChapterText = exports.parseChapters = exports.parseContent = exports.parseHomePageSection = exports.prepId = exports.getExploreCollections = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const cheerio_1 = require("cheerio");
+const BASE_URL = "https://lightnovelreader.org";
+const getExploreCollections = () => {
+    return [
+        {
+            id: "popular",
+            title: "Popular Updates",
+            subtitle: "Recently Updated Popular Novels",
+            style: daisuke_1.CollectionStyle.NORMAL,
+        },
+        {
+            id: "top_viewed",
+            title: "Most Viewed Novels",
+            subtitle: "All Time Most Popular Titles",
+            style: daisuke_1.CollectionStyle.NORMAL,
+        },
+        {
+            id: "top_bookmarked",
+            title: "Top Bookmarked Novels.",
+            style: daisuke_1.CollectionStyle.NORMAL,
+        },
+        {
+            id: "top_rated",
+            title: "Top Rated Novels",
+            subtitle: "What others are enjoying.",
+            style: daisuke_1.CollectionStyle.NORMAL,
+        },
+        {
+            id: "new",
+            title: "New Novels",
+            subtitle: "Recently added novels",
+            style: daisuke_1.CollectionStyle.NORMAL,
+        },
+        {
+            id: "latest",
+            title: "Latest Updates",
+            subtitle: "Read the latest updated light, web, chinese and korean novels.",
+            style: daisuke_1.CollectionStyle.NORMAL,
+        },
+    ];
+};
+exports.getExploreCollections = getExploreCollections;
+const prepId = (from) => {
+    return from.trim().replace(`${BASE_URL}/`, "") ?? "";
+};
+exports.prepId = prepId;
+const parseHomePageSection = (data, key) => {
+    const highlights = [];
+    const $ = (0, cheerio_1.load)(data);
+    switch (key) {
+        case "new":
+        case "popular":
+            const selector = $(`body > section:nth-child(${key == "new" ? "3" : "4"}) > div > div > div:nth-child(${key == "new" ? "3" : "2"}) > div .card-v`).toArray();
+            // body > section:nth-child(4) > div > div > div:nth-child(2) > div
+            for (const e of selector) {
+                const element = $(e);
+                const cover = $("img", element).attr("src") ?? "";
+                const title = $(".card-v-name", element).text().trim();
+                const contentId = $(".card-v-name > a", element)
+                    .attr("href")
+                    ?.trim()
+                    .replace(`${BASE_URL}/`, "") ?? "";
+                if (!contentId)
+                    continue;
+                const highlight = {
+                    contentId,
+                    cover,
+                    title,
+                };
+                highlights.push(highlight);
+            }
+            //
+            break;
+        case "latest":
+            const latestSelector = $("body > section:nth-child(5) > div > div > div.col-md-7.col-lg-8.col-xl-9 > div .card-box").toArray();
+            for (const e of latestSelector) {
+                const elem = $(e);
+                const cover = $("img", elem).attr("src") ?? "";
+                const titleElem = $(".card-box-name", elem);
+                const title = titleElem.attr("title") ?? "Failed To Parse";
+                const contentId = $("a", titleElem).attr("href")?.trim().replace(`${BASE_URL}/`, "") ??
+                    "";
+                if (!contentId)
+                    continue;
+                const highlight = {
+                    contentId,
+                    title,
+                    cover,
+                };
+                highlights.push(highlight);
+            }
+            break;
+    }
+    return highlights;
+};
+exports.parseHomePageSection = parseHomePageSection;
+const parseContent = (data, contentId) => {
+    const $ = (0, cheerio_1.load)(data);
+    const title = $(".novel-title").text() ?? "";
+    if (!title)
+        throw "Failed To Parse";
+    const imageUrl = $(".novels-detail-left img").attr("src") ?? "";
+    const rows = $(".novels-detail-right li").toArray();
+    const additionalTitles = [];
+    const creators = [];
+    let status = daisuke_1.Status.UNKNOWN;
+    const TAG_URL = "https://lightnovelreader.org/category";
+    const properties = [];
+    const tags = [];
+    for (const row of rows) {
+        const dataElem = $(".novels-detail-right-in-right", row);
+        const label = $(".novels-detail-right-in-left", row)
+            .text()
+            .trim()
+            .replace(":", "");
+        switch (label) {
+            case "Alternative Names":
+                additionalTitles.push(dataElem.text().trim());
+                break;
+            case "Status":
+                if (dataElem.text().toLowerCase().includes("ongoing")) {
+                    status = daisuke_1.Status.ONGOING;
+                }
+                else {
+                    status = daisuke_1.Status.COMPLETED;
+                }
+                break;
+            case "Authors(s)":
+            case "Artists(s)":
+                if (!dataElem.text().trim().includes("N/A")) {
+                    creators.push(dataElem.text().trim());
+                }
+                break;
+            case "Genres":
+                for (const tag of $("a", dataElem).toArray()) {
+                    tags.push({
+                        id: $(tag).text().replace(TAG_URL, ""),
+                        label: $(tag).text().trim(),
+                        adultContent: false,
+                    });
+                }
+                break;
+        }
+    }
+    const summary = $("body > section:nth-child(4) > div > div > div.col-12.col-xl-9 > div > div:nth-child(5) > div")
+        .text()
+        .trim();
+    return {
+        contentId,
+        properties,
+        summary,
+        status,
+        title,
+        additionalTitles,
+        cover: imageUrl,
+        creators,
+        adultContent: false,
+        webUrl: `${BASE_URL}/${contentId}`,
+        recommendedReadingMode: daisuke_1.ReadingMode.NOVEL,
+        chapters: (0, exports.parseChapters)(data, contentId),
+    };
+};
+exports.parseContent = parseContent;
+const parseChapters = (data, contentId) => {
+    const $ = (0, cheerio_1.load)(data);
+    const chapters = [];
+    let index = 0;
+    for (let e of $(".novels-detail-chapters li a")) {
+        const chapter = $(e);
+        const chapterText = chapter.text();
+        const chapterId = chapter.attr("href")?.split("/").pop();
+        if (!chapterId)
+            continue;
+        chapters.push({
+            chapterId,
+            contentId,
+            number: isNaN(parseFloat(chapterText.substring(chapterText.indexOf("CH") + 3) ?? "0"))
+                ? 0
+                : parseFloat(chapterText.substring(chapterText.indexOf("CH") + 3) ?? "0"),
+            index,
+            title: chapter.text().replace("CH ", "Chapter ").trim(),
+            language: "GB",
+            date: new Date(),
+            webUrl: chapter.attr("href") ?? "",
+        });
+        index++;
+    }
+    return chapters;
+};
+exports.parseChapters = parseChapters;
+const parseChapterText = (html, contentId, chapterId) => {
+    const $ = (0, cheerio_1.load)(html);
+    const nodes = $("#chapterText > p");
+    let text = "";
+    for (const element of nodes.toArray()) {
+        const html = $.html(element);
+        const t = $(element).text().trim();
+        if (t) {
+            text += html;
+        }
+    }
+    return {
+        chapterId,
+        contentId,
+        text,
+    };
+};
+exports.parseChapterText = parseChapterText;
+
+},{"@suwatte/daisuke":6,"cheerio":"cheerio"}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DaisukeRunner = void 0;
+class DaisukeRunner {
+}
+exports.DaisukeRunner = DaisukeRunner;
+
+},{}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Source = void 0;
+const types_1 = require("../types");
+class Source {
+    constructor() {
+        this.type = types_1.RunnerType.CONTENT_SOURCE;
+    }
+}
+exports.Source = Source;
+
+},{"../types":23}],5:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Runner"), exports);
+__exportStar(require("./Source"), exports);
+
+},{"./Runner":3,"./Source":4}],6:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./classes"), exports);
+__exportStar(require("./types"), exports);
+
+},{"./classes":5,"./types":23}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],8:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],9:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CollectionStyle = void 0;
+var CollectionStyle;
+(function (CollectionStyle) {
+    CollectionStyle[CollectionStyle["NORMAL"] = 0] = "NORMAL";
+    CollectionStyle[CollectionStyle["INFO"] = 1] = "INFO";
+    CollectionStyle[CollectionStyle["GALLERY"] = 2] = "GALLERY";
+    CollectionStyle[CollectionStyle["UPDATE_LIST"] = 3] = "UPDATE_LIST";
+})(CollectionStyle = exports.CollectionStyle || (exports.CollectionStyle = {}));
+
+},{}],10:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.Status = void 0;
+var Status;
+(function (Status) {
+    Status[Status["UNKNOWN"] = 0] = "UNKNOWN";
+    Status[Status["ONGOING"] = 1] = "ONGOING";
+    Status[Status["COMPLETED"] = 2] = "COMPLETED";
+    Status[Status["CANCELLED"] = 3] = "CANCELLED";
+    Status[Status["HIATUS"] = 4] = "HIATUS";
+})(Status = exports.Status || (exports.Status = {}));
+/**
+ * The method in which the content can be read
+ */
+var ReadingMode;
+(function (ReadingMode) {
+    ReadingMode[ReadingMode["PAGED_MANGA"] = 0] = "PAGED_MANGA";
+    ReadingMode[ReadingMode["PAGED_COMIC"] = 1] = "PAGED_COMIC";
+    ReadingMode[ReadingMode["VERTICAL"] = 2] = "VERTICAL";
+    ReadingMode[ReadingMode["VERTICAL_SEPARATED"] = 3] = "VERTICAL_SEPARATED";
+    ReadingMode[ReadingMode["NOVEL"] = 4] = "NOVEL";
+    ReadingMode[ReadingMode["WEB"] = 5] = "WEB";
+})(ReadingMode = exports.ReadingMode || (exports.ReadingMode = {}));
+var ReadingFlag;
+(function (ReadingFlag) {
+    ReadingFlag[ReadingFlag["READING"] = 0] = "READING";
+    ReadingFlag[ReadingFlag["PLANNED"] = 1] = "PLANNED";
+    ReadingFlag[ReadingFlag["COMPLETED"] = 2] = "COMPLETED";
+    ReadingFlag[ReadingFlag["DROPPED"] = 3] = "DROPPED";
+    ReadingFlag[ReadingFlag["REREADING"] = 4] = "REREADING";
+    ReadingFlag[ReadingFlag["PAUSED"] = 5] = "PAUSED";
+    ReadingFlag[ReadingFlag["UNKNOWN"] = 6] = "UNKNOWN";
+})(ReadingFlag = exports.ReadingFlag || (exports.ReadingFlag = {}));
+var ContentType;
+(function (ContentType) {
+    ContentType[ContentType["NOVEL"] = 0] = "NOVEL";
+    ContentType[ContentType["MANGA"] = 1] = "MANGA";
+    ContentType[ContentType["MANHUA"] = 2] = "MANHUA";
+    ContentType[ContentType["MANHWA"] = 3] = "MANHWA";
+    ContentType[ContentType["COMIC"] = 4] = "COMIC";
+    ContentType[ContentType["UNKNOWN"] = 5] = "UNKNOWN";
+})(ContentType = exports.ContentType || (exports.ContentType = {}));
+
+},{}],11:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],12:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],13:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],14:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProviderLinkType = void 0;
+var ProviderLinkType;
+(function (ProviderLinkType) {
+    ProviderLinkType[ProviderLinkType["WEBSITE"] = 0] = "WEBSITE";
+    ProviderLinkType[ProviderLinkType["TWITTER"] = 1] = "TWITTER";
+    ProviderLinkType[ProviderLinkType["DISCORD"] = 2] = "DISCORD";
+    ProviderLinkType[ProviderLinkType["PATREON"] = 3] = "PATREON";
+})(ProviderLinkType = exports.ProviderLinkType || (exports.ProviderLinkType = {}));
+
+},{}],15:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],16:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],17:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Content"), exports);
+__exportStar(require("./Highlight"), exports);
+__exportStar(require("./Chapter"), exports);
+__exportStar(require("./ChapterData"), exports);
+__exportStar(require("./SearchRequest"), exports);
+__exportStar(require("./PagedResult"), exports);
+__exportStar(require("./TrackerInfo"), exports);
+__exportStar(require("./Property"), exports);
+__exportStar(require("./Collection"), exports);
+__exportStar(require("./Provider"), exports);
+
+},{"./Chapter":7,"./ChapterData":8,"./Collection":9,"./Content":10,"./Highlight":11,"./PagedResult":12,"./Property":13,"./Provider":14,"./SearchRequest":15,"./TrackerInfo":16}],18:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],19:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthMethod = void 0;
+var AuthMethod;
+(function (AuthMethod) {
+    AuthMethod[AuthMethod["USERNAME_PW"] = 0] = "USERNAME_PW";
+    AuthMethod[AuthMethod["EMAIL_PW"] = 1] = "EMAIL_PW";
+    AuthMethod[AuthMethod["WEB"] = 2] = "WEB";
+    AuthMethod[AuthMethod["OAUTH"] = 3] = "OAUTH";
+})(AuthMethod = exports.AuthMethod || (exports.AuthMethod = {}));
+
+},{}],20:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PreferenceType = void 0;
+var PreferenceType;
+(function (PreferenceType) {
+    PreferenceType[PreferenceType["select"] = 0] = "select";
+    PreferenceType[PreferenceType["multiSelect"] = 1] = "multiSelect";
+    PreferenceType[PreferenceType["stepper"] = 2] = "stepper";
+    PreferenceType[PreferenceType["toggle"] = 3] = "toggle";
+    PreferenceType[PreferenceType["textfield"] = 4] = "textfield";
+})(PreferenceType = exports.PreferenceType || (exports.PreferenceType = {}));
+
+},{}],21:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RunnerType = void 0;
+var RunnerType;
+(function (RunnerType) {
+    RunnerType[RunnerType["CONTENT_SOURCE"] = 0] = "CONTENT_SOURCE";
+    RunnerType[RunnerType["SERVICE_INTERACTOR"] = 1] = "SERVICE_INTERACTOR";
+})(RunnerType = exports.RunnerType || (exports.RunnerType = {}));
+
+},{}],22:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Authentication"), exports);
+__exportStar(require("./Preferences"), exports);
+__exportStar(require("./RunnerInfo"), exports);
+__exportStar(require("./Actions"), exports);
+
+},{"./Actions":18,"./Authentication":19,"./Preferences":20,"./RunnerInfo":21}],23:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./core"), exports);
+__exportStar(require("./content"), exports);
+__exportStar(require("./networking"), exports);
+
+},{"./content":17,"./core":22,"./networking":26}],24:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],25:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],26:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./NetworkRequest"), exports);
+__exportStar(require("./NetworkResponse"), exports);
+
+},{"./NetworkRequest":24,"./NetworkResponse":25}]},{},[1])(1)
+});
