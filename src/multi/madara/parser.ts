@@ -251,4 +251,22 @@ export class Parser {
       pages,
     };
   }
+
+  // Parse Genres
+  genres(ctx: Context, html: string) {
+    const $ = load(html);
+
+    const nodes = $("div.checkbox", "div.checkbox-group").toArray();
+
+    const tags = nodes
+      .map((node): Tag => {
+        const label = $("label", node).text().trim();
+        const id = $("input[type=checkbox]", node).attr("value")?.trim() ?? "";
+        const adultContent = ctx.adultTags.includes(label.toLowerCase());
+        return { label, id, adultContent };
+      })
+      .filter((v) => v.id);
+
+    return tags;
+  }
 }

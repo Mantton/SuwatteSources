@@ -69,7 +69,7 @@ describe("MangaDex Tests", () => {
       await expect(source.getMDUserStatuses()).resolves.not.toThrow();
     });
     test("Sync Library", async () => {
-      const library = await source.getUserLibrary();
+      const library = await source.syncUserLibrary([]);
       expect(library.length).toBeGreaterThan(1);
     });
 

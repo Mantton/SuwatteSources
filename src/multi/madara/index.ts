@@ -10,7 +10,9 @@ import {
   SearchRequest,
   Source,
   SourceInfo,
+  Tag,
 } from "@suwatte/daisuke";
+import { sampleSize } from "lodash";
 import {
   DEFAULT_CONTEXT,
   EXPLORE_SECTIONS as EXPLORE_COLLECTIONS,
@@ -46,7 +48,7 @@ export abstract class MadaraTemplate extends Source {
 
   //
   getChapterData(contentId: string, chapterId: string): Promise<ChapterData> {
-    throw new Error("Method not implemented.");
+    return this.controller.getChapterData(contentId, chapterId);
   }
 
   //
@@ -55,8 +57,21 @@ export abstract class MadaraTemplate extends Source {
   }
 
   //
-  getSourceTags(): Promise<Property[]> {
-    throw new Error("Method not implemented.");
+  async getSourceTags(): Promise<Property[]> {
+    const tags = await this.controller.getTags();
+    return [
+      {
+        id: "main",
+        label: "Tags",
+        tags,
+      },
+    ];
+  }
+
+  //
+  async getExplorePageTags(): Promise<Tag[]> {
+    const tags = await this.controller.getTags();
+    return sampleSize(tags, 7);
   }
 
   //

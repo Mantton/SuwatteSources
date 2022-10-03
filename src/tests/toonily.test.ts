@@ -32,4 +32,8 @@ describe("Toonily Tests", () => {
       console.log(data);
     }
   });
+
+  test("Get Source Tags", async () => {
+    await expect(source.getSourceTags()).resolves.not.toThrow();
+  });
 });

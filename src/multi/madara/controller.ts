@@ -44,6 +44,7 @@ export class Controller {
     return this.parser.chapters(this.context, response.data, id);
   }
 
+  // Get Chapter Data
   async getChapterData(
     contentId: string,
     chapterId: string
@@ -58,5 +59,14 @@ export class Controller {
       chapterId,
       response.data
     );
+  }
+
+  async getTags() {
+    // parseGenres;
+    const response = await this.client.get(
+      `${this.context.baseUrl}/?s=genre&post_type=wp-manga`
+    );
+
+    return this.parser.genres(this.context, response.data);
   }
 }
