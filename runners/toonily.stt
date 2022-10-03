@@ -195,6 +195,10 @@ class Controller {
         const response = await this.client.get(`${this.context.baseUrl}/${this.context.contentPath}/${id}/`);
         return this.parser.chapters(this.context, response.data, id);
     }
+    async getChapterData(contentId, chapterId) {
+        const response = await this.client.get(`${this.context.baseUrl}/${this.context.contentPath}/${contentId}/${chapterId}`);
+        return this.parser.chapterData(this.context, contentId, chapterId, response.data);
+    }
 }
 exports.Controller = Controller;
 
@@ -226,7 +230,7 @@ class MadaraTemplate extends daisuke_1.Source {
     }
     //
     getChapters(contentId) {
-        throw new Error("Method not implemented.");
+        return this.controller.getChapters(contentId);
     }
     //
     getChapterData(contentId, chapterId) {
@@ -272,6 +276,7 @@ exports.Test = Test;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
 const cheerio_1 = require("cheerio");
 const lodash_1 = require("lodash");
 const constants_1 = require("./constants");
@@ -412,6 +417,7 @@ class Parser {
             adultContent,
             properties,
             chapters,
+            recommendedReadingMode: daisuke_1.ReadingMode.VERTICAL,
             additionalTitles: additionalTitles.length != 0 ? additionalTitles : undefined,
         };
     }
@@ -449,10 +455,22 @@ class Parser {
         }
         return chapters;
     }
+    chapterData(ctx, contentId, chapterId, html) {
+        const $ = (0, cheerio_1.load)(html);
+        const nodes = $(ctx.imageSelector).toArray();
+        const pages = nodes
+            .map((node) => (0, utils_1.imageFromElement)($(node)).trim())
+            .map((url) => ({ url }));
+        return {
+            contentId,
+            chapterId,
+            pages,
+        };
+    }
 }
 exports.Parser = Parser;
 
-},{"./constants":1,"./utils":5,"cheerio":"cheerio","lodash":"lodash"}],5:[function(require,module,exports){
+},{"./constants":1,"./utils":5,"@suwatte/daisuke":10,"cheerio":"cheerio","lodash":"lodash"}],5:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -639,7 +657,7 @@ class Target extends madara_1.MadaraTemplate {
         id: "com.toonily",
         name: "Toonily",
         thumbnail: "toonily.png",
-        version: 1.0,
+        version: 1.1,
         hasExplorePage: true,
         primarilyAdultContent: true,
         website: "https://toonily.com",
