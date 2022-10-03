@@ -41,7 +41,7 @@ export abstract class MadaraTemplate extends Source {
 
   //
   getChapters(contentId: string): Promise<Chapter[]> {
-    throw new Error("Method not implemented.");
+    return this.controller.getChapters(contentId);
   }
 
   //

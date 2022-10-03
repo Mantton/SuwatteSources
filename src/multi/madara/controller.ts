@@ -1,5 +1,6 @@
 import {
   Chapter,
+  ChapterData,
   CollectionExcerpt,
   Content,
   ExploreCollection,
@@ -41,5 +42,21 @@ export class Controller {
       `${this.context.baseUrl}/${this.context.contentPath}/${id}/`
     );
     return this.parser.chapters(this.context, response.data, id);
+  }
+
+  async getChapterData(
+    contentId: string,
+    chapterId: string
+  ): Promise<ChapterData> {
+    const response = await this.client.get(
+      `${this.context.baseUrl}/${this.context.contentPath}/${contentId}/${chapterId}`
+    );
+
+    return this.parser.chapterData(
+      this.context,
+      contentId,
+      chapterId,
+      response.data
+    );
   }
 }

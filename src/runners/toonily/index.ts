@@ -18,7 +18,7 @@ export class Target extends MadaraTemplate {
     id: "com.toonily",
     name: "Toonily",
     thumbnail: "toonily.png",
-    version: 1.0,
+    version: 1.1,
     hasExplorePage: true,
     primarilyAdultContent: true,
     website: "https://toonily.com",
