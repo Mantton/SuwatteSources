@@ -1,8 +1,11 @@
 import {
   Chapter,
+  ChapterData,
+  ChapterPage,
   Content,
   Highlight,
   Property,
+  ReadingMode,
   Status,
   Tag,
 } from "@suwatte/daisuke";
@@ -183,6 +186,7 @@ export class Parser {
       adultContent,
       properties,
       chapters,
+      recommendedReadingMode: ReadingMode.VERTICAL,
       additionalTitles:
         additionalTitles.length != 0 ? additionalTitles : undefined,
     };
@@ -226,5 +230,25 @@ export class Parser {
     }
 
     return chapters;
+  }
+
+  chapterData(
+    ctx: Context,
+    contentId: string,
+    chapterId: string,
+    html: string
+  ): ChapterData {
+    const $ = load(html);
+    const nodes = $(ctx.imageSelector).toArray();
+
+    const pages: ChapterPage[] = nodes
+      .map((node) => imageFromElement($(node)).trim())
+      .map((url): ChapterPage => ({ url }));
+
+    return {
+      contentId,
+      chapterId,
+      pages,
+    };
   }
 }
