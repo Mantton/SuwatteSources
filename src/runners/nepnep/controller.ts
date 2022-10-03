@@ -72,7 +72,6 @@ export class Controller {
     const key = SORT_KEYS[request.sort?.id ?? ""] ?? "v";
 
     const parsed = this.parser.search(request);
-    console.log(this.directory[0], parsed);
 
     const matches = this.directory.filter((v) =>
       this.matchesRequest(v, parsed)
@@ -99,7 +98,6 @@ export class Controller {
 
   matchesRequest(entry: DirectoryEntry, request: ParsedRequest): Boolean {
     let match = true;
-
     // Author
     if (request.authors && request.authors.length > 0) {
       const hasAuthor = (name: string) => {

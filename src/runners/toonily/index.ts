@@ -1,7 +1,16 @@
-import { RunnerType, SourceInfo } from "@suwatte/daisuke";
-import { MadaraTemplate } from "../../multi/madara2";
-import { DEFAULT_CONTEXT } from "../../multi/madara2/constants";
-import { Context } from "../../multi/madara2/types";
+import {
+  AuthMethod,
+  NetworkRequest,
+  NetworkResponse,
+  RunnerType,
+  SourceInfo,
+  User,
+} from "@suwatte/daisuke";
+import { load } from "cheerio";
+import { MadaraTemplate } from "../../multi/madara";
+import { DEFAULT_CONTEXT } from "../../multi/madara/constants";
+import { Context } from "../../multi/madara/types";
+import { imageFromElement } from "../../multi/madara/utils";
 // import { Madara } from "../../multi/madara";
 
 export class Target extends MadaraTemplate {
@@ -14,6 +23,7 @@ export class Target extends MadaraTemplate {
     primarilyAdultContent: true,
     website: "https://toonily.com",
     supportedLanguages: ["GB"],
+    authMethod: AuthMethod.WEB,
   };
 
   // Template Variables
@@ -35,5 +45,38 @@ export class Target extends MadaraTemplate {
       chapterUseAJAX: true,
       searchSelector: "div.page-item-detail.manga",
     });
+  }
+
+  async willRequestWebViewAuth(): Promise<NetworkRequest> {
+    return {
+      url: this.info.website,
+    };
+  }
+  async didReceiveWebAuthCookie(name: string): Promise<boolean> {
+    return name.includes("wordpress_logged_in");
+  }
+
+  async getAuthenticatedUser(): Promise<User | null> {
+    const response = await this.controller.client.get(
+      "https://toonily.com/user-settings/?tab=account-settings"
+    );
+
+    const $ = load(response.data);
+
+    const username = $(
+      "#form-account-settings > div > div:nth-child(2) > div:nth-child(2) > div > span"
+    ).text();
+
+    const avatar = imageFromElement($(".c-user-avatar > img"));
+
+    if (!username) {
+      return null;
+    }
+
+    return {
+      id: username,
+      username,
+      avatar,
+    };
   }
 }

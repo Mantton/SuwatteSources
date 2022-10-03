@@ -1,36 +1,33 @@
 import {
   Chapter,
-  ChapterData,
-  ChapterPage,
-  CollectionStyle,
   Content,
   Highlight,
-  HighlightCollection,
   Property,
-  ReadingMode,
   Status,
   Tag,
 } from "@suwatte/daisuke";
-import { imageFromElement } from "./utils";
-import moment from "moment";
-import { decode } from "he";
-import { Madara } from ".";
 import { load } from "cheerio";
+import { trim } from "lodash";
+import { TAG_PREFIX } from "./constants";
+import { AnchorTag, Context } from "./types";
+import {
+  generateAnchorTag,
+  imageFromElement,
+  notUpdating,
+  parseDate,
+  parseStatus,
+} from "./utils";
 
-export namespace Parser {
-  export function parseAjaxDirectoryResponse(
-    response: string,
-    baseUrl: string,
-    traversal: string
-  ) {
+export class Parser {
+  AJAXResponse(ctx: Context, html: string): Highlight[] {
     const highlights: Highlight[] = [];
-    const $ = load(response);
+    const $ = load(html);
 
     for (const element of $(".page-item-detail")) {
       const title = $("a", $("h3.h5", element)).text();
       const id = $("a", $("h3.h5", element))
         .attr("href")
-        ?.replace(`${baseUrl}/${traversal}/`, "")
+        ?.replace(`${ctx.baseUrl}/${ctx.contentPath}/`, "")
         .replace(/\/$/, "");
 
       if (!title || !id) {
@@ -49,269 +46,185 @@ export namespace Parser {
     return highlights;
   }
 
-  export function parseTags(data: string, searchPage: boolean): Property[] {
-    const $ = load(data);
-    const tags: Tag[] = [];
-    if (searchPage) {
-      for (const obj of $(".checkbox-group div label").toArray()) {
-        const label = $(obj).text().trim();
-        const id = $(obj).attr("for") ?? label;
-        tags.push({ label, id, adultContent: false });
-      }
-    } else {
-      for (const obj of $(
-        ".menu-item-object-wp-manga-genre a",
-        $(".second-menu")
-      ).toArray()) {
-        const label = $(obj).text().trim();
-        const id = $(obj).attr("href")?.split("/")[4] ?? label;
-        tags.push({ label, id, adultContent: false });
-      }
-    }
-
-    return [
-      {
-        id: "genres",
-        label: "Genres",
-        tags,
-      },
-    ];
-  }
-
-  export function parseContent(
-    id: string,
-    data: string,
-    context: Madara
-  ): Content {
-    const $ = load(data);
+  content(ctx: Context, html: string, contentId: string): Content {
+    const $ = load(html);
 
     // Title
-    const title = $(context.DETAILS_SELECTOR_TITLE).text().trim();
+    const title = $(ctx.titleSelector).first()?.text().trim();
+    if (!title)
+      throw new Error("Title not found\nPotentially incorrect selectors");
+
+    // Author
+    const authors = $(ctx.authorSelector)
+      .toArray()
+      .map((node) => generateAnchorTag($, node))
+      .filter(notUpdating)
+      .map(
+        (tag): Tag => ({
+          id: `${TAG_PREFIX.author}|tag.title.toLowerCase()`,
+          label: tag.title,
+          adultContent: false,
+        })
+      );
+    // Artists
+    const artists = $(ctx.artistSelector)
+      .toArray()
+      .map((node) => generateAnchorTag($, node))
+      .filter(notUpdating)
+      .map(
+        (tag): Tag => ({
+          id: `${TAG_PREFIX.artist}|tag.title.toLowerCase()`,
+          label: tag.title,
+          adultContent: false,
+        })
+      );
 
     // Creators
-    const author = $(context.DETAILS_SELECTOR_AUTHOR)
-      .first()
-      .text()
-      .replace("Updating", "");
-    const artist = $(context.DETAILS_SELECTOR_ARTIST)
-      .first()
-      .text()
-      .replace("Updating", "");
-    const creators: string[] = [];
-    if (author) creators.push(author);
-    if (artist && !creators.includes(artist)) creators.push(artist);
+    const creators = Array.from(
+      new Set(authors.concat(artists).map((v) => v.label))
+    );
 
-    // Covers
-    const cover = imageFromElement($(context.DETAILS_SELECTOR_THUMBNAIL));
-
-    // Additional Titles
-    const summary = $(context.DETAILS_SELECTOR_SUMMARY).text().trim();
-    // Additional Titles
-    const altNameSelector = $(context.DETAILS_ALT_NAME_SELECTOR)
-      .first()
-      .text()
-      .trim();
-    const additionalTitles: string[] = [];
-    if (altNameSelector && altNameSelector !== "Updating") {
-      additionalTitles.push(...altNameSelector.split(", "));
+    // Summary
+    let summary = "";
+    let summaryNode = $(ctx.summarySelector);
+    if ($(summaryNode, "p").text().trim()) {
+      summary = $(summaryNode, "p")
+        .toArray()
+        .map((v): string => {
+          const elem = $(v);
+          return elem.text().replace("<br>", "\n");
+        })
+        .join("\n\n")
+        .trim();
+    } else {
+      summary = $(ctx.summarySelector).text().trim();
     }
+
+    // Cover
+    const coverElem = $(ctx.thumbnailSelector).first();
+    const cover = imageFromElement(coverElem);
 
     // Status
-    let status = Status.UNKNOWN;
-    const statusSelector = $(context.DETAILS_SELECTOR_STATUS)
-      .last()
+    const statusString = $(ctx.statusSelector).last()?.text().trim() ?? "";
+    const status = parseStatus(statusString);
+
+    // Genres
+    const genres = $(ctx.genreSelector)
+      .toArray()
+      .map((node) => generateAnchorTag($, node))
+      .map(
+        (v): Tag => ({
+          id:
+            v
+              .link!.split("/")
+              .filter((v) => v)
+              .pop() ?? "",
+          label: v.title,
+          adultContent: ctx.adultTags.includes(v.title.toLowerCase()),
+        })
+      )
+      .filter((v) => v.id);
+
+    const hashtags = $(ctx.tagSelector)
+      .toArray()
+      .map((node) => generateAnchorTag($, node))
+      .map(
+        (v): Tag => ({
+          id: `${TAG_PREFIX.hashtag}${
+            v
+              .link!.split("/")
+              .filter((v) => v)
+              .pop() ?? ""
+          }`,
+          label: v.title,
+          adultContent: ctx.adultTags.includes(v.title.toLowerCase()),
+        })
+      )
+      .filter((v) => v.id.replace(TAG_PREFIX.hashtag, ""));
+
+    const additionalTitles = $(ctx.alternativeTitlesSelector)
+      .first()
       .text()
-      .trim();
+      .trim()
+      .split(";")
+      .map(trim);
 
-    if (context.COMPLETED_STATUS_LIST.includes(statusSelector))
-      status = Status.COMPLETED;
-    else if (context.ONGOING_STATUS_LIST.includes(statusSelector))
-      status = Status.ONGOING;
+    const adultContent = genres.some((v) => v.adultContent);
 
-    // Adult Content
-    let adultContent = context.ADULT_CONTENT_ONLY;
-
-    // Properties
-    const tags: Tag[] = [];
-    for (const node of $(context.DETAILS_SELECTOR_GENRE)) {
-      const element = $(node);
-      const id = $(node)
-        .attr("href")
-        ?.replace(`${context.BASE_URL}/${context.GENRE_TRAVERSAL_PATH}`, "")
-        .replaceAll("/", "");
-
-      if (!id) continue;
-      const tag: Tag = {
-        id,
-        adultContent: context.ADULT_SLUGS.includes(id),
-        label: element.text().trim(),
-      };
-      tags.push(tag);
-      if (tag.adultContent && !adultContent) adultContent = true;
-    }
-
-    const properties = [
+    const properties: Property[] = [
       {
-        id: "genres",
+        id: "main",
         label: "Genres",
-        tags,
+        tags: genres,
+      },
+      {
+        id: "supporting",
+        label: "Tags",
+        tags: hashtags,
+      },
+      {
+        id: "creators",
+        label: "Credits",
+        tags: [
+          ...authors.map((v): Tag => ({ ...v, label: `Story By ${v.label}` })),
+          ...artists.map((v): Tag => ({ ...v, label: `Art By ${v.label}` })),
+        ],
       },
     ];
 
-    // Recommended Reading Mode
-    let recommendedReadingMode = ReadingMode.VERTICAL;
-    const seriesSelector = $(context.SERIES_TYPE_SELECTOR)
-      .first()
-      .text()
-      .toLowerCase();
-
-    if (seriesSelector && seriesSelector === "manga") {
-      recommendedReadingMode = ReadingMode.PAGED_MANGA;
-    }
-    // Recommended Content
-    const relatedContent: Highlight[] = [];
-    for (const node of $(context.RECOMMENDED_SELECTOR)) {
-      const element = $(node);
-
-      const id = element
-        .attr("href")
-        ?.replace(`${context.BASE_URL}/${context.CONTENT_TRAVERSAL_PATH}/`, "")
-        .replace(/\/$/, "");
-      const title = element.attr("title") ?? "";
-      if (!id || !title) continue;
-      const highlight: Highlight = {
-        contentId: id,
-        title,
-        cover: imageFromElement($("img", element)),
-      };
-
-      relatedContent.push(highlight);
-    }
-
-    const collection: HighlightCollection = {
-      id: "related",
-      title: "You might also like",
-      highlights: relatedContent,
-      style: CollectionStyle.NORMAL,
-    };
-
-    // Chapters
-    let chapters: Chapter[] | undefined = undefined;
-    try {
-      chapters = parseChapters(context, id, data);
-    } catch (error) {
-      console.log("caught error parsing chapters", error);
-    }
-    // Output
-    const content: Content = {
-      contentId: id,
+    const chapters = this.chapters(ctx, html, contentId);
+    return {
+      contentId,
       title,
-      additionalTitles,
       cover,
-      status,
+      summary: summary ? summary : undefined,
       creators,
-      summary,
+      status,
       adultContent,
-      webUrl: `${context.BASE_URL}/${context.CONTENT_TRAVERSAL_PATH}/${id}/`,
       properties,
-      recommendedReadingMode,
-      includedCollections: [collection],
       chapters,
+      additionalTitles:
+        additionalTitles.length != 0 ? additionalTitles : undefined,
     };
-
-    return content;
   }
 
-  export function parseChapters(ctx: Madara, contentId: string, data: string) {
-    const $ = load(data);
+  chapters(ctx: Context, html: string, contentId: string): Chapter[] {
+    const $ = load(html);
     let index = 0;
     const chapters: Chapter[] = [];
-    for (const node of $("li.wp-manga-chapter").toArray()) {
+    for (const node of $(ctx.chapterSelector).toArray()) {
       const elem = $(node);
-      const chapterId = ($("a", elem).first().attr("href") || "")
-        .replace(
-          `${ctx.BASE_URL}/${ctx.CONTENT_TRAVERSAL_PATH}/${contentId}/`,
-          ""
-        )
+
+      const id = $("a", elem)
+        .first()
+        .attr("href")
+        ?.replace(`${ctx.baseUrl}/${ctx.contentPath}/${contentId}/`, "")
         .replace(/\/$/, "");
-      const numberString = decode(chapterId)
+
+      if (!id) throw new Error("Failed to parse Chapter ID");
+      const title = $("a", elem).first().text().trim();
+
+      const numStr = id
         .match(/\D*(\d*\-?\d*)\D*$/)
         ?.pop()
         ?.replace(/-/g, ".");
-      const number = Number(numberString);
-      if (!chapterId || !number) throw "Unable to Parse Chapter identifiers";
-      const title = $("a", elem).first().text().trim() ?? "";
+      const number = Number(numStr);
+      const dateStr = $(ctx.chapterDateSelector, elem).first().text().trim();
+      const date = parseDate(dateStr);
 
-      // Chapter Date
-      const dateString =
-        $(
-          "span.chapter-release-date > a, span.chapter-release-date > span.c-new-tag > a",
-          elem
-        ).attr("title") ??
-        $("span.chapter-release-date > i", elem).text().trim();
-
-      const date = dateString ? getChapterDate(dateString) : new Date();
-
-      const chapter: Chapter = {
-        chapterId,
-        number,
-        title,
-        date,
-        contentId,
+      chapters.push({
         index,
+        contentId,
+        chapterId: id,
+        number,
+        date,
+        title,
         language: "GB",
-        webUrl: $("a", elem).first().attr("href"),
-      };
-      chapters.push(chapter);
+      });
+
       index++;
     }
+
     return chapters;
-  }
-
-  export function parsePages(
-    ctx: Madara,
-    contentId: string,
-    chapterId: string,
-    data: string
-  ): ChapterData {
-    const $ = load(data);
-    const nodes = $(ctx.PAGE_LIST_SELECTOR);
-    const pages = nodes
-      .toArray()
-      .map((node) => imageFromElement($(node)).trim())
-      .map((url): ChapterPage => ({ url }));
-    return {
-      contentId,
-      chapterId,
-      pages,
-    };
-  }
-
-  function getChapterDate(str: string) {
-    str = str.toLowerCase();
-    let mom = moment();
-    const number = Number((/\d*/.exec(str) ?? [])[0]);
-    if (str.includes("less than") || str.includes("just")) {
-      // Do nothing
-    } else if (str.includes("year")) {
-      mom.subtract(number, "years").toDate();
-    } else if (str.includes("month")) {
-      mom.subtract(number, "months");
-    } else if (str.includes("week")) {
-      mom.subtract(number, "weeks");
-    } else if (str.includes("yester")) {
-      mom.subtract(1, "day");
-    } else if (str.includes("day")) {
-      mom.subtract(number, "days");
-    } else if (str.includes("hour")) {
-      mom.subtract(number, "hours");
-    } else if (str.includes("minute")) {
-      mom.subtract(number, "minutes");
-    } else if (str.includes("second")) {
-      mom.subtract(number, "seconds");
-    } else {
-      mom = moment(str);
-    }
-    return mom.toDate();
   }
 }

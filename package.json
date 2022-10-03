@@ -27,8 +27,8 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@suwatte/cli": "^1.0.3",
-    "@suwatte/daisuke": "file:../daisuke/bridge",
+    "@suwatte/cli": "^1.0.5",
+    "@suwatte/daisuke": "^1.2.0",
     "@suwatte/emulator": "^1.0.3",
     "cheerio": "^1.0.0-rc.12",
     "he": "^1.2.0",

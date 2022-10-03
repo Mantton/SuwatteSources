@@ -21,7 +21,6 @@ export class Controller {
     const request = AJAXDirectoryRequest(this.context, {
       sort: { id: excerpt.id, label: "" },
     });
-    console.log(request);
     const response = await this.client.request(request);
     const highlights = this.parser.AJAXResponse(this.context, response.data);
 

@@ -1,145 +1,189 @@
-import {
-  CollectionExcerpt,
-  CollectionStyle,
-  NetworkRequest,
-} from "@suwatte/daisuke";
+import { NetworkRequest, SearchRequest, Status } from "@suwatte/daisuke";
 import { AnyNode, Cheerio, CheerioAPI } from "cheerio";
+import moment, { Moment } from "moment";
+import {
+  AJAX_DIRECTORY,
+  CANCELLED_STATUS_LIST,
+  COMPLETED_STATUS_LIST,
+  DAY_DATE_LIST,
+  HIATUS_STATUS_LIST,
+  HOUR_DATE_LIST,
+  MINUTE_DATE_LIST,
+  MONTH_DATE_LIST,
+  ONGOING_STATUS_LIST,
+  SECONDS_DATE_LIST,
+  WEEK_DATE_LIST,
+  YEAR_DATE_LIST,
+} from "./constants";
+import { AnchorTag, Context } from "./types";
 
-export enum AJAX_DIRECTORY {
-  LATEST = "_latest_update",
-  TRENDING_WEEKLY = "_wp_manga_week_views_value",
-  TRENDING_DAILY = "_wp_manga_day_views_value",
-  TRENDING_MONTHLY = "_wp_manga_month_views_value",
-  POPULAR_AT = "_wp_manga_views",
-  COMPLETED = "_wp_manga_status",
-  MOST_REVIEWED = "_manga_total_votes",
-  TOP_RATED = "_manga_avarage_reviews",
-  NEW = "date",
-}
-
-export namespace AJAX_DIRECTORY {
-  export function fromString(dir: string): AJAX_DIRECTORY {
-    return (AJAX_DIRECTORY as any)[dir];
-  }
-}
-export const ajaxDirectoryRequest = (
-  domain: string,
-  page: number,
-  type: string
+export const AJAXDirectoryRequest = (
+  ctx: Context,
+  request: SearchRequest,
+  searching: boolean = false
 ): NetworkRequest => {
-  let body = {
-    action: "madara_load_more",
-    template: "madara-core/content/content-archive",
-    "vars[manga_archives_item_layout]": "big_thumbnail",
-    "vars[paged]": "1",
-    "vars[orderby]": type !== AJAX_DIRECTORY.NEW ? "meta_value_num" : "date",
-    "vars[template]": "archive",
-    "vars[sidebar]": "right",
-    "vars[post_type]": "wp-manga",
-    "vars[post_status]": "publish",
-    "vars[order]": "desc",
-    "vars[posts_per_page]": 30,
-    "vars[meta_key]": type !== AJAX_DIRECTORY.NEW ? type : "",
-    "vars[meta_value]": type == AJAX_DIRECTORY.COMPLETED ? "end" : "",
-    page: page - 1,
-  };
-
+  const body = generateAJAXRequest(ctx, request);
+  if (!searching) {
+    body["template"] = "madara-core/content/content-archive";
+  }
   return {
-    url: `${domain}/wp-admin/admin-ajax.php`,
+    url: `${ctx.baseUrl}/wp-admin/admin-ajax.php`,
     method: "POST",
-    body,
     headers: {
       "content-type": "application/x-www-form-urlencoded",
-      referer: domain,
+      referer: ctx.baseUrl,
     },
+
+    body,
     cookies: [
       {
         name: "wpmanga-adault",
         domain: ".toonily.com",
-        value: "0",
+        value: "1",
       },
     ],
   };
 };
+const generateAJAXRequest = (
+  ctx: Context,
+  request: SearchRequest
+): Record<string, string> => {
+  const body: Record<string, string> = {
+    action: "madara_load_more",
+    page: ((request.page ?? 1) - 1).toString(),
+    template: "madara-core/content/content-search",
+    "vars[paged]": "1",
+    "vars[template]": "archive",
+    "vars[sidebar]": "right",
+    "vars[post_type]": "wp-manga",
+    "vars[post_status]": "publish",
+    "vars[manga_archives_item_layout]": "big_thumbnail",
+    "vars[posts_per_page]": "30",
+  };
 
-export const generateExploreSections = (): CollectionExcerpt[] => {
-  const sections: CollectionExcerpt[] = [
-    {
-      id: AJAX_DIRECTORY.POPULAR_AT,
-      title: "Popular Titles",
-      subtitle: `The "Must Reads"`,
-      style: CollectionStyle.INFO,
-    },
-    {
-      id: AJAX_DIRECTORY.TRENDING_DAILY,
-      title: "Trending Daily",
-      subtitle: `What we're "reading"`,
-      style: CollectionStyle.NORMAL,
-    },
-    {
-      id: AJAX_DIRECTORY.NEW,
-      title: "Recently Added Series",
-      subtitle: `Fresh from the bakery, discover new stories`,
-      style: CollectionStyle.NORMAL,
-    },
-    {
-      id: AJAX_DIRECTORY.TRENDING_WEEKLY,
-      title: "Trending Weekly",
-      subtitle: `Top Reads from this past week.`,
-      style: CollectionStyle.NORMAL,
-    },
-    {
-      id: AJAX_DIRECTORY.TOP_RATED,
-      title: "Top Rated Titles",
-      subtitle: `Guaranteed Bangers 🔥`,
-      style: CollectionStyle.NORMAL,
-    },
-    {
-      id: AJAX_DIRECTORY.TRENDING_MONTHLY,
-      title: "Trending Monthly",
-      subtitle: `Top Reads from this past month.`,
-      style: CollectionStyle.NORMAL,
-    },
+  if (ctx.filterNonMangaItems && ctx.showOnlyManga) {
+    body["vars[meta_query][0][key]"] = "_wp_manga_chapter_type";
+    body["vars[meta_query][0][value]"] = "manga";
+  }
 
-    {
-      id: AJAX_DIRECTORY.COMPLETED,
-      title: "Completed Titles",
-      subtitle: `Perfect for binging.`,
-      style: CollectionStyle.NORMAL,
-    },
-    {
-      id: AJAX_DIRECTORY.MOST_REVIEWED,
-      title: "Top Reviewed Series",
-      subtitle: `Titles that get the community talking`,
-      style: CollectionStyle.INFO,
-    },
-    {
-      id: AJAX_DIRECTORY.LATEST,
-      title: "Latest Updates",
-      style: CollectionStyle.UPDATE_LIST,
-    },
-  ];
+  if (request.sort?.id) {
+    switch (request.sort.id) {
+      case "latest":
+        body["vars[orderby]"] = "meta_value_num";
+        body["vars[order]"] = "DESC";
+        body["vars[meta_key]"] = "_latest_update";
+        break;
+      case "alphabet":
+        body["vars[orderby]"] = "post_title";
+        body["vars[order]"] = "ASC";
+        break;
+      case "rating":
+        body["vars[orderby][query_average_reviews]"] = "DESC";
+        body["vars[orderby][query_total_reviews]"] = "DESC";
+        break;
+      case "trending_daily":
+        body["vars[orderby]"] = "meta_value_num";
+        body["vars[meta_key]"] = "_wp_manga_day_views_value";
+        body["vars[order]"] = "DESC";
+        break;
+      case "trending_weekly":
+        body["vars[orderby]"] = "meta_value_num";
+        body["vars[meta_key]"] = "_wp_manga_week_views_value";
+        body["vars[order]"] = "DESC";
+        break;
+      case "trending_monthly":
+        body["vars[orderby]"] = "meta_value_num";
+        body["vars[meta_key]"] = "_wp_manga_month_views_value";
+        body["vars[order]"] = "DESC";
+        break;
+      case "popular_allTime":
+        body["vars[orderby]"] = "meta_value_num";
+        body["vars[meta_key]"] = "_wp_manga_views";
+        body["vars[order]"] = "DESC";
+        break;
+      case "new":
+        body["vars[orderby]"] = "date";
+        body["vars[order]"] = "DESC";
+        break;
+      case "completed":
+        body["vars[orderby]"] = "meta_value_num";
+        body["vars[meta_value]"] = "end";
+        body["vars[meta_key]"] = "_wp_manga_status";
+        break;
+    }
+  }
 
-  return sections;
+  if (request.query) {
+    body["s"] = request.query;
+  }
+  return body;
 };
 
-export const imageFromElement = (element: any): string => {
-  const srcset = element.attr("srcset");
-  const dataSrcSet = element.attr("data-srcset");
-  if (srcset) {
-    const [last] = srcset.split(", ").splice(-1);
-    return last.split(" ")[0]?.trim() ?? "";
-  } else if (dataSrcSet) {
-    const [last] = dataSrcSet.split(", ").splice(-1);
-    return last.split(" ")[0]?.trim() ?? "";
-  }
-  return (
-    element.attr("srcset") ??
-    element.attr("srcset")?.split(" ")[0] ??
+export const imageFromElement = (element: Cheerio<AnyNode>): string => {
+  const url =
     element.attr("data-src") ??
     element.attr("data-lazy-src") ??
+    element.attr("srcset")?.split(" ")?.[0] ??
     element.attr("src") ??
     element.attr("data-cfsrc") ??
-    ""
-  );
+    "https://aegaeon.mantton.com/ceres.jpeg";
+
+  return url
+    .replace("-110x150", "")
+    .replace("-175x238", "")
+    .replace("-193x278", "")
+    .replace("-224x320", "")
+    .replace("-350x476", "");
+};
+
+export const notUpdating = (tag: AnchorTag): boolean => {
+  const regex = /Updating|Atualizando/;
+  return !!!tag.title.trim().match(regex);
+};
+
+export const generateAnchorTag = ($: CheerioAPI, node: AnyNode): AnchorTag => {
+  const elem = $(node);
+  const link = elem.attr("href");
+  const title = elem.text().trim();
+  return { link, title };
+};
+
+export const parseStatus = (str: string): Status => {
+  if (COMPLETED_STATUS_LIST.includes(str)) return Status.COMPLETED;
+  if (ONGOING_STATUS_LIST.includes(str)) return Status.ONGOING;
+  if (HIATUS_STATUS_LIST.includes(str)) return Status.HIATUS;
+  if (CANCELLED_STATUS_LIST.includes(str)) return Status.CANCELLED;
+
+  return Status.UNKNOWN;
+};
+
+export const parseDate = (str: string) => {
+  if (["just", "now", "up"].some((v) => str.trim().toLowerCase().includes(v)))
+    return new Date();
+  if (str.trim().toLowerCase() === "yesterday")
+    return moment().subtract(1, "day").toDate();
+  return parseRelativeDate(str)?.toDate() ?? moment(str).toDate();
+};
+export const parseRelativeDate = (str: string) => {
+  const numStr = str.match(/(\d+)/)?.[1];
+  if (!numStr || parseInt(numStr) === NaN) {
+    throw new Error(`Date Parse Failure: ${str}`);
+  }
+  const number = parseInt(numStr);
+
+  let now = moment();
+  if (DAY_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "days");
+  if (HOUR_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "hours");
+  if (MINUTE_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "minutes");
+  if (SECONDS_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "seconds");
+  if (WEEK_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "weeks");
+  if (MONTH_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "months");
+  if (YEAR_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
+    return now.subtract(number, "years");
 };
