@@ -36,4 +36,9 @@ describe("Toonily Tests", () => {
   test("Get Source Tags", async () => {
     await expect(source.getSourceTags()).resolves.not.toThrow();
   });
+
+  test("Handle Search", async () => {
+    const pagedResult = await source.getSearchResults({ query: "noona" });
+    console.log(pagedResult);
+  });
 });

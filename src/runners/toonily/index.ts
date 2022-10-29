@@ -9,9 +9,7 @@ import {
 import { load } from "cheerio";
 import { MadaraTemplate } from "../../multi/madara";
 import { DEFAULT_CONTEXT } from "../../multi/madara/constants";
-import { Context } from "../../multi/madara/types";
 import { imageFromElement } from "../../multi/madara/utils";
-// import { Madara } from "../../multi/madara";
 
 export class Target extends MadaraTemplate {
   info: SourceInfo = {
@@ -26,15 +24,6 @@ export class Target extends MadaraTemplate {
     authMethod: AuthMethod.WEB,
   };
 
-  // Template Variables
-  // BASE_URL = "https://toonily.com";
-  // CONTENT_TRAVERSAL_PATH = "webtoon";
-  // GENRE_TRAVERSAL_PATH = "webtoon-genre";
-  // HAS_ADVANCED_SEARCH = true;
-  // async getCFRequestURL() {
-  //   return this.BASE_URL;
-  // }
-
   constructor() {
     super({
       ...DEFAULT_CONTEXT,
@@ -44,9 +33,33 @@ export class Target extends MadaraTemplate {
       filterNonMangaItems: false,
       chapterUseAJAX: true,
       searchSelector: "div.page-item-detail.manga",
+      useLoadMoreSearch: true,
     });
   }
 
+  async onSourceLoaded(): Promise<void> {
+    this.controller.client.requestInterceptHandler = async (req) => {
+      return {
+        ...req,
+        headers: {
+          ...(req.headers ?? {}),
+          referer: this.context.baseUrl + "/",
+        },
+        cookies: [
+          {
+            name: "wpmanga-adault",
+            domain: ".toonily.com",
+            value: "1",
+          },
+          {
+            name: "toonily-mature",
+            domain: ".toonily.com",
+            value: "1",
+          },
+        ],
+      };
+    };
+  }
   async willRequestWebViewAuth(): Promise<NetworkRequest> {
     return {
       url: this.info.website,

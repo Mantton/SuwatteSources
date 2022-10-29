@@ -4,15 +4,16 @@ import {
   CollectionExcerpt,
   Content,
   ExploreCollection,
+  Filter,
   NetworkRequest,
   PagedResult,
   Property,
   SearchRequest,
+  SearchSort,
   Source,
   SourceInfo,
   Tag,
 } from "@suwatte/daisuke";
-import { sampleSize } from "lodash";
 import {
   DEFAULT_CONTEXT,
   EXPLORE_SECTIONS as EXPLORE_COLLECTIONS,
@@ -52,26 +53,28 @@ export abstract class MadaraTemplate extends Source {
   }
 
   //
-  getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    throw "Method not Implemented";
+  getSearchFilters(): Promise<Filter[]> {
+    return this.controller.getFilters();
+  }
+
+  //
+  async getSearchSorters(): Promise<SearchSort[]> {
+    return this.controller.getSorters();
+  }
+  //
+  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
+    return this.controller.handleSearch(query);
   }
 
   //
   async getSourceTags(): Promise<Property[]> {
-    const tags = await this.controller.getTags();
-    return [
-      {
-        id: "main",
-        label: "Tags",
-        tags,
-      },
-    ];
+    const main = await this.controller.getTags();
+    return [main];
   }
 
   //
-  async getExplorePageTags(): Promise<Tag[]> {
-    const tags = await this.controller.getTags();
-    return sampleSize(tags, 7);
+  getExplorePageTags(): Promise<Tag[]> {
+    return this.controller.getExploreTags();
   }
 
   //

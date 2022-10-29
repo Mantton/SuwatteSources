@@ -4,6 +4,7 @@ import {
   ChapterPage,
   Content,
   Highlight,
+  PagedResult,
   Property,
   ReadingMode,
   Status,
@@ -268,5 +269,32 @@ export class Parser {
       .filter((v) => v.id);
 
     return tags;
+  }
+
+  searchResponse(ctx: Context, html: string, page: number): PagedResult {
+    const $ = load(html);
+    const nodes = $(".page-item-detail").toArray();
+
+    const highlights: Highlight[] = nodes.map((node) => {
+      const title = $("a", node).attr("title");
+      const contentId = $("a", node)
+        .attr("href")
+        ?.replace(`${ctx.baseUrl}/${ctx.contentPath}/`, "")
+        .replace(/\/$/, "");
+
+      if (!title || !contentId) throw "Failed to Parse Search Result";
+      const cover = imageFromElement($("img", node));
+
+      return {
+        title,
+        contentId,
+        cover,
+      };
+    });
+    return {
+      results: highlights,
+      page,
+      isLastPage: highlights.length <= 18,
+    };
   }
 }

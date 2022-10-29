@@ -31,17 +31,9 @@ export const AJAXDirectoryRequest = (
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded",
-      referer: ctx.baseUrl,
+      referer: ctx.baseUrl + "/",
     },
-
     body,
-    cookies: [
-      {
-        name: "wpmanga-adault",
-        domain: ".toonily.com",
-        value: "1",
-      },
-    ],
   };
 };
 const generateAJAXRequest = (
@@ -114,7 +106,7 @@ const generateAJAXRequest = (
   }
 
   if (request.query) {
-    body["s"] = request.query;
+    body["vars[s]"] = request.query;
   }
   return body;
 };
@@ -135,7 +127,6 @@ export const imageFromElement = (element: Cheerio<AnyNode>): string => {
     .replace("-224x320", "")
     .replace("-350x476", "");
 };
-
 export const notUpdating = (tag: AnchorTag): boolean => {
   const regex = /Updating|Atualizando/;
   return !!!tag.title.trim().match(regex);

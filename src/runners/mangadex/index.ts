@@ -69,7 +69,7 @@ export class Target extends Source {
     "97893a4c-12af-4dac-b6be-0dffb353568e",
     "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
   ];
-  private SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
+  private SEASONAL_LIST_ID = "4be9338a-3402-4f98-b467-43fb56663927";
   private LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
   private RESULT_LIMIT = 30;
   private DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
@@ -274,8 +274,8 @@ export class Target extends Source {
       label: "Additional Info",
       tags: [
         `📚 Follows: ${stats.follows.toLocaleString()}`,
-        `⭐️ Rating: ${stats.rating.toFixed(1)} / 10 `,
-      ],
+        stats.rating ? `⭐️ Rating: ${stats.rating.toFixed(1)} / 10 ` : "",
+      ].filter((v) => v),
     };
 
     let contentType: ContentType = ContentType.UNKNOWN;
