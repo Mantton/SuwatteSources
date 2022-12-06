@@ -151,7 +151,7 @@ exports.DEFAULT_FILTERS = [
     },
 ];
 
-},{"@suwatte/daisuke":11,"lodash":"lodash"}],2:[function(require,module,exports){
+},{"@suwatte/daisuke":10,"lodash":"lodash"}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Controller = void 0;
@@ -413,7 +413,7 @@ class Target extends daisuke_1.Source {
 }
 exports.Target = Target;
 
-},{"./constants":1,"./controller":2,"./preference":5,"@suwatte/daisuke":11}],4:[function(require,module,exports){
+},{"./constants":1,"./controller":2,"./preference":5,"@suwatte/daisuke":10}],4:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -730,7 +730,7 @@ class Parser {
 }
 exports.Parser = Parser;
 
-},{"./constants":1,"./utils":7,"@suwatte/daisuke":11,"cheerio":"cheerio","lodash":"lodash","moment":"moment"}],5:[function(require,module,exports){
+},{"./constants":1,"./utils":7,"@suwatte/daisuke":10,"cheerio":"cheerio","lodash":"lodash","moment":"moment"}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.preferences = void 0;
@@ -752,7 +752,7 @@ exports.preferences = [
     },
 ];
 
-},{"./constants":1,"@suwatte/daisuke":11}],6:[function(require,module,exports){
+},{"./constants":1,"@suwatte/daisuke":10}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Store = void 0;
@@ -816,24 +816,12 @@ exports.prepareURLSuffix = prepareURLSuffix;
 },{}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DaisukeRunner = void 0;
-class DaisukeRunner {
-}
-exports.DaisukeRunner = DaisukeRunner;
-
-},{}],9:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.Source = void 0;
-const types_1 = require("../types");
 class Source {
-    constructor() {
-        this.type = types_1.RunnerType.CONTENT_SOURCE;
-    }
 }
 exports.Source = Source;
 
-},{"../types":28}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -850,10 +838,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./Runner"), exports);
 __exportStar(require("./Source"), exports);
 
-},{"./Runner":8,"./Source":9}],11:[function(require,module,exports){
+},{"./Source":8}],10:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -873,13 +860,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./classes"), exports);
 __exportStar(require("./types"), exports);
 
-},{"./classes":10,"./types":28}],12:[function(require,module,exports){
+},{"./classes":9,"./types":27}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],13:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollectionStyle = void 0;
@@ -891,7 +878,7 @@ var CollectionStyle;
     CollectionStyle[CollectionStyle["UPDATE_LIST"] = 3] = "UPDATE_LIST";
 })(CollectionStyle = exports.CollectionStyle || (exports.CollectionStyle = {}));
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.Status = void 0;
@@ -935,13 +922,13 @@ var ContentType;
     ContentType[ContentType["UNKNOWN"] = 5] = "UNKNOWN";
 })(ContentType = exports.ContentType || (exports.ContentType = {}));
 
-},{}],16:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],17:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],18:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],19:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],16:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],17:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProviderLinkType = void 0;
@@ -953,11 +940,11 @@ var ProviderLinkType;
     ProviderLinkType[ProviderLinkType["PATREON"] = 3] = "PATREON";
 })(ProviderLinkType = exports.ProviderLinkType || (exports.ProviderLinkType = {}));
 
-},{}],20:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],21:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],22:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],20:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],21:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -985,9 +972,9 @@ __exportStar(require("./Property"), exports);
 __exportStar(require("./Collection"), exports);
 __exportStar(require("./Provider"), exports);
 
-},{"./Chapter":12,"./ChapterData":13,"./Collection":14,"./Content":15,"./Highlight":16,"./PagedResult":17,"./Property":18,"./Provider":19,"./SearchRequest":20,"./TrackerInfo":21}],23:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],24:[function(require,module,exports){
+},{"./Chapter":11,"./ChapterData":12,"./Collection":13,"./Content":14,"./Highlight":15,"./PagedResult":16,"./Property":17,"./Provider":18,"./SearchRequest":19,"./TrackerInfo":20}],22:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],23:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthMethod = void 0;
@@ -999,7 +986,7 @@ var AuthMethod;
     AuthMethod[AuthMethod["OAUTH"] = 3] = "OAUTH";
 })(AuthMethod = exports.AuthMethod || (exports.AuthMethod = {}));
 
-},{}],25:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PreferenceType = void 0;
@@ -1012,7 +999,7 @@ var PreferenceType;
     PreferenceType[PreferenceType["textfield"] = 4] = "textfield";
 })(PreferenceType = exports.PreferenceType || (exports.PreferenceType = {}));
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RunnerType = void 0;
@@ -1022,7 +1009,7 @@ var RunnerType;
     RunnerType[RunnerType["SERVICE_INTERACTOR"] = 1] = "SERVICE_INTERACTOR";
 })(RunnerType = exports.RunnerType || (exports.RunnerType = {}));
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1044,7 +1031,7 @@ __exportStar(require("./Preferences"), exports);
 __exportStar(require("./RunnerInfo"), exports);
 __exportStar(require("./Actions"), exports);
 
-},{"./Actions":23,"./Authentication":24,"./Preferences":25,"./RunnerInfo":26}],28:[function(require,module,exports){
+},{"./Actions":22,"./Authentication":23,"./Preferences":24,"./RunnerInfo":25}],27:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1065,11 +1052,11 @@ __exportStar(require("./core"), exports);
 __exportStar(require("./content"), exports);
 __exportStar(require("./networking"), exports);
 
-},{"./content":22,"./core":27,"./networking":31}],29:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],30:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],31:[function(require,module,exports){
+},{"./content":21,"./core":26,"./networking":30}],28:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],29:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],30:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1089,5 +1076,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./NetworkRequest"), exports);
 __exportStar(require("./NetworkResponse"), exports);
 
-},{"./NetworkRequest":29,"./NetworkResponse":30}]},{},[3])(3)
+},{"./NetworkRequest":28,"./NetworkResponse":29}]},{},[3])(3)
 });
