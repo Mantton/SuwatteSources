@@ -27,7 +27,7 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@suwatte/cli": "^1.0.8",
+    "@suwatte/cli": "^1.1.0",
     "@suwatte/daisuke": "^1.2.3",
     "@suwatte/emulator": "^1.0.7",
     "cheerio": "^1.0.0-rc.12",
