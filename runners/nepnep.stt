@@ -367,7 +367,7 @@ class Target extends daisuke_1.Source {
         version: 1.0,
         name: "NepNep",
         hasExplorePage: true,
-        supportedLanguages: ["GB"],
+        supportedLanguages: ["EN_US"],
         primarilyAdultContent: false,
         authors: ["Mantton"],
         thumbnail: "nepnep.png",
@@ -688,7 +688,7 @@ class Parser {
                 ...numbers,
                 index,
                 date: (0, moment_1.default)(object.Date).subtract(1, "hour").toDate(),
-                language: "GB",
+                language: "en_us",
             });
             index++;
         }

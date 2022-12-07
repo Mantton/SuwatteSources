@@ -65,7 +65,7 @@ class Target extends daisuke_1.Source {
         id: "org.mangadex",
         version: 1.1,
         website: "https://mangadex.org",
-        supportedLanguages: [],
+        supportedLanguages: utils_1.languages.map((v) => `${v.languageCode}${v.languageCode.includes("-") ? "" : "-" + v.regionCode}`),
         primarilyAdultContent: true,
         authMethod: daisuke_1.AuthMethod.USERNAME_PW,
         contentSync: true,
@@ -328,7 +328,7 @@ class Target extends daisuke_1.Source {
                     ? Number(attributes.volume)
                     : undefined;
                 const date = new Date(attributes.publishAt);
-                const language = (0, utils_1.languageISO)(attributes.translatedLanguage ?? "UNKNOWN");
+                const language = (0, utils_1.languageCode)(attributes.translatedLanguage);
                 let webUrl = attributes.externalUrl;
                 if (!webUrl) {
                     webUrl = `${this.info.website}/chapter/${id}`;
@@ -1167,7 +1167,7 @@ const getPreferenceList = () => {
         defaultValue: "en",
         options: utils_1.languages.map((v) => ({
             label: v.label,
-            value: v.id,
+            value: v.languageCode,
         })),
     };
     groups.push({
@@ -1328,7 +1328,7 @@ exports.MDStore = MDStore;
 },{"./utils":5}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.languageISO = exports.languageLabel = exports.languages = exports.getURLSuffixFor = void 0;
+exports.languageCode = exports.languageLabel = exports.languages = exports.getURLSuffixFor = void 0;
 const getURLSuffixFor = (id) => {
     switch (id) {
         case "medium":
@@ -1344,252 +1344,257 @@ exports.languages = [
     {
         // Arabic
         label: "اَلْعَرَبِيَّةُ",
-        id: "ar",
-        iso: "sa",
+        languageCode: "ar",
+        regionCode: "sa",
     },
     {
         // Bulgarian
         label: "български",
-        id: "bg",
-        iso: "bg",
+        languageCode: "bg",
+        regionCode: "bg",
     },
     {
         // Bengali
         label: "বাংলা",
-        id: "bn",
-        iso: "bd",
+        languageCode: "bn",
+        regionCode: "bd",
     },
     {
         // Catalan
         label: "Català",
-        id: "ca",
-        iso: "es",
+        languageCode: "ca",
+        regionCode: "es",
     },
     {
         // Czech
         label: "Čeština",
-        id: "cs",
-        iso: "cz",
+        languageCode: "cs",
+        regionCode: "cz",
     },
     {
         // Danish
         label: "Dansk",
-        id: "da",
-        iso: "dk",
+        languageCode: "da",
+        regionCode: "dk",
     },
     {
         // German
         label: "Deutsch",
-        id: "de",
-        iso: "de",
+        languageCode: "de",
+        regionCode: "de",
     },
     {
         // English
         label: "English",
-        id: "en",
-        iso: "gb",
+        languageCode: "en",
+        regionCode: "gb",
     },
     {
         // Spanish
         label: "Español",
-        id: "es",
-        iso: "es",
+        languageCode: "es",
+        regionCode: "es",
     },
     {
         // Spanish (Latin American)
         label: "Español (Latinoamérica)",
-        id: "es-la",
-        iso: "es",
+        languageCode: "es-la",
+        regionCode: "es",
     },
     {
         // Farsi
         label: "فارسی",
-        id: "fa",
-        iso: "ir",
+        languageCode: "fa",
+        regionCode: "ir",
     },
     {
         // Finnish
         label: "Suomi",
-        id: "fi",
-        iso: "fi",
+        languageCode: "fi",
+        regionCode: "fi",
     },
     {
         // French
         label: "Français",
-        id: "fr",
-        iso: "fr",
+        languageCode: "fr",
+        regionCode: "fr",
     },
     {
         // Hebrew
         label: "עִבְרִית",
-        id: "he",
-        iso: "il",
+        languageCode: "he",
+        regionCode: "il",
     },
     {
         // Hindi
         label: "हिन्दी",
-        id: "hi",
-        iso: "in",
+        languageCode: "hi",
+        regionCode: "in",
     },
     {
         // Hungarian
         label: "Magyar",
-        id: "hu",
-        iso: "hu",
+        languageCode: "hu",
+        regionCode: "hu",
     },
     {
         // Indonesian
         label: "Indonesia",
-        id: "id",
-        iso: "id",
+        languageCode: "id",
+        regionCode: "id",
     },
     {
         // Italian
         label: "Italiano",
-        id: "it",
-        iso: "it",
+        languageCode: "it",
+        regionCode: "it",
     },
     {
         // Japanese
         label: "日本語",
-        id: "ja",
-        iso: "jp",
+        languageCode: "ja",
+        regionCode: "jp",
     },
     {
         // Korean
         label: "한국어",
-        id: "ko",
-        iso: "kr",
+        languageCode: "ko",
+        regionCode: "kr",
     },
     {
         // Lithuanian
         label: "Lietuvių",
-        id: "lt",
-        iso: "lt",
+        languageCode: "lt",
+        regionCode: "lt",
     },
     {
         // Mongolian
         label: "монгол",
-        id: "mn",
-        iso: "mn",
+        languageCode: "mn",
+        regionCode: "mn",
     },
     {
         // Malay
         label: "Melayu",
-        id: "ms",
-        iso: "my",
+        languageCode: "ms",
+        regionCode: "my",
     },
     {
         // Burmese
         label: "မြန်မာဘာသာ",
-        id: "my",
-        iso: "mm",
+        languageCode: "my",
+        regionCode: "mm",
     },
     {
         // Dutch
         label: "Nederlands",
-        id: "nl",
-        iso: "nl",
+        languageCode: "nl",
+        regionCode: "nl",
     },
     {
         // Norwegian
         label: "Norsk",
-        id: "no",
-        iso: "no",
+        languageCode: "no",
+        regionCode: "no",
     },
     {
         // Polish
         label: "Polski",
-        id: "pl",
-        iso: "pl",
+        languageCode: "pl",
+        regionCode: "pl",
     },
     {
         // Portuguese
         label: "Português",
-        id: "pt",
-        iso: "pt",
+        languageCode: "pt",
+        regionCode: "pt",
     },
     {
         // Portuguese (Brazilian)
         label: "Português (Brasil)",
-        id: "pt-br",
-        iso: "pt",
+        languageCode: "pt-br",
+        regionCode: "pt",
     },
     {
         // Romanian
         label: "Română",
-        id: "ro",
-        iso: "ro",
+        languageCode: "ro",
+        regionCode: "ro",
     },
     {
         // Russian
         label: "Pусский",
-        id: "ru",
-        iso: "ru",
+        languageCode: "ru",
+        regionCode: "ru",
     },
     {
         // Serbian
         label: "Cрпски",
-        id: "sr",
-        iso: "rs",
+        languageCode: "sr",
+        regionCode: "rs",
     },
     {
         // Swedish
         label: "Svenska",
-        id: "sv",
-        iso: "se",
+        languageCode: "sv",
+        regionCode: "se",
     },
     {
         // Thai
         label: "ไทย",
-        id: "th",
-        iso: "th",
+        languageCode: "th",
+        regionCode: "th",
     },
     {
         // Tagalog
         label: "Filipino",
-        id: "tl",
-        iso: "ph",
+        languageCode: "tl",
+        regionCode: "ph",
     },
     {
         // Turkish
         label: "Türkçe",
-        id: "tr",
-        iso: "tr",
+        languageCode: "tr",
+        regionCode: "tr",
     },
     {
         // Ukrainian
         label: "Yкраї́нська",
-        id: "uk",
-        iso: "ua",
+        languageCode: "uk",
+        regionCode: "ua",
     },
     {
         // Vietnamese
         label: "Tiếng Việt",
-        id: "vi",
-        iso: "vn",
+        languageCode: "vi",
+        regionCode: "vn",
     },
     {
         // Chinese (Simplified)
         label: "中文 (简化字)",
-        id: "zh",
-        iso: "cn",
+        languageCode: "zh",
+        regionCode: "cn",
     },
     {
         // Chinese (Traditional)
         label: "中文 (繁體字)",
-        id: "zh-hk",
-        iso: "hk",
+        languageCode: "zh-hk",
+        regionCode: "hk",
     },
 ];
 const languageLabel = (lang) => {
-    return exports.languages.find((v) => v.id === lang)?.label ?? lang.toUpperCase();
+    return (exports.languages.find((v) => v.languageCode === lang)?.label ?? lang.toUpperCase());
 };
 exports.languageLabel = languageLabel;
-const languageISO = (lang) => {
-    return exports.languages.find((v) => v.id === lang)?.iso ?? "UNKNOWN";
+const languageCode = (lang) => {
+    const t = exports.languages.find((v) => v.languageCode == lang);
+    if (!t)
+        return undefined;
+    return t.languageCode.includes("-")
+        ? t.languageCode
+        : t.languageCode + "-" + t.regionCode;
 };
-exports.languageISO = languageISO;
+exports.languageCode = languageCode;
 
 },{}],6:[function(require,module,exports){
 "use strict";

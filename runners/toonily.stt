@@ -420,7 +420,7 @@ class Test extends MadaraTemplate {
         hasExplorePage: true,
         primarilyAdultContent: true,
         website: "https://toonily.com",
-        supportedLanguages: ["GB"],
+        supportedLanguages: ["EN_US"],
     };
     context = {
         ...constants_1.DEFAULT_CONTEXT,
@@ -606,7 +606,7 @@ class Parser {
                 number,
                 date,
                 title,
-                language: "GB",
+                language: "en_us",
             });
             index++;
         }
@@ -848,7 +848,7 @@ class Target extends madara_1.MadaraTemplate {
         hasExplorePage: true,
         primarilyAdultContent: true,
         website: "https://toonily.com",
-        supportedLanguages: ["GB"],
+        supportedLanguages: ["EN_US"],
         authMethod: daisuke_1.AuthMethod.WEB,
     };
     constructor() {
