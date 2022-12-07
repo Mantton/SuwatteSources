@@ -25,7 +25,7 @@ export class Target extends Source {
     version: 1.0,
     name: "NepNep",
     hasExplorePage: true,
-    supportedLanguages: ["GB"],
+    supportedLanguages: ["EN_US"],
     primarilyAdultContent: false,
     authors: ["Mantton"],
     thumbnail: "nepnep.png",

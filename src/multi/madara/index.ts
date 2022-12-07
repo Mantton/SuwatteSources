@@ -99,7 +99,7 @@ export class Test extends MadaraTemplate {
     hasExplorePage: true,
     primarilyAdultContent: true,
     website: "https://toonily.com",
-    supportedLanguages: ["GB"],
+    supportedLanguages: ["EN_US"],
   };
 
   context: Context = {

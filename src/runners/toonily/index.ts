@@ -20,7 +20,7 @@ export class Target extends MadaraTemplate {
     hasExplorePage: true,
     primarilyAdultContent: true,
     website: "https://toonily.com",
-    supportedLanguages: ["GB"],
+    supportedLanguages: ["EN_US"],
     authMethod: AuthMethod.WEB,
   };
 

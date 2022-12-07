@@ -336,7 +336,7 @@ export class Parser {
         ...numbers,
         index,
         date: moment(object.Date).subtract(1, "hour").toDate(),
-        language: "GB",
+        language: "en_us",
       });
       index++;
     }

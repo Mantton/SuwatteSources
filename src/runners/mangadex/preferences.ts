@@ -13,7 +13,7 @@ export const getPreferenceList = (): PreferenceGroup[] => {
     defaultValue: "en",
     options: languages.map((v) => ({
       label: v.label,
-      value: v.id,
+      value: v.languageCode,
     })),
   };
 

@@ -224,7 +224,7 @@ export class Parser {
         number,
         date,
         title,
-        language: "GB",
+        language: "en_us",
       });
 
       index++;

@@ -35,7 +35,7 @@ export class Target extends Source {
     name: "Light Novel Reader",
     version: 1.0,
     hasExplorePage: true,
-    supportedLanguages: ["GB"],
+    supportedLanguages: ["EN_US"],
     website: "https://lightnovelreader.org",
     primarilyAdultContent: false,
   };

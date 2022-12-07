@@ -37,7 +37,12 @@ import explore_tags from "./explore.json";
 import { decode, encode } from "he";
 import { groupBy, capitalize, sample } from "lodash";
 import { MDStore } from "./store";
-import { languageISO, languageLabel, MimasRecommendation } from "./utils";
+import {
+  languageCode,
+  languageLabel,
+  languages,
+  MimasRecommendation,
+} from "./utils";
 import { getPreferenceList } from "./preferences";
 
 export class Target extends Source {
@@ -46,7 +51,12 @@ export class Target extends Source {
     id: "org.mangadex",
     version: 1.1,
     website: "https://mangadex.org",
-    supportedLanguages: [],
+    supportedLanguages: languages.map(
+      (v) =>
+        `${v.languageCode}${
+          v.languageCode.includes("-") ? "" : "-" + v.regionCode
+        }`
+    ),
     primarilyAdultContent: true,
     authMethod: AuthMethod.USERNAME_PW,
     contentSync: true,
@@ -341,9 +351,7 @@ export class Target extends Source {
           ? Number(attributes.volume)
           : undefined;
         const date = new Date(attributes.publishAt);
-        const language = languageISO(
-          attributes.translatedLanguage ?? "UNKNOWN"
-        );
+        const language = languageCode(attributes.translatedLanguage);
 
         let webUrl = attributes.externalUrl;
         if (!webUrl) {
