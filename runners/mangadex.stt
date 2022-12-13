@@ -63,9 +63,11 @@ class Target extends daisuke_1.Source {
     info = {
         name: "MangaDex",
         id: "org.mangadex",
-        version: 1.1,
+        version: 1.2,
         website: "https://mangadex.org",
-        supportedLanguages: utils_1.languages.map((v) => `${v.languageCode}${v.languageCode.includes("-") ? "" : "-" + v.regionCode}`),
+        supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
+            ? v.languageCode
+            : v.languageCode + "-" + v.regionCode),
         primarilyAdultContent: true,
         authMethod: daisuke_1.AuthMethod.USERNAME_PW,
         contentSync: true,
@@ -581,12 +583,14 @@ class Target extends daisuke_1.Source {
     // Events
     async onChapterRead(contentId, chapterId) {
         await this.STORE.saveToMimasTargets(contentId);
-        if (!this.isSignedIn())
+        const signedIn = await this.isSignedIn();
+        if (!signedIn)
             return;
         await this.syncToMD(contentId, [chapterId]);
     }
     async onChaptersMarked(contentId, chapterIds, completed) {
-        if (!this.isSignedIn())
+        const signedIn = await this.isSignedIn();
+        if (!signedIn)
             return;
         if (completed) {
             await this.syncToMD(contentId, chapterIds);
@@ -596,7 +600,8 @@ class Target extends daisuke_1.Source {
         }
     }
     async onContentsAddedToLibrary(ids) {
-        if (!this.isSignedIn())
+        const signedIn = await this.isSignedIn();
+        if (!signedIn)
             return;
         for (const id of ids) {
             await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/status`, {
@@ -612,6 +617,18 @@ class Target extends daisuke_1.Source {
     }
     async getSourceActions() {
         return [
+            {
+                id: "auth",
+                header: "Auth",
+                children: [
+                    {
+                        isDestructive: true,
+                        systemImage: "trash",
+                        title: "Force Sign Out",
+                        key: "force_sign_out",
+                    },
+                ],
+            },
             {
                 id: "base",
                 header: "Mimas",
@@ -631,6 +648,8 @@ class Target extends daisuke_1.Source {
             case "mimas_clear":
                 await this.STORE.clearMimasTargets();
                 break;
+            case "force_sign_out":
+                await this.clearTokens();
         }
     }
     // Auth
@@ -1100,7 +1119,16 @@ class Target extends daisuke_1.Source {
         console.log("Refreshed Token");
     }
     async isSignedIn() {
-        return !!(await this.KEYCHAIN.get("session"));
+        const session = await this.KEYCHAIN.get("session");
+        const refresh = await this.KEYCHAIN.get("refresh");
+        if (!session || !refresh)
+            return false; // Either Refresh or Access is missing, not signed in
+        if (this.isTokenExpired(refresh)) {
+            // Refresh is expired, not signed in
+            this.clearTokens(); // clear tokens
+            return false;
+        }
+        return true;
     }
     async requestHandler(request) {
         let token = null;
