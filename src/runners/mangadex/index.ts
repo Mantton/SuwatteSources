@@ -49,13 +49,12 @@ export class Target extends Source {
   info: SourceInfo = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.1,
+    version: 1.2,
     website: "https://mangadex.org",
-    supportedLanguages: languages.map(
-      (v) =>
-        `${v.languageCode}${
-          v.languageCode.includes("-") ? "" : "-" + v.regionCode
-        }`
+    supportedLanguages: languages.map((v) =>
+      v.languageCode.includes("-")
+        ? v.languageCode
+        : v.languageCode + "-" + v.regionCode
     ),
     primarilyAdultContent: true,
     authMethod: AuthMethod.USERNAME_PW,
@@ -651,8 +650,8 @@ export class Target extends Source {
   // Events
   async onChapterRead(contentId: string, chapterId: string): Promise<void> {
     await this.STORE.saveToMimasTargets(contentId);
-
-    if (!this.isSignedIn()) return;
+    const signedIn = await this.isSignedIn();
+    if (!signedIn) return;
     await this.syncToMD(contentId, [chapterId]);
   }
 
@@ -661,7 +660,8 @@ export class Target extends Source {
     chapterIds: string[],
     completed: boolean
   ): Promise<void> {
-    if (!this.isSignedIn()) return;
+    const signedIn = await this.isSignedIn();
+    if (!signedIn) return;
 
     if (completed) {
       await this.syncToMD(contentId, chapterIds);
@@ -671,7 +671,8 @@ export class Target extends Source {
   }
 
   async onContentsAddedToLibrary(ids: string[]): Promise<void> {
-    if (!this.isSignedIn()) return;
+    const signedIn = await this.isSignedIn();
+    if (!signedIn) return;
 
     for (const id of ids) {
       await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/status`, {
@@ -689,6 +690,18 @@ export class Target extends Source {
 
   async getSourceActions(): Promise<ActionGroup[]> {
     return [
+      {
+        id: "auth",
+        header: "Auth",
+        children: [
+          {
+            isDestructive: true,
+            systemImage: "trash",
+            title: "Force Sign Out",
+            key: "force_sign_out",
+          },
+        ],
+      },
       {
         id: "base",
         header: "Mimas",
@@ -709,6 +722,8 @@ export class Target extends Source {
       case "mimas_clear":
         await this.STORE.clearMimasTargets();
         break;
+      case "force_sign_out":
+        await this.clearTokens();
     }
   }
   // Auth
@@ -1310,7 +1325,17 @@ export class Target extends Source {
   }
 
   async isSignedIn() {
-    return !!(await this.KEYCHAIN.get("session"));
+    const session = await this.KEYCHAIN.get("session");
+    const refresh = await this.KEYCHAIN.get("refresh");
+
+    if (!session || !refresh) return false; // Either Refresh or Access is missing, not signed in
+
+    if (this.isTokenExpired(refresh)) {
+      // Refresh is expired, not signed in
+      this.clearTokens(); // clear tokens
+      return false;
+    }
+    return true;
   }
   async requestHandler(request: NetworkRequest) {
     let token: string | null = null;
