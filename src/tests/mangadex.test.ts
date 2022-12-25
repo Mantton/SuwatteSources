@@ -30,7 +30,10 @@ describe("MangaDex Tests", () => {
       expect(collections.length).toBeGreaterThan(1);
     });
 
-    test("Resolve CollectionExcerpt", async () => {});
+    test("Get Popular New Titles", async () => {
+      const data = await source.getPopularNewTitles();
+      expect(data.results.length).toBeGreaterThan(1);
+    });
   });
   test("Get MD Statistics", async () => {
     const result = await source.getMDStatistics(testIds);

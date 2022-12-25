@@ -1,11 +1,4 @@
-import {
-  AuthMethod,
-  NetworkRequest,
-  NetworkResponse,
-  RunnerType,
-  SourceInfo,
-  User,
-} from "@suwatte/daisuke";
+import { AuthMethod, NetworkRequest, SourceInfo, User } from "@suwatte/daisuke";
 import { load } from "cheerio";
 import { MadaraTemplate } from "../../multi/madara";
 import { DEFAULT_CONTEXT } from "../../multi/madara/constants";
@@ -17,11 +10,9 @@ export class Target extends MadaraTemplate {
     name: "Toonily",
     thumbnail: "toonily.png",
     version: 1.1,
-    hasExplorePage: true,
-    primarilyAdultContent: true,
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
-    authMethod: AuthMethod.WEB,
+    nsfw: true,
   };
 
   constructor() {
@@ -59,6 +50,10 @@ export class Target extends MadaraTemplate {
         ],
       };
     };
+  }
+
+  async getAuthenticationMethod(): Promise<AuthMethod> {
+    return AuthMethod.WEB;
   }
   async willRequestWebViewAuth(): Promise<NetworkRequest> {
     return {

@@ -49,6 +49,7 @@ export class Controller {
 
   // Explore
   async resolveExcerpt(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
+    if (!this.directoryHTML || !this.homeHTML) await this.populate();
     const regex = PATHS[excerpt.id];
     const str = this.homeHTML.match(regex)?.[1];
 
@@ -60,6 +61,9 @@ export class Controller {
 
   // Search
   async getFilters() {
+    if (!this.directoryHTML) {
+      await this.fetchDirectory();
+    }
     return this.parser.filters(this.directoryHTML);
   }
 

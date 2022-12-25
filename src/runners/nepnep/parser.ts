@@ -69,11 +69,9 @@ export class Parser {
       .replace(/'/g, '"')
       .trim();
 
-    console.log(genreStr, typesStr);
     if (!genreStr || !typesStr) throw new Error("Failed to parse Filters");
     const genres: string[] = JSON.parse(genreStr);
     const types: string[] = JSON.parse(typesStr);
-
     // Genres
     filters.push({
       id: "genres",
@@ -271,7 +269,6 @@ export class Parser {
         adultContent: false,
       })),
     });
-    console.log(properties);
 
     const statusString = $(
       ".list-group-item:has(span:contains(Status)) a:contains(Publish)",
@@ -344,7 +341,6 @@ export class Parser {
   }
 
   chapterData(html: string, chapterId: string, contentId: string): ChapterData {
-    console.log(contentId, chapterId);
     const host = html.match(PATHS.chapter_data_domain)?.[1].replaceAll(`"`, "");
     const path = html.match(PATHS.chapter_data_path)?.[1].replaceAll(`"`, "");
     const chapterStr = html.match(PATHS.chapter_data_chapter)?.[1];
@@ -363,13 +359,11 @@ export class Parser {
     if (decimal) {
       chapterPath += `.${decimal}`;
     }
-    console.log(chapterPath);
     const base = `https://${host}/manga/${path}/${directory}${chapterPath}`;
 
     const pageCount = chapter.Page ? parseInt(chapter.Page) : 0;
 
     if (!pageCount) throw new Error("Invalid Page Count");
-    console.log(pageCount, base);
 
     const pages = Array.from(
       Array(pageCount),

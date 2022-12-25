@@ -157,7 +157,7 @@ export const parseDate = (str: string) => {
 };
 export const parseRelativeDate = (str: string) => {
   const numStr = str.match(/(\d+)/)?.[1];
-  if (!numStr || parseInt(numStr) === NaN) {
+  if (!numStr || Number.isNaN(parseInt(numStr))) {
     throw new Error(`Date Parse Failure: ${str}`);
   }
   const number = parseInt(numStr);

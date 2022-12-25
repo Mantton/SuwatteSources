@@ -96,10 +96,9 @@ export class Test extends MadaraTemplate {
     name: "Toonily",
     thumbnail: "toonily.png",
     version: 1.0,
-    hasExplorePage: true,
-    primarilyAdultContent: true,
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
+    nsfw: true,
   };
 
   context: Context = {

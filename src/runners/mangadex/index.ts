@@ -44,24 +44,22 @@ import {
   MimasRecommendation,
 } from "./utils";
 import { getPreferenceList } from "./preferences";
+import moment from "moment";
 
 export class Target extends Source {
   info: SourceInfo = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.2,
+    version: 1.3,
     website: "https://mangadex.org",
     supportedLanguages: languages.map((v) =>
       v.languageCode.includes("-")
         ? v.languageCode
         : v.languageCode + "-" + v.regionCode
     ),
-    primarilyAdultContent: true,
-    authMethod: AuthMethod.USERNAME_PW,
-    contentSync: true,
-    hasExplorePage: true,
-    thumbnail: `mangadex.png`,
-    minSupportedAppVersion: "4.1.0",
+    nsfw: false,
+    thumbnail: "mangadex.png",
+    minSupportedAppVersion: "4.5.0",
   };
   private API_URL = "https://api.mangadex.org";
   private COVER_URL = "https://uploads.mangadex.org/covers";
@@ -90,7 +88,6 @@ export class Target extends Source {
   private STORE = new MDStore(this.VALUE_STORE);
   private PROPERTIES: Property[] = [];
 
-  async playground() {}
   async getContent(contentId: string): Promise<Content> {
     const url = `${this.API_URL}/manga/${contentId}`;
     const params = {
@@ -496,19 +493,17 @@ export class Target extends Source {
         title: "Latest Updates",
         style: CollectionStyle.UPDATE_LIST,
       },
+      {
+        id: "popular_new",
+        title: "Popular New Titles",
+        style: CollectionStyle.GALLERY,
+      },
     ];
 
     // Seasonal Lists
     if (injectSeasonal) {
       sections.push(
         ...[
-          // Uncomment when list actually changes
-          // {
-          //   id: "seasonal_last",
-          //   title: "Seasonal List",
-          //   subtitle: "Titles from last anime season.",
-          //   style: CollectionStyle.GALLERY,
-          // },
           {
             id: "seasonal",
             title: "Seasonal List",
@@ -540,6 +535,11 @@ export class Target extends Source {
     excerpt: CollectionExcerpt
   ): Promise<ExploreCollection> {
     switch (excerpt.id) {
+      case "popular_new":
+        return {
+          ...excerpt,
+          highlights: (await this.getPopularNewTitles()).results,
+        };
       case "seasonal":
         return this.getCollectionForList(this.SEASONAL_LIST_ID, excerpt);
       case "seasonal_last":
@@ -600,6 +600,24 @@ export class Target extends Source {
   ): Promise<ExploreCollection> {
     const list = await this.getMDList(id);
     return { ...excerpt, highlights: list.highlights, title: list.title };
+  }
+
+  async getPopularNewTitles(): Promise<PagedResult> {
+    const date = moment().subtract({ month: 1 }).toDate();
+    const contentRating = await this.STORE.getContentRatings();
+    const params = {
+      includes: ["cover_art"],
+      "order[followedCount]": "desc",
+      contentRating,
+      hasAvailableChapters: true,
+      limit: 15,
+      createdAtSince: date.toISOString().split(".")[0],
+    };
+    const response = await this.NETWORK_CLIENT.get(this.API_URL + "/manga", {
+      params,
+    });
+
+    return this.parsePagedResponse(response, 1, true, false);
   }
   async getExplorePageTags(): Promise<Tag[]> {
     return explore_tags;
@@ -1322,6 +1340,10 @@ export class Target extends Source {
     }
 
     console.log("Refreshed Token");
+  }
+
+  async getAuthenticationMethod(): Promise<AuthMethod> {
+    return AuthMethod.USERNAME_PW;
   }
 
   async isSignedIn() {

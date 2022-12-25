@@ -14,6 +14,7 @@ import {
   SourceInfo,
   Tag,
 } from "@suwatte/daisuke";
+import { sampleSize } from "lodash";
 import { BASE_EXPLORE_COLLECTIONS, SEARCH_SORTERS } from "./constants";
 import { Controller } from "./controller";
 import { preferences } from "./preference";
@@ -24,9 +25,8 @@ export class Target extends Source {
     website: "https://mangasee123.com",
     version: 1.0,
     name: "NepNep",
-    hasExplorePage: true,
     supportedLanguages: ["EN_US"],
-    primarilyAdultContent: false,
+    nsfw: false,
     authors: ["Mantton"],
     thumbnail: "nepnep.png",
   };
@@ -46,12 +46,12 @@ export class Target extends Source {
   }
 
   async getSourceTags(): Promise<Property[]> {
-    throw new Error("Method not implemented.");
+    const filters = await this.controller.getFilters();
+    return filters.map((v) => v.property);
   }
 
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
     // Refresh
-    await this.controller.populate();
     return BASE_EXPLORE_COLLECTIONS;
   }
 
@@ -62,7 +62,8 @@ export class Target extends Source {
   }
 
   async getExplorePageTags(): Promise<Tag[]> {
-    return [];
+    const tags = (await this.controller.getFilters())[0].property.tags;
+    return sampleSize(tags, 7);
   }
   // Searching
   async getSearchSorters(): Promise<SearchSort[]> {

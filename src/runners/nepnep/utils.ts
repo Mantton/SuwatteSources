@@ -15,12 +15,12 @@ export const parseChapterString = (str: string) => {
   if (!str) throw new Error("Invalid Chapter String");
   let volume: number | undefined = parseInt(str[0]);
 
-  if (volume === NaN) throw new Error("Invalid Chapter Volume String");
+  if (Number.isNaN(volume)) throw new Error("Invalid Chapter Volume String");
   volume -= 1;
   if (volume == 0) volume = undefined;
 
   let number = parseInt(str.slice(1));
-  if (number === NaN) {
+  if (Number.isNaN(number)) {
     throw new Error("Invalid Chapter Number String");
   }
   number = number / 10;

@@ -22,18 +22,18 @@ export const getExploreCollections = (): CollectionExcerpt[] => {
       style: CollectionStyle.NORMAL,
     },
     {
-      id: "top_viewed",
+      id: "most-viewed",
       title: "Most Viewed Novels",
       subtitle: "All Time Most Popular Titles",
       style: CollectionStyle.NORMAL,
     },
     {
-      id: "top_bookmarked",
+      id: "subscribers",
       title: "Top Bookmarked Novels.",
       style: CollectionStyle.NORMAL,
     },
     {
-      id: "top_rated",
+      id: "top-rated",
       title: "Top Rated Novels",
       subtitle: "What others are enjoying.",
       style: CollectionStyle.NORMAL,
@@ -66,15 +66,10 @@ export const parseHomePageSection = (
   switch (key) {
     case "new":
     case "popular":
-      const selector = $(
-        `body > section:nth-child(${
-          key == "new" ? "3" : "4"
-        }) > div > div > div:nth-child(${
-          key == "new" ? "3" : "2"
-        }) > div .card-v`
-      ).toArray();
-      // body > section:nth-child(4) > div > div > div:nth-child(2) > div
-      for (const e of selector) {
+      const index = key == "new" ? "4" : "5";
+      const selector = `body > section:nth-child(${index}) .card-v`;
+      const elements = $(selector).toArray();
+      for (const e of elements) {
         const element = $(e);
         const cover = $("img", element).attr("src") ?? "";
         const title = $(".card-v-name", element).text().trim();
@@ -96,7 +91,7 @@ export const parseHomePageSection = (
       break;
     case "latest":
       const latestSelector = $(
-        "body > section:nth-child(5) > div > div > div.col-md-7.col-lg-8.col-xl-9 > div .card-box"
+        "body > section:nth-child(6) .card-box"
       ).toArray();
 
       for (const e of latestSelector) {
@@ -216,7 +211,7 @@ export const parseChapters = (data: string, contentId: string): Chapter[] => {
           ),
       index,
       title: chapter.text().replace("CH ", "Chapter ").trim(),
-      language: "GB",
+      language: "en_gb",
       date: new Date(),
       webUrl: chapter.attr("href") ?? "",
     });
@@ -247,4 +242,75 @@ export const parseChapterText = (
     contentId,
     text,
   };
+};
+
+export const parseRankingPage = (html: string) => {
+  const $ = load(html);
+
+  const selector = ".category-items > ul > li";
+  const elements = $(selector).toArray();
+  const highlights: Highlight[] = [];
+  for (const element of elements) {
+    const title = $(".category-name a", element).text();
+    const cover = $(".category-img img", element).attr("src");
+    const id = $(".category-name a", element).attr("href")?.replace("/", "");
+    if (!id || !cover || !title) continue;
+    highlights.push({
+      contentId: id,
+      title,
+      cover,
+    });
+  }
+  return highlights;
+};
+
+export const parseTags = (html: string) => {
+  const $ = load(html);
+
+  // Genre
+  const genreSelector = "li:contains(Genre) > .detail-search-right li";
+  const genreElements = $(genreSelector).toArray();
+  const genres: Property = {
+    id: "genre",
+    label: "Genres",
+    tags: [],
+  };
+  for (const element of genreElements) {
+    const label = $("label", element).text().trim();
+    const id = $("span", element).attr("data-id");
+
+    if (!id) continue;
+    genres.tags.push({ label, id: `genre|${id}`, adultContent: false });
+  }
+
+  // Novel Type
+  const typeSelector = `li:contains("Novel Type") > .detail-search-right li`;
+  const typeElements = $(typeSelector).toArray();
+  const types: Property = {
+    id: "type",
+    label: "Novel Type",
+    tags: [],
+  };
+  for (const element of typeElements) {
+    const label = $("span", element).text().trim();
+    const id = $("input", element).attr("value");
+    if (!id) continue;
+    types.tags.push({ id: `type|${id}`, label, adultContent: false });
+  }
+
+  // Languages
+  const langSelector = "li:contains(Language) > .detail-search-right li";
+  const langElements = $(langSelector).toArray();
+  const langs: Property = {
+    id: "lang",
+    label: "Original Language",
+    tags: [],
+  };
+  for (const element of langElements) {
+    const label = $("label", element).text().trim();
+    const id = $("span", element).attr("data-value");
+    if (!id) continue;
+    langs.tags.push({ id: `lang|${id}`, label, adultContent: false });
+  }
+  return [genres, types, langs];
 };
