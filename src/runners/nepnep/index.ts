@@ -23,7 +23,7 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "m.nepnep",
     website: "https://mangasee123.com",
-    version: 1.11,
+    version: 1.12,
     name: "NepNep",
     supportedLanguages: ["EN_US"],
     nsfw: false,
@@ -32,9 +32,6 @@ export class Target extends Source {
   };
   private controller = new Controller();
 
-  async onSourceLoaded(): Promise<void> {
-    this.controller.populate();
-  }
   async getContent(contentId: string): Promise<Content> {
     return this.controller.getContent(contentId);
   }

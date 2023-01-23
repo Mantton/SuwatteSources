@@ -22,22 +22,31 @@ export class Controller {
   // private homeHTML: String = "";
 
   // Directory
-  async populate() {
-    await this.fetchDirectory();
-  }
 
-  private async fetchDirectory() {
+  private async getDirectoryString() {
+    if (this.directoryHTML) {
+      return this.directoryHTML;
+    }
     const url = await this.store.host();
     const response = await this.client.get(`${url}/search`);
 
     const html = response.data;
     this.directoryHTML = html;
+    return this.directoryHTML;
+  }
+  private async fetchDirectory() {
+    const html = await this.getDirectoryString();
     this.parser.thumbnail(html);
     const regex = PATHS.directory;
     const dirStr = html.match(regex)?.[1];
 
     if (!dirStr) throw new Error("Failed to parse NepNep Directory");
     this.directory = JSON.parse(dirStr);
+  }
+
+  private async setThumbnail() {
+    const html = await this.getDirectoryString();
+    this.parser.thumbnail(html);
   }
 
   private async fetchHomePage(): Promise<string> {
@@ -48,6 +57,9 @@ export class Controller {
 
   // Explore
   async resolveExcerpt(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
+    if (!this.parser.hasThumbnail()) {
+      await this.setThumbnail();
+    }
     const html = await this.fetchHomePage();
     const regex = PATHS[excerpt.id];
     const str = html.match(regex)?.[1];
@@ -60,16 +72,14 @@ export class Controller {
 
   // Search
   async getFilters() {
-    if (!this.directoryHTML) {
-      await this.fetchDirectory();
-    }
-    return this.parser.filters(this.directoryHTML);
+    const html = await this.getDirectoryString();
+    return this.parser.filters(html);
   }
 
   async getSearchResults(request: SearchRequest): Promise<PagedResult> {
     // Populate if empty
     if (this.directory.length == 0) {
-      await this.populate();
+      await this.fetchDirectory();
     }
 
     const key = SORT_KEYS[request.sort?.id ?? ""] ?? "v";
@@ -214,7 +224,7 @@ export class Controller {
     const html = response.data;
 
     if (!this.parser.hasThumbnail()) {
-      await this.populate();
+      await this.setThumbnail();
     }
     return this.parser.content(html, id, host);
   }
