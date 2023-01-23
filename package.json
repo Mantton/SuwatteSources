@@ -27,9 +27,9 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@suwatte/cli": "^1.2.0",
-    "@suwatte/daisuke": "^1.2.4",
-    "@suwatte/emulator": "file:../daisuke/emulator",
+    "@suwatte/cli": "^1.3.1",
+    "@suwatte/daisuke": "^1.3.1",
+    "@suwatte/emulator": "^1.1.1",
     "cheerio": "^1.0.0-rc.12",
     "he": "^1.2.0",
     "lodash": "^4.17.21",

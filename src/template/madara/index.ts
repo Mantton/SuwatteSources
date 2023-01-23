@@ -89,20 +89,3 @@ export abstract class MadaraTemplate extends Source {
     return this.controller.getCollection(excerpt);
   }
 }
-
-export class Test extends MadaraTemplate {
-  info: SourceInfo = {
-    id: "com.toonily",
-    name: "Toonily",
-    thumbnail: "toonily.png",
-    version: 1.0,
-    website: "https://toonily.com",
-    supportedLanguages: ["EN_US"],
-    nsfw: true,
-  };
-
-  context: Context = {
-    ...DEFAULT_CONTEXT,
-    baseUrl: this.info.website,
-  };
-}

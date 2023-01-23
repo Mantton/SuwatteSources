@@ -1,6 +1,7 @@
 import {
   Chapter,
   ChapterData,
+  ChapterPage,
   CollectionStyle,
   Content,
   Filter,
@@ -365,17 +366,13 @@ export class Parser {
 
     if (!pageCount) throw new Error("Invalid Page Count");
 
-    const pages = Array.from(
-      Array(pageCount),
-      (_, n) => `${base}-${(n + 1).toString().padStart(3, "0")}.png`
-    );
-
+    const pages: ChapterPage[] = Array.from(Array(pageCount), (_, n) => ({
+      url: `${base}-${(n + 1).toString().padStart(3, "0")}.png`,
+    }));
     return {
       chapterId,
       contentId,
-      pages: pages.map((url) => ({
-        url,
-      })),
+      pages,
     };
   }
 }

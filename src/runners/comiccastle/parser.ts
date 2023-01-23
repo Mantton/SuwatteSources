@@ -241,6 +241,7 @@ export class Parser {
         title,
         number,
         date: new Date(),
+        language: "en_US",
       });
       idx++;
     }

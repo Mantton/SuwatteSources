@@ -1,8 +1,8 @@
 import { AuthMethod, NetworkRequest, SourceInfo, User } from "@suwatte/daisuke";
 import { load } from "cheerio";
-import { MadaraTemplate } from "../../multi/madara";
-import { DEFAULT_CONTEXT } from "../../multi/madara/constants";
-import { imageFromElement } from "../../multi/madara/utils";
+import { MadaraTemplate } from "../../template/madara";
+import { DEFAULT_CONTEXT } from "../../template/madara/constants";
+import { imageFromElement } from "../../template/madara/utils";
 
 export class Target extends MadaraTemplate {
   info: SourceInfo = {
@@ -85,6 +85,7 @@ export class Target extends MadaraTemplate {
       id: username,
       username,
       avatar,
+      info: [],
     };
   }
 }

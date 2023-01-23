@@ -54,7 +54,18 @@ export class Parser {
     const $ = load(html);
 
     // Title
-    const title = $(ctx.titleSelector).first()?.text().trim();
+    /**
+     * Removes the Text from child elements so we get only the text from the H1 Tag
+     * Reference: https://stackoverflow.com/a/8851526
+     */
+    let title = $(ctx.titleSelector)
+      .first()
+      ?.clone()
+      .children()
+      .remove()
+      .end()
+      .text()
+      .trim();
     if (!title)
       throw new Error("Title not found\nPotentially incorrect selectors");
 

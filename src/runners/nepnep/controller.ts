@@ -24,7 +24,6 @@ export class Controller {
   async populate() {
     await this.fetchDirectory();
     await this.fetchHomePage();
-    console.log("Population Successful");
   }
 
   private async fetchDirectory() {
