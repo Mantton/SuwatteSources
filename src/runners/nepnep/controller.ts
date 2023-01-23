@@ -2,6 +2,7 @@ import {
   CollectionExcerpt,
   ExploreCollection,
   PagedResult,
+  Property,
   SearchRequest,
 } from "@suwatte/daisuke";
 import { data } from "cheerio/lib/api/attributes";
@@ -18,12 +19,11 @@ export class Controller {
 
   private directory: DirectoryEntry[] = [];
   private directoryHTML = "";
-  private homeHTML: String = "";
+  // private homeHTML: String = "";
 
   // Directory
   async populate() {
     await this.fetchDirectory();
-    await this.fetchHomePage();
   }
 
   private async fetchDirectory() {
@@ -40,17 +40,17 @@ export class Controller {
     this.directory = JSON.parse(dirStr);
   }
 
-  private async fetchHomePage() {
+  private async fetchHomePage(): Promise<string> {
     const host = await this.store.host();
     const response = await this.client.get(host);
-    this.homeHTML = response.data;
+    return response.data;
   }
 
   // Explore
   async resolveExcerpt(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
-    if (!this.directoryHTML || !this.homeHTML) await this.populate();
+    const html = await this.fetchHomePage();
     const regex = PATHS[excerpt.id];
-    const str = this.homeHTML.match(regex)?.[1];
+    const str = html.match(regex)?.[1];
 
     if (!str) throw new Error("Failed to Match HomePage Section");
     const highlights = this.parser.homepageSection(JSON.parse(str));
