@@ -167,20 +167,28 @@ class Controller {
     directoryHTML = "";
     // private homeHTML: String = "";
     // Directory
-    async populate() {
-        await this.fetchDirectory();
-    }
-    async fetchDirectory() {
+    async getDirectoryString() {
+        if (this.directoryHTML) {
+            return this.directoryHTML;
+        }
         const url = await this.store.host();
         const response = await this.client.get(`${url}/search`);
         const html = response.data;
         this.directoryHTML = html;
+        return this.directoryHTML;
+    }
+    async fetchDirectory() {
+        const html = await this.getDirectoryString();
         this.parser.thumbnail(html);
         const regex = constants_1.PATHS.directory;
         const dirStr = html.match(regex)?.[1];
         if (!dirStr)
             throw new Error("Failed to parse NepNep Directory");
         this.directory = JSON.parse(dirStr);
+    }
+    async setThumbnail() {
+        const html = await this.getDirectoryString();
+        this.parser.thumbnail(html);
     }
     async fetchHomePage() {
         const host = await this.store.host();
@@ -189,6 +197,9 @@ class Controller {
     }
     // Explore
     async resolveExcerpt(excerpt) {
+        if (!this.parser.hasThumbnail()) {
+            await this.setThumbnail();
+        }
         const html = await this.fetchHomePage();
         const regex = constants_1.PATHS[excerpt.id];
         const str = html.match(regex)?.[1];
@@ -199,15 +210,13 @@ class Controller {
     }
     // Search
     async getFilters() {
-        if (!this.directoryHTML) {
-            await this.fetchDirectory();
-        }
-        return this.parser.filters(this.directoryHTML);
+        const html = await this.getDirectoryString();
+        return this.parser.filters(html);
     }
     async getSearchResults(request) {
         // Populate if empty
         if (this.directory.length == 0) {
-            await this.populate();
+            await this.fetchDirectory();
         }
         const key = constants_1.SORT_KEYS[request.sort?.id ?? ""] ?? "v";
         const parsed = this.parser.search(request);
@@ -332,7 +341,7 @@ class Controller {
         const response = await this.client.get(`${host}/manga/${id}`);
         const html = response.data;
         if (!this.parser.hasThumbnail()) {
-            await this.populate();
+            await this.setThumbnail();
         }
         return this.parser.content(html, id, host);
     }
@@ -367,7 +376,7 @@ class Target extends daisuke_1.Source {
     info = {
         id: "m.nepnep",
         website: "https://mangasee123.com",
-        version: 1.11,
+        version: 1.12,
         name: "NepNep",
         supportedLanguages: ["EN_US"],
         nsfw: false,
@@ -375,9 +384,6 @@ class Target extends daisuke_1.Source {
         thumbnail: "nepnep.png",
     };
     controller = new controller_1.Controller();
-    async onSourceLoaded() {
-        this.controller.populate();
-    }
     async getContent(contentId) {
         return this.controller.getContent(contentId);
     }
