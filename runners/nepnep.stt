@@ -165,11 +165,10 @@ class Controller {
     store = new store_1.Store();
     directory = [];
     directoryHTML = "";
-    homeHTML = "";
+    // private homeHTML: String = "";
     // Directory
     async populate() {
         await this.fetchDirectory();
-        await this.fetchHomePage();
     }
     async fetchDirectory() {
         const url = await this.store.host();
@@ -186,14 +185,13 @@ class Controller {
     async fetchHomePage() {
         const host = await this.store.host();
         const response = await this.client.get(host);
-        this.homeHTML = response.data;
+        return response.data;
     }
     // Explore
     async resolveExcerpt(excerpt) {
-        if (!this.directoryHTML || !this.homeHTML)
-            await this.populate();
+        const html = await this.fetchHomePage();
         const regex = constants_1.PATHS[excerpt.id];
-        const str = this.homeHTML.match(regex)?.[1];
+        const str = html.match(regex)?.[1];
         if (!str)
             throw new Error("Failed to Match HomePage Section");
         const highlights = this.parser.homepageSection(JSON.parse(str));
@@ -369,7 +367,7 @@ class Target extends daisuke_1.Source {
     info = {
         id: "m.nepnep",
         website: "https://mangasee123.com",
-        version: 1.1,
+        version: 1.11,
         name: "NepNep",
         supportedLanguages: ["EN_US"],
         nsfw: false,
@@ -377,6 +375,9 @@ class Target extends daisuke_1.Source {
         thumbnail: "nepnep.png",
     };
     controller = new controller_1.Controller();
+    async onSourceLoaded() {
+        this.controller.populate();
+    }
     async getContent(contentId) {
         return this.controller.getContent(contentId);
     }
