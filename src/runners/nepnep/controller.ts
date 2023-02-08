@@ -2,10 +2,8 @@ import {
   CollectionExcerpt,
   ExploreCollection,
   PagedResult,
-  Property,
   SearchRequest,
 } from "@suwatte/daisuke";
-import { data } from "cheerio/lib/api/attributes";
 import { HIGHLIGHT_LIMIT, PATHS, SORT_KEYS } from "./constants";
 import { Parser } from "./parser";
 import { Store } from "./store";
@@ -19,7 +17,6 @@ export class Controller {
 
   private directory: DirectoryEntry[] = [];
   private directoryHTML = "";
-  // private homeHTML: String = "";
 
   // Directory
 
