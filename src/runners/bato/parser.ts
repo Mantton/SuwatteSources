@@ -51,7 +51,7 @@ export class Parser {
     const workStatus = textFromInfo("Original work");
 
     const uploadStatus = textFromInfo("Upload status");
-    const title = decode($("h3", infoElement).text().trim());
+    let title = decode($("h3", infoElement).text().trim());
     const author = textFromInfo("Authors:");
     const artist = textFromInfo("Artists:");
     const summary = (
@@ -80,6 +80,8 @@ export class Parser {
     let recommendedReadingMode = ReadingMode.PAGED_MANGA;
     if (direction === "Top to Bottom")
       recommendedReadingMode = ReadingMode.VERTICAL;
+    else if (direction === "Left to Right")
+      recommendedReadingMode = ReadingMode.PAGED_COMIC;
 
     // Genres
     const selected = textFromInfo("Genres:")
@@ -135,17 +137,32 @@ export class Parser {
 
       const group = $("div.extra > a:not(.ps-3)", element).first();
       const time = $("div.extra > i.ps-3", element).text().trim();
-      let title = $("span", urlElement)?.text().trim().replace(": ", "");
-      const chapterText = $("b", urlElement).text().trim().split("Chapter");
+      let title: string | undefined = $("span", urlElement)
+        ?.text()
+        .trim()
+        .replace(": ", "");
+
+      if (!title) title = undefined;
+      const chapterText = $("b", urlElement)
+        .text()
+        .trim()
+        .split(/Chapter|Episode|Ch\./);
 
       let volume: number | undefined = undefined;
-      if (chapterText[0] && chapterText[0].includes("Volume")) {
-        volume = Number(chapterText[0].replace("Volume", "").trim());
+      if (chapterText[0] && chapterText[0].includes("Vol")) {
+        const volStr = chapterText[0]
+          .replace(/Volume|Vol\./, "")
+          .trim()
+          .match(/\d+/)?.[0];
+        volume = Number(volStr);
+        if (!volume) volume = undefined;
       }
       // TODO: Better Special Chapter Handling
       let number = -1;
-      if (chapterText[1]) {
-        number = Number(chapterText[1].trim()) ?? -1;
+      const strNum = chapterText[1]?.match(/(\d+)/)?.[1];
+      if (strNum) {
+        number = Number(strNum) ?? -1;
+        if (!number) number = -1;
       } else {
         title = chapterText[0];
       }

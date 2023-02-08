@@ -20,7 +20,14 @@ describe("Bato Tests", () => {
     expect(content.properties?.[0]).toBeDefined();
     expect(content.creators?.includes("Aoi nuwi")).toBe(true);
   });
-
+  test("Get Content", async () => {
+    const content = await source.getContent("72315");
+    expect(content.title).toBe("Doctor Elise: The Royal Lady with the Lamp");
+    expect(content.recommendedReadingMode).toBe(ReadingMode.PAGED_COMIC);
+    expect(content.status).toBe(Status.COMPLETED);
+    expect(content.properties?.[0]).toBeDefined();
+    expect(content.creators?.includes("Mini")).toBe(true);
+  });
   test("Get Chapter Data", async () => {
     const data = await source.getChapterData("84565", "2176683");
     expect(data.pages).toBeDefined();
