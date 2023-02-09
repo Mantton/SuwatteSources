@@ -1,8 +1,9 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.STTPackage = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EXCERPTS = void 0;
+exports.properties = exports.EXCERPTS = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
+const lodash_1 = require("lodash");
 exports.EXCERPTS = [
     {
         id: "popular_today",
@@ -35,12 +36,126 @@ exports.EXCERPTS = [
         style: daisuke_1.CollectionStyle.UPDATE_LIST,
     },
 ];
+const GENRE_LIST = [
+    "Action/Adventure",
+    "Anthology",
+    "Anthropomorphic",
+    "Biography",
+    "Children's",
+    "Comedy",
+    "Crime",
+    "Drama",
+    "Fantasy",
+    "Gore",
+    "Graphic Novels",
+    "Historical",
+    "Holiday",
+    "Horror",
+    "Leading Ladies",
+    "LGBTQ",
+    "Literature",
+    "Manga",
+    "Martial Arts",
+    "Mature",
+    "Military",
+    "Movies & TV",
+    "Music",
+    "Mystery",
+    "Mythology",
+    "Non-Fiction",
+    "Original Series",
+    "Political",
+    "Post-Apocalyptic",
+    "Pulp",
+    "Religious",
+    "Risque",
+    "Robots, Cyborgs & Mecha",
+    "Romance",
+    "School Life",
+    "Science Fiction",
+    "Slice of Life",
+    "Spy",
+    "Steampunk",
+    "Superhero",
+    "Supernatural/Occult",
+    "Suspense",
+    "Vampires",
+    "Video Games",
+    "Web Comics",
+    "Werewolves",
+    "Western",
+    "Zombies",
+];
+const PUBLISHER_LIST = [
+    "Action Lab",
+    "Aftershock",
+    "AHOY",
+    "American Mythology",
+    "Aspen",
+    "Avatar Press",
+    "AWA Studios",
+    "Black Mask",
+    "BOOM! Studios",
+    "Dark Horse",
+    "DC",
+    "Death Rattle",
+    "Dynamite",
+    "IDW",
+    "Image",
+    "Magnetic Press",
+    "Marvel",
+    "MAX",
+    "Titan",
+    "Ubiworkshop",
+    "Valiant",
+    "Vault",
+    "Vertigo",
+    "Wildstorm",
+    "Zenescope",
+];
+const YEAR_LIST = (0, lodash_1.range)(1963, 2023);
+const properties = () => {
+    const properties = [];
+    // Genres
+    properties.push({
+        id: "genres",
+        label: "Genres",
+        tags: GENRE_LIST.map((v) => ({
+            id: `genre:${v}`,
+            label: v,
+            adultContent: false,
+        })),
+    });
+    // Publishers
+    properties.push({
+        id: "publishers",
+        label: "Publishers",
+        tags: PUBLISHER_LIST.map((v) => ({
+            id: `publisher:${v}`,
+            label: v,
+            adultContent: false,
+        })),
+    });
+    // Years
+    properties.push({
+        id: "years",
+        label: "Years",
+        tags: YEAR_LIST.map((v) => ({
+            id: `year:${v}`,
+            label: v.toString(),
+            adultContent: false,
+        })),
+    });
+    return properties;
+};
+exports.properties = properties;
 
-},{"@suwatte/daisuke":6}],2:[function(require,module,exports){
+},{"@suwatte/daisuke":6,"lodash":"lodash"}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
+const he_1 = require("he");
 const constants_1 = require("./constants");
 const parser_1 = require("./parser");
 class Target extends daisuke_1.Source {
@@ -48,7 +163,7 @@ class Target extends daisuke_1.Source {
         id: "dev_comic_castle",
         name: "Comic Castle",
         nsfw: false,
-        version: 1.0,
+        version: 1.1,
         website: "https://comicastle.org",
         supportedLanguages: ["en_US"],
         thumbnail: "comic_castle.png",
@@ -68,14 +183,58 @@ class Target extends daisuke_1.Source {
         const response = await this.client.get(url);
         return this.parser.parseChapters(response.data, contentId);
     }
-    getChapterData(contentId, chapterId) {
-        throw new Error("Method not implemented.");
+    async getChapterData(contentId, chapterId) {
+        const url = this.info.website + `/read/swiper/${chapterId}/${contentId}`;
+        const response = await this.client.get(url);
+        const pages = this.parser.parseChapterData(response.data);
+        return {
+            contentId,
+            chapterId,
+            pages,
+        };
     }
-    getSearchResults(query) {
-        throw new Error("Method not implemented.");
+    async getSearchResults(query) {
+        const { page, query: text, includedTags } = query;
+        let path = "/library/search/result";
+        let config = {
+            method: "POST",
+            body: {
+                search: "",
+                submit: "Submit",
+            },
+            headers: {
+                "content-type": "application/x-www-form-urlencoded",
+            },
+        };
+        if (text) {
+            // Title Search
+            config.body.search = (0, he_1.encode)(text);
+        }
+        if (includedTags && includedTags.length != 0) {
+            // Tag Search, Can Only Search Single Tag
+            const [lastPathExtension, search] = includedTags[0].split(":");
+            path = `/library/search/${lastPathExtension}`;
+            config.body.search = (0, he_1.encode)(search);
+        }
+        if (query.page) {
+            path += `/${page}`;
+        }
+        const response = await this.client.request({
+            url: `${this.info.website}${path}`,
+            ...config,
+        });
+        const { isLastPage, highlights: results } = this.parser.parseSearchResults(response.data);
+        return { page: query.page ?? 1, isLastPage, results };
     }
-    getSourceTags() {
-        throw new Error("Method not implemented.");
+    async getSourceTags() {
+        return (0, constants_1.properties)();
+    }
+    async getSearchFilters() {
+        return (0, constants_1.properties)().map((v) => ({
+            id: v.id,
+            property: v,
+            canExclude: false,
+        }));
     }
     async createExploreCollections() {
         return constants_1.EXCERPTS;
@@ -98,7 +257,7 @@ class Target extends daisuke_1.Source {
 }
 exports.Target = Target;
 
-},{"./constants":1,"./parser":3,"@suwatte/daisuke":6}],3:[function(require,module,exports){
+},{"./constants":1,"./parser":3,"@suwatte/daisuke":6,"he":"he"}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
@@ -227,7 +386,7 @@ class Parser {
             if (!value)
                 continue;
             properties[0].tags.push({
-                id: `genre|${value}`,
+                id: `genre:${value}`,
                 label: $(element).text().trim(),
                 adultContent: false,
             });
@@ -237,7 +396,7 @@ class Parser {
         if (!publisherElement.attr("value"))
             throw new Error("Failed to parse publisher");
         properties[0].tags.push({
-            id: `publisher|${publisherElement.attr("Value")}`,
+            id: `publisher:${publisherElement.attr("value")}`,
             label: "Published By " + publisherElement.text().trim(),
             adultContent: false,
         });
@@ -249,7 +408,7 @@ class Parser {
             if (!value)
                 continue;
             properties[1].tags.push({
-                id: `writer|${value}`,
+                id: `writer:${value}`,
                 label: $(element).text().trim(),
                 adultContent: false,
             });
@@ -260,7 +419,7 @@ class Parser {
             if (!value)
                 continue;
             properties[1].tags.push({
-                id: `artist|${value}`,
+                id: `artist:${value}`,
                 label: $(element).text().trim(),
                 adultContent: false,
             });
@@ -313,7 +472,7 @@ class Parser {
             const [, chapterId] = url.match(/pbp\/(\d+)\/(\d+)\/\/(\d+)/) ?? [];
             const [, numberStr] = title.match(/(\d+)/) || [];
             const number = Number(numberStr);
-            if (!chapterId || !number)
+            if (!chapterId || Number.isNaN(number))
                 throw new Error("Chapter Element Cannot be parsed");
             chapters.push({
                 index: idx,
@@ -327,6 +486,38 @@ class Parser {
             idx++;
         }
         return chapters;
+    }
+    // Chapter Data
+    parseChapterData(html) {
+        const $ = (0, cheerio_1.load)(html);
+        const elements = $(".swiper-wrapper .swiper-slide img").toArray();
+        const urls = elements
+            .map((v) => $(v).attr("src")?.trim())
+            .filter((a) => a)
+            .map((url) => ({ url }));
+        return urls;
+    }
+    parseSearchResults(html) {
+        const $ = (0, cheerio_1.load)(html);
+        const items = $("div.shadow-sm").toArray();
+        const highlights = [];
+        for (const item of items) {
+            const title = $("p", item).text().trim();
+            const cover = $("img", item).attr("data-src");
+            const link = $("a", item).attr("href");
+            if (!link)
+                continue;
+            const contentId = this.parseIdFromLink(link);
+            if (!contentId || !cover)
+                continue;
+            highlights.push({
+                title,
+                cover,
+                contentId,
+            });
+        }
+        const isLastPage = $("li.page-item.next a").length == 0;
+        return { isLastPage, highlights };
     }
 }
 exports.Parser = Parser;
