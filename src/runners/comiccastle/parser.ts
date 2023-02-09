@@ -1,5 +1,6 @@
 import {
   Chapter,
+  ChapterPage,
   CollectionStyle,
   Content,
   Highlight,
@@ -140,7 +141,7 @@ export class Parser {
       const value = $(element).attr("value");
       if (!value) continue;
       properties[0].tags.push({
-        id: `genre|${value}`,
+        id: `genre:${value}`,
         label: $(element).text().trim(),
         adultContent: false,
       });
@@ -151,7 +152,7 @@ export class Parser {
       throw new Error("Failed to parse publisher");
 
     properties[0].tags.push({
-      id: `publisher|${publisherElement.attr("Value")}`,
+      id: `publisher:${publisherElement.attr("value")}`,
       label: "Published By " + publisherElement.text().trim(),
       adultContent: false,
     });
@@ -163,7 +164,7 @@ export class Parser {
       const value = $(element).attr("value");
       if (!value) continue;
       properties[1].tags.push({
-        id: `writer|${value}`,
+        id: `writer:${value}`,
         label: $(element).text().trim(),
         adultContent: false,
       });
@@ -174,7 +175,7 @@ export class Parser {
       const value = $(element).attr("value");
       if (!value) continue;
       properties[1].tags.push({
-        id: `artist|${value}`,
+        id: `artist:${value}`,
         label: $(element).text().trim(),
         adultContent: false,
       });
@@ -231,7 +232,7 @@ export class Parser {
       const [, chapterId] = url.match(/pbp\/(\d+)\/(\d+)\/\/(\d+)/) ?? [];
       const [, numberStr] = title.match(/(\d+)/) || [];
       const number = Number(numberStr);
-      if (!chapterId || !number)
+      if (!chapterId || Number.isNaN(number))
         throw new Error("Chapter Element Cannot be parsed");
 
       chapters.push({
@@ -246,5 +247,41 @@ export class Parser {
       idx++;
     }
     return chapters;
+  }
+
+  // Chapter Data
+
+  parseChapterData(html: string) {
+    const $ = load(html);
+    const elements = $(".swiper-wrapper .swiper-slide img").toArray();
+    const urls = elements
+      .map((v) => $(v).attr("src")?.trim())
+      .filter((a) => a)
+      .map((url) => ({ url }));
+    return urls;
+  }
+
+  parseSearchResults(html: string) {
+    const $ = load(html);
+
+    const items = $("div.shadow-sm").toArray();
+    const highlights: Highlight[] = [];
+    for (const item of items) {
+      const title = $("p", item).text().trim();
+      const cover = $("img", item).attr("data-src");
+      const link = $("a", item).attr("href");
+      if (!link) continue;
+      const contentId = this.parseIdFromLink(link);
+      if (!contentId || !cover) continue;
+
+      highlights.push({
+        title,
+        cover,
+        contentId,
+      });
+    }
+
+    const isLastPage = $("li.page-item.next a").length == 0;
+    return { isLastPage, highlights };
   }
 }

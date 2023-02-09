@@ -67,4 +67,23 @@ describe("Comic Castle Tests", () => {
       expect(data.highlights.length).toBeGreaterThan(1);
     });
   });
+
+  test("Get Chapter Data", async () => {
+    const data = await source.getChapterData("456", "4201");
+    expect(data.pages?.length).toBeGreaterThan(0);
+  });
+
+  test("Get Search Results", async () => {
+    const data = await source.getSearchResults({ query: "doctor" });
+    expect(data.results.length).toBeGreaterThan(1);
+    expect(data.results[0].title).toBe(
+      "Doctor Star and The Kingdom of Lost Tomorrows: From the World of Black Hammer"
+    );
+  });
+  test("Get Search Results", async () => {
+    const data = await source.getSearchResults({
+      includedTags: ["publisher:Marvel"],
+    });
+    expect(data.results.length).toBeGreaterThan(1);
+  });
 });

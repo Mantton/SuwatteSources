@@ -4,13 +4,15 @@ import {
   CollectionExcerpt,
   Content,
   ExploreCollection,
+  Filter,
   PagedResult,
   Property,
   SearchRequest,
   Source,
   SourceInfo,
 } from "@suwatte/daisuke";
-import { EXCERPTS } from "./constants";
+import { encode } from "he";
+import { EXCERPTS, properties } from "./constants";
 import { Parser } from "./parser";
 
 export class Target extends Source {
@@ -18,7 +20,7 @@ export class Target extends Source {
     id: "dev_comic_castle",
     name: "Comic Castle",
     nsfw: false,
-    version: 1.0,
+    version: 1.1,
     website: "https://comicastle.org",
     supportedLanguages: ["en_US"],
     thumbnail: "comic_castle.png",
@@ -39,14 +41,66 @@ export class Target extends Source {
     const response = await this.client.get(url);
     return this.parser.parseChapters(response.data, contentId);
   }
-  getChapterData(contentId: string, chapterId: string): Promise<ChapterData> {
-    throw new Error("Method not implemented.");
+  async getChapterData(
+    contentId: string,
+    chapterId: string
+  ): Promise<ChapterData> {
+    const url = this.info.website + `/read/swiper/${chapterId}/${contentId}`;
+    const response = await this.client.get(url);
+    const pages = this.parser.parseChapterData(response.data);
+    return {
+      contentId,
+      chapterId,
+      pages,
+    };
   }
-  getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    throw new Error("Method not implemented.");
+  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
+    const { page, query: text, includedTags } = query;
+    let path = "/library/search/result";
+    let config: any = {
+      method: "POST",
+      body: {
+        search: "",
+        submit: "Submit",
+      },
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+    };
+    if (text) {
+      // Title Search
+      config.body.search = encode(text);
+    }
+
+    if (includedTags && includedTags.length != 0) {
+      // Tag Search, Can Only Search Single Tag
+      const [lastPathExtension, search] = includedTags[0].split(":");
+      path = `/library/search/${lastPathExtension}`;
+      config.body.search = encode(search);
+    }
+
+    if (query.page) {
+      path += `/${page}`;
+    }
+    const response = await this.client.request({
+      url: `${this.info.website}${path}`,
+      ...config,
+    });
+    const { isLastPage, highlights: results } = this.parser.parseSearchResults(
+      response.data
+    );
+    return { page: query.page ?? 1, isLastPage, results };
   }
-  getSourceTags(): Promise<Property[]> {
-    throw new Error("Method not implemented.");
+  async getSourceTags(): Promise<Property[]> {
+    return properties();
+  }
+
+  async getSearchFilters(): Promise<Filter[]> {
+    return properties().map((v) => ({
+      id: v.id,
+      property: v,
+      canExclude: false,
+    }));
   }
 
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
