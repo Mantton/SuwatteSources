@@ -184,6 +184,7 @@ export const parseContent = (html: string, contentId: string): Content => {
     adultContent,
     recommendedReadingMode,
     webUrl: `https://chapmanganato.com/${contentId}`,
+    chapters: parseChapters(html, contentId),
   };
 };
 
