@@ -373,6 +373,7 @@ const parseContent = (html, contentId) => {
         adultContent,
         recommendedReadingMode,
         webUrl: `https://chapmanganato.com/${contentId}`,
+        chapters: (0, exports.parseChapters)(html, contentId),
     };
 };
 exports.parseContent = parseContent;
