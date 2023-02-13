@@ -121,7 +121,7 @@ const mangaFromElement = (
 
 // Content
 
-export const parseContent = (html: string): Omit<Content, "contentId"> => {
+export const parseContent = (html: string, contentId: string): Content => {
   const $ = load(html);
 
   const doc = $("div.manga-info-top, div.panel-story-info");
@@ -175,6 +175,7 @@ export const parseContent = (html: string): Omit<Content, "contentId"> => {
     ? ReadingMode.VERTICAL
     : ReadingMode.PAGED_MANGA;
   return {
+    contentId,
     summary,
     title,
     additionalTitles,
@@ -182,6 +183,7 @@ export const parseContent = (html: string): Omit<Content, "contentId"> => {
     status,
     adultContent,
     recommendedReadingMode,
+    webUrl: `https://chapmanganato.com/${contentId}`,
   };
 };
 

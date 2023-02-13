@@ -50,11 +50,7 @@ export class Controller {
       `https://chapmanganato.com/${contentId}`
     );
 
-    const parsed = parseContent(data);
-    return {
-      ...parsed,
-      contentId,
-    };
+    return parseContent(data, contentId);
   }
 
   async getChapters(contentId: string) {

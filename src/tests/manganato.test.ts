@@ -1,11 +1,6 @@
 import { Target } from "../runners/manganato";
 import emulate from "@suwatte/emulator";
-import {
-  CollectionExcerpt,
-  Status,
-  Validate,
-  ZExploreCollection,
-} from "@suwatte/daisuke";
+import { Status, Validate, ZExploreCollection } from "@suwatte/daisuke";
 
 describe("MangaNato Tests", () => {
   const source = emulate(Target);
