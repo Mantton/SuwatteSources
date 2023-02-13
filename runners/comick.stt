@@ -264,7 +264,7 @@ class Target extends daisuke_1.Source {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.1,
+        version: 0.2,
         website: "https://comick.app/home",
         supportedLanguages: [],
         nsfw: false,

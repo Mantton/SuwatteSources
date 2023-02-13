@@ -64,7 +64,7 @@ class Target extends daisuke_1.Source {
     info = {
         name: "MangaDex",
         id: "org.mangadex",
-        version: 1.3,
+        version: 1.4,
         website: "https://mangadex.org",
         supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
             ? v.languageCode
