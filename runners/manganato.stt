@@ -134,11 +134,7 @@ class Controller {
     }
     async getContent(contentId) {
         const { data } = await this.client.get(`https://chapmanganato.com/${contentId}`);
-        const parsed = (0, parser_1.parseContent)(data);
-        return {
-            ...parsed,
-            contentId,
-        };
+        return (0, parser_1.parseContent)(data, contentId);
     }
     async getChapters(contentId) {
         const { data } = await this.client.get(`https://chapmanganato.com/${contentId}`);
@@ -328,7 +324,7 @@ const mangaFromElement = ($, element, urlSelector = "h3 a") => {
     };
 };
 // Content
-const parseContent = (html) => {
+const parseContent = (html, contentId) => {
     const $ = (0, cheerio_1.load)(html);
     const doc = $("div.manga-info-top, div.panel-story-info");
     const title = $("h1, h2", doc).first().text().trim();
@@ -368,6 +364,7 @@ const parseContent = (html) => {
         ? daisuke_1.ReadingMode.VERTICAL
         : daisuke_1.ReadingMode.PAGED_MANGA;
     return {
+        contentId,
         summary,
         title,
         additionalTitles,
@@ -375,6 +372,7 @@ const parseContent = (html) => {
         status,
         adultContent,
         recommendedReadingMode,
+        webUrl: `https://chapmanganato.com/${contentId}`,
     };
 };
 exports.parseContent = parseContent;
