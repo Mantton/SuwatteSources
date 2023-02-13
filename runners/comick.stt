@@ -1,813 +1,679 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.STTPackage = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DEFAULT_FILTERS = exports.SEARCH_SORTERS = exports.TAG_PREFIX = exports.SORT_KEYS = exports.PATHS = exports.HIGHLIGHT_LIMIT = exports.BASE_EXPLORE_COLLECTIONS = exports.VERTICAL_TYPES = exports.ADULT_TAGS = exports.STATUS_KEYS = exports.NEPNEP_DOMAINS = void 0;
+exports.EXPLORE_COLLECTIONS = exports.LANGUAGE_OPTIONS = exports.getProperties = exports.GENRE_OPTIONS = exports.DEMOGRAPHIC_OPTIONS = exports.TYPE_OPTIONS = exports.SORT_OPTIONS = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
-const lodash_1 = require("lodash");
-exports.NEPNEP_DOMAINS = [
-    {
-        name: "MangaSee",
-        url: "https://mangasee123.com",
-        id: "see",
-    },
-    {
-        name: "MangaLife",
-        url: "https://manga4life.com",
-        id: "life",
-    },
+exports.SORT_OPTIONS = [
+    { label: "Most Followed", id: "user_follow_count" },
+    { label: "Most Viewed", id: "view" },
+    { label: "Top Rated", id: "rating" },
+    { label: "Last Updated", id: "uploaded" },
 ];
-const STATUSES = ["ongoing", "complete", "hiatus", "discontinued", "cancelled"];
-exports.STATUS_KEYS = {
-    ongoing: daisuke_1.Status.ONGOING,
-    complete: daisuke_1.Status.COMPLETED,
-    hiatus: daisuke_1.Status.HIATUS,
-    cancelled: daisuke_1.Status.CANCELLED,
-    discontinued: daisuke_1.Status.CANCELLED,
+exports.TYPE_OPTIONS = [
+    { label: "Manga", id: "jp" },
+    { label: "Manhwa", id: "kr" },
+    { label: "Manhua", id: "cn" },
+];
+exports.DEMOGRAPHIC_OPTIONS = [
+    { label: "Shounen", id: "1" },
+    { label: "Shoujo", id: "2" },
+    { label: "Seinen", id: "3" },
+    { label: "Josei", id: "4" },
+];
+exports.GENRE_OPTIONS = [
+    { label: "4-Koma", id: "4-koma" },
+    { label: "Action", id: "action" },
+    { label: "Adaptation", id: "adaptation" },
+    { label: "Adult", id: "adult" },
+    { label: "Adventure", id: "adventure" },
+    { label: "Aliens", id: "aliens" },
+    { label: "Animals", id: "animals" },
+    { label: "Anthology", id: "anthology" },
+    { label: "Award Winning", id: "award-winning" },
+    { label: "Comedy", id: "comedy" },
+    { label: "Cooking", id: "cooking" },
+    { label: "Crime", id: "crime" },
+    { label: "Crossdressing", id: "crossdressing" },
+    { label: "Delinquents", id: "delinquents" },
+    { label: "Demons", id: "demons" },
+    { label: "Doujinshi", id: "doujinshi" },
+    { label: "Drama", id: "drama" },
+    { label: "Ecchi", id: "ecchi" },
+    { label: "Fan Colored", id: "fan-colored" },
+    { label: "Fantasy", id: "fantasy" },
+    { label: "Full Color", id: "full-color" },
+    { label: "Gender Bender", id: "gender-bender" },
+    { label: "Genderswap", id: "genderswap" },
+    { label: "Ghosts", id: "ghosts" },
+    { label: "Gore", id: "gore" },
+    { label: "Gyaru", id: "gyaru" },
+    { label: "Harem", id: "harem" },
+    { label: "Historical", id: "historical" },
+    { label: "Horror", id: "horror" },
+    { label: "Incest", id: "incest" },
+    { label: "Isekai", id: "isekai" },
+    { label: "Loli", id: "loli" },
+    { label: "Long Strip", id: "long-strip" },
+    { label: "Mafia", id: "mafia" },
+    { label: "Magic", id: "magic" },
+    { label: "Magical Girls", id: "magical-girls" },
+    { label: "Martial Arts", id: "martial-arts" },
+    { label: "Mature", id: "mature" },
+    { label: "Mecha", id: "mecha" },
+    { label: "Medical", id: "medical" },
+    { label: "Military", id: "military" },
+    { label: "Monster Girls", id: "monster-girls" },
+    { label: "Monsters", id: "monsters" },
+    { label: "Music", id: "music" },
+    { label: "Mystery", id: "mystery" },
+    { label: "Ninja", id: "ninja" },
+    { label: "Office Workers", id: "office-workers" },
+    { label: "Official Colored", id: "official-colored" },
+    { label: "Oneshot", id: "oneshot" },
+    { label: "Philosophical", id: "philosophical" },
+    { label: "Police", id: "police" },
+    { label: "Post-Apocalyptic", id: "post-apocalyptic" },
+    { label: "Psychological", id: "psychological" },
+    { label: "Reincarnation", id: "reincarnation" },
+    { label: "Reverse Harem", id: "reverse-harem" },
+    { label: "Romance", id: "romance" },
+    { label: "Samurai", id: "samurai" },
+    { label: "School Life", id: "school-life" },
+    { label: "Sci-Fi", id: "sci-fi" },
+    { label: "Sexual Violence", id: "sexual-violence" },
+    { label: "Shota", id: "shota" },
+    { label: "Shoujo Ai", id: "shoujo-ai" },
+    { label: "Shounen Ai", id: "shounen-ai" },
+    { label: "Slice of Life", id: "slice-of-life" },
+    { label: "Smut", id: "smut" },
+    { label: "Sports", id: "sports" },
+    { label: "Superhero", id: "superhero" },
+    { label: "Supernatural", id: "supernatural" },
+    { label: "Survival", id: "survival" },
+    { label: "Thriller", id: "thriller" },
+    { label: "Time Travel", id: "time-travel" },
+    { label: "Traditional Games", id: "traditional-games" },
+    { label: "Tragedy", id: "tragedy" },
+    { label: "User Created", id: "user-created" },
+    { label: "Vampires", id: "vampires" },
+    { label: "Video Games", id: "video-games" },
+    { label: "Villainess", id: "villainess" },
+    { label: "Virtual Reality", id: "virtual-reality" },
+    { label: "Web Comic", id: "web-comic" },
+    { label: "Wuxia", id: "wuxia" },
+    { label: "Yaoi", id: "yaoi" },
+    { label: "Yuri", id: "yuri" },
+    { label: "Zombies", id: "zombies" },
+];
+const getProperties = () => {
+    const properties = [];
+    // Type
+    properties.push({
+        id: "type",
+        label: "Content Type",
+        tags: exports.TYPE_OPTIONS.map((v) => ({
+            ...v,
+            id: `type:${v.id}`,
+            adultContent: false,
+        })),
+    });
+    // Demographic
+    properties.push({
+        id: "demographic",
+        label: "Content Demographics",
+        tags: exports.DEMOGRAPHIC_OPTIONS.map((v) => ({
+            ...v,
+            id: `demographic:${v.id}`,
+            adultContent: false,
+        })),
+    });
+    // Genre
+    properties.push({
+        id: "Genre",
+        label: "Genres",
+        tags: exports.GENRE_OPTIONS.map((v) => ({
+            ...v,
+            id: `genre:${v.id}`,
+            adultContent: false,
+        })),
+    });
+    return properties;
 };
-exports.ADULT_TAGS = ["mature", "adult", "hentai", "smut"];
-exports.VERTICAL_TYPES = ["OEL", "Manhwa", "Manhua"];
-exports.BASE_EXPLORE_COLLECTIONS = [
+exports.getProperties = getProperties;
+exports.LANGUAGE_OPTIONS = [
+    { value: "all", label: "All Languages" },
+    { value: "en", label: "English" },
+    { value: "pt-br", label: "Portuguese (Brazil)" },
+    { value: "ru", label: "Russian" },
+    { value: "fr", label: "French" },
+    { value: "es-419", label: "Spanish (Latin America)" },
+    { value: "pl", label: "Polish" },
+    { value: "tr", label: "Turkish" },
+    { value: "it", label: "Italian" },
+    { value: "es", label: "Spanish" },
+    { value: "id", label: "Indonesian" },
+    { value: "hu", label: "Hungarian" },
+    { value: "vi", label: "Vietnamese" },
+    { value: "zh-hk", label: "Chinese (Hong Kong)" },
+    { value: "ar", label: "Arabic" },
+    { value: "de", label: "German" },
+    { value: "zh", label: "Chinese" },
+    { value: "ca", label: "Catalan" },
+    { value: "bg", label: "Bulgarian" },
+    { value: "th", label: "Thai" },
+    { value: "fa", label: "Persian" },
+    { value: "uk", label: "Ukrainian" },
+    { value: "mn", label: "Mongolian" },
+    { value: "ro", label: "Romanian" },
+    { value: "he", label: "Hebrew" },
+    { value: "ms", label: "Malay" },
+    { value: "tl", label: "Tagalog" },
+    { value: "ja", label: "Japanese" },
+    { value: "hi", label: "Hindi" },
+    { value: "my", label: "Burmese" },
+    { value: "ko", label: "Korean" },
+    { value: "cs", label: "Czech" },
+    { value: "pt", label: "Portuguese" },
+    { value: "nl", label: "Dutch" },
+    { value: "sv", label: "Swedish" },
+    { value: "bn", label: "Bengali" },
+    { value: "no", label: "Norwegian" },
+    { value: "lt", label: "Lithuanian" },
+    { value: "el", label: "Greek" },
+    { value: "sr", label: "Serbian" },
+    { value: "da", label: "Danish" },
+];
+exports.EXPLORE_COLLECTIONS = [
     {
-        id: "trending",
-        title: "Trending Titles 🚀 ",
-        subtitle: "Hottest updates being read right now!",
+        id: "hot_updates",
+        title: "Hot Updates",
         style: daisuke_1.CollectionStyle.INFO,
     },
     {
-        id: "admin_recommendations",
-        title: "Admin Recommendations",
-        subtitle: "Titles worth your time",
-        style: daisuke_1.CollectionStyle.GALLERY,
-    },
-    {
-        id: "hot_monthly",
-        title: "Top Titles This Month 🔥 ",
-        subtitle: "Certified Bangers",
+        id: "recently_added",
+        title: "Recently Added Titles",
         style: daisuke_1.CollectionStyle.NORMAL,
     },
     {
-        id: "new",
-        title: "New Titles",
-        subtitle: "Just added to the site.",
+        id: "most_viewed_7",
+        title: "Most Viewed Titles This Week",
+        style: daisuke_1.CollectionStyle.NORMAL,
+    },
+    {
+        id: "most_viewed_30",
+        title: "Most Viewed Titles This Month",
+        style: daisuke_1.CollectionStyle.GALLERY,
+    },
+    {
+        id: "popular_new_7",
+        title: "Popular Titles This Week",
+        style: daisuke_1.CollectionStyle.INFO,
+    },
+    {
+        id: "popular_new_30",
+        title: "Most Viewed Titles This Month",
+        style: daisuke_1.CollectionStyle.NORMAL,
+    },
+    {
+        id: "completed",
+        title: "Completed Titles",
+        subtitle: "Binge-Worthy Completed Titles.",
+        style: daisuke_1.CollectionStyle.INFO,
+    },
+    {
+        id: "recently_followed",
+        title: "Recent Follows",
+        subtitle: "What others are reading.",
+        style: daisuke_1.CollectionStyle.NORMAL,
+    },
+    {
+        id: "popular_ongoing",
+        title: "Popular Ongoing Titles",
+        style: daisuke_1.CollectionStyle.INFO,
+    },
+    {
+        id: "upcoming",
+        title: "Up n' Coming",
+        style: daisuke_1.CollectionStyle.NORMAL,
+    },
+    {
+        id: "top_followed_7",
+        title: "Top Followed Titles This Week",
+        style: daisuke_1.CollectionStyle.INFO,
+    },
+    {
+        id: "top_followed_30",
+        title: "Top Followed Titles This Month",
         style: daisuke_1.CollectionStyle.NORMAL,
     },
     {
         id: "latest",
-        title: "Latest Updates ",
-        subtitle: "Top of the morning.",
+        title: "Latest Updates",
         style: daisuke_1.CollectionStyle.UPDATE_LIST,
     },
 ];
-exports.HIGHLIGHT_LIMIT = 30;
-exports.PATHS = {
-    trending: /vm.HotUpdateJSON = (.*);/,
-    latest: /vm.LatestJSON = (.*);/,
-    admin_recommendations: /vm.RecommendationJSON = (.*);/,
-    new: /vm.NewSeriesJSON = (.*);/,
-    chapters: /vm.Chapters = (.*);/,
-    full_directory: /vm.FullDirectory = (.*);/,
-    directory: /vm.Directory = (.*);/,
-    related: /vm.RelatedSeriesJSON = (.*);/,
-    hot_monthly: /vm.TopTenJSON = (.*);/,
-    genre_tag: /"Genre"\s*: (.*)/,
-    format_tag: /"Type"\s*: (.*),/g,
-    chapter_data_domain: /vm.CurPathName = (.*);/,
-    chapter_data_path: /vm.IndexName = (.*);/,
-    chapter_data_chapter: /vm.CurChapter = (.*);/,
-};
-exports.SORT_KEYS = {
-    views_all: "v",
-    views_monthly: "vm",
-    recent: "lt",
-    alphabetically: "s",
-};
-exports.TAG_PREFIX = {
-    publication: "p_status",
-    scanlation: "s_status",
-    type: "type",
-    year: "released",
-    lang: "o_translation",
-    author: "author",
-    translation: "translation",
-    genres: "genres",
-};
-exports.SEARCH_SORTERS = [
-    {
-        id: "views_all",
-        label: "Most Popular (All Time)",
-    },
-    {
-        id: "views_monthly",
-        label: "Most Popular (Monthly)",
-    },
-    {
-        id: "recent",
-        label: "Recently Released Chapter",
-    },
-    {
-        id: "alphabetically",
-        label: "Alphabetically",
-    },
-];
-exports.DEFAULT_FILTERS = [
-    {
-        id: exports.TAG_PREFIX.publication,
-        title: "Publication Status",
-        type: daisuke_1.FilterType.MULTISELECT,
-        options: STATUSES.map((v) => ({ id: v, label: (0, lodash_1.capitalize)(v) })),
-    },
-    {
-        id: exports.TAG_PREFIX.scanlation,
-        title: "Scan Status",
-        options: STATUSES.map((v) => ({ id: v, label: (0, lodash_1.capitalize)(v) })),
-        type: daisuke_1.FilterType.MULTISELECT,
-    },
-    {
-        id: exports.TAG_PREFIX.translation,
-        title: "Translation Status",
-        label: "Official Translation Only",
-        type: daisuke_1.FilterType.TOGGLE,
-    },
-];
 
-},{"@suwatte/daisuke":10,"lodash":"lodash"}],2:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Controller = void 0;
-const constants_1 = require("./constants");
-const parser_1 = require("./parser");
-const store_1 = require("./store");
-const utils_1 = require("./utils");
-class Controller {
-    client = new NetworkClient();
-    parser = new parser_1.Parser();
-    store = new store_1.Store();
-    directory = [];
-    directoryHTML = "";
-    homepage = "";
-    // Directory
-    async getDirectoryString() {
-        if (this.directoryHTML) {
-            return this.directoryHTML;
-        }
-        const url = await this.store.host();
-        const response = await this.client.get(`${url}/search`);
-        const html = response.data;
-        this.directoryHTML = html;
-        return this.directoryHTML;
-    }
-    async fetchDirectory() {
-        const html = await this.getDirectoryString();
-        this.parser.thumbnail(html);
-        const regex = constants_1.PATHS.directory;
-        const dirStr = html.match(regex)?.[1];
-        if (!dirStr)
-            throw new Error("Failed to parse NepNep Directory");
-        this.directory = JSON.parse(dirStr);
-    }
-    async setThumbnail() {
-        const html = await this.getDirectoryString();
-        this.parser.thumbnail(html);
-    }
-    async fetchHomePage() {
-        const host = await this.store.host();
-        const response = await this.client.get(host);
-        this.homepage = response.data;
-        if (!this.parser.hasThumbnail()) {
-            await this.setThumbnail();
-        }
-    }
-    // Explore
-    async resolveExcerpt(excerpt) {
-        const regex = constants_1.PATHS[excerpt.id];
-        const str = this.homepage.match(regex)?.[1];
-        if (!str)
-            throw new Error("Failed to Match HomePage Section");
-        const highlights = this.parser.homepageSection(JSON.parse(str));
-        return { ...excerpt, highlights };
-    }
-    // Search
-    async getFilters() {
-        const html = await this.getDirectoryString();
-        return this.parser.filters(html);
-    }
-    async getSearchResults(request) {
-        // Populate if empty
-        if (this.directory.length == 0) {
-            await this.fetchDirectory();
-        }
-        const key = constants_1.SORT_KEYS[request.sort ?? ""] ?? "v";
-        const parsed = this.parser.search(request);
-        const matches = this.directory.filter((v) => this.matchesRequest(v, parsed));
-        const page = request.page ?? 1;
-        const min = constants_1.HIGHLIGHT_LIMIT * (page - 1);
-        const max = constants_1.HIGHLIGHT_LIMIT * page;
-        if (key !== "s") {
-            matches.sort((0, utils_1.dynamicSort)(key));
-        }
-        const results = matches
-            .slice(min, max)
-            .map((v) => this.parser.toHighlight(v));
-        return {
-            page,
-            results,
-            isLastPage: results.length <= constants_1.HIGHLIGHT_LIMIT,
-            totalResultCount: matches.length,
-        };
-    }
-    matchesRequest(entry, request) {
-        let match = true;
-        // Author
-        if (request.authors && request.authors.length > 0) {
-            const hasAuthor = (name) => {
-                return (entry.a ?? [])
-                    .map((v) => v.toLowerCase().trim())
-                    .includes(name.toLowerCase().trim());
-            };
-            match = request.authors.some(hasAuthor);
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Query
-        if (request.query) {
-            const str = [...(entry.al ?? []), entry.s].join(" ");
-            match = str.toLowerCase().includes(request.query.toLowerCase());
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Release Year
-        if (request.released) {
-            match = entry.y == request.released;
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Official Translation
-        if (request.originalTranslation) {
-            match = entry.o === "yes";
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Included Types
-        if (request.includeTypes && request.includeTypes.length > 0) {
-            match = request.includeTypes.includes(entry.t.toLowerCase());
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Excluded Types
-        if (request.excludeTypes && request.excludeTypes.length > 0) {
-            match = !request.excludeTypes.includes(entry.t.toLowerCase());
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Scan Status
-        if (request.s_status && request.s_status.length > 0) {
-            match = request.s_status.includes(entry.ss.toLowerCase());
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Publication Status
-        if (request.p_status && request.p_status.length > 0) {
-            match = request.p_status.includes(entry.ps.toLowerCase());
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        /**
-         * checks if the entry's genre list contains provided genre
-         * @param v Genre Name
-         */
-        const hasTag = (v) => {
-            return (entry.g ?? [])
-                .map((v) => v.toLowerCase().trim())
-                .includes(v.toLowerCase().trim());
-        };
-        // Included Tags
-        if (request.includedTags && request.includedTags.length > 0) {
-            match = request.includedTags.every(hasTag);
-            // Check
-            if (!match) {
-                return false;
-            }
-        }
-        // Excluded Tags
-        if (request.excludedTags && request.excludedTags.length > 0) {
-            match = !request.excludedTags.some(hasTag);
-            if (!match) {
-                return false;
-            }
-        }
-        return true;
-    }
-    // Content
-    async getContent(id) {
-        const host = await this.store.host();
-        const response = await this.client.get(`${host}/manga/${id}`);
-        const html = response.data;
-        if (!this.parser.hasThumbnail()) {
-            await this.setThumbnail();
-        }
-        return this.parser.content(html, id, host);
-    }
-    // Chapters
-    async getChapters(id) {
-        const host = await this.store.host();
-        const response = await this.client.get(`${host}/manga/${id}`);
-        const html = response.data;
-        return this.parser.chapters(html, id);
-    }
-    async getChapterData(contentId, chapterId) {
-        const host = await this.store.host();
-        const suffix = (0, utils_1.prepareURLSuffix)(chapterId);
-        const url = `${host}/read-online/${contentId}${suffix}`;
-        const response = await this.client.get(url);
-        return this.parser.chapterData(response.data, chapterId, contentId);
-    }
-}
-exports.Controller = Controller;
-
-},{"./constants":1,"./parser":4,"./store":6,"./utils":7}],3:[function(require,module,exports){
+},{"@suwatte/daisuke":6}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
-const lodash_1 = require("lodash");
 const constants_1 = require("./constants");
-const controller_1 = require("./controller");
-const preference_1 = require("./preference");
-// Wanted to make this less bloated than MangaDex LMAO
+const utilts_1 = require("./utilts");
 class Target extends daisuke_1.Source {
     info = {
-        id: "m.nepnep",
-        website: "https://mangasee123.com",
-        version: 1.12,
-        name: "NepNep",
-        supportedLanguages: ["EN_US"],
+        id: "app.comick",
+        name: "ComicK",
+        version: 0.1,
+        website: "https://comick.app/home",
+        supportedLanguages: [],
         nsfw: false,
-        authors: ["Mantton"],
-        thumbnail: "nepnep.png",
+        thumbnail: "comick.png",
         minSupportedAppVersion: "4.6.0",
     };
-    controller = new controller_1.Controller();
+    client = new NetworkClient();
+    store = new ValueStore();
+    API_URL = "https://api.comick.fun";
     async getContent(contentId) {
-        return this.controller.getContent(contentId);
+        const data = await this.getManga(contentId);
+        const content = (0, utilts_1.MangaToContent)(data, contentId);
+        return content;
     }
     async getChapters(contentId) {
-        return this.controller.getChapters(contentId);
-    }
-    async getChapterData(contentId, chapterId) {
-        return this.controller.getChapterData(contentId, chapterId);
-    }
-    async getSourceTags() {
-        const filters = await this.controller.getFilters();
-        return filters
-            .map((v) => ({
-            id: v.id,
-            label: v.title,
-            tags: (v.options ?? []).map((v) => ({
-                ...v,
-                adultContent: constants_1.ADULT_TAGS.includes(v.id),
-            })),
-        }))
-            .filter((v) => v.tags.length != 0);
-    }
-    async createExploreCollections() {
-        // Refresh
-        return constants_1.BASE_EXPLORE_COLLECTIONS;
-    }
-    async willResolveExploreCollections() {
-        await this.controller.fetchHomePage();
-    }
-    async resolveExploreCollection(excerpt) {
-        return await this.controller.resolveExcerpt(excerpt);
-    }
-    async getExplorePageTags() {
-        const tags = (await this.getSourceTags())[0].tags.filter((v) => !v.adultContent);
-        return (0, lodash_1.sampleSize)(tags, 7).map((v) => ({
-            ...v,
-            filterId: constants_1.TAG_PREFIX.genres,
+        const manga = await this.getManga(contentId);
+        const { chapter_count: limit, hid } = manga.comic;
+        if (!limit || !hid)
+            throw new Error("Could Not Get Chapter Count");
+        const url = `${this.API_URL}/comic/${hid}/chapters`;
+        const lang = await this.store.get("content_lang");
+        const { data: response } = await this.client.get(url, {
+            params: {
+                ...(lang && lang !== "all" && { lang }),
+                ...{ tachiyomi: "true", limit },
+            },
+        });
+        const { chapters: data } = JSON.parse(response);
+        const chapters = data.map((v, index) => ({
+            ...(0, utilts_1.CKChapterToChapter)(v),
+            contentId,
+            index,
         }));
-    }
-    // Searching
-    async getSearchSorters() {
-        return constants_1.SEARCH_SORTERS;
-    }
-    async getSearchFilters() {
-        return this.controller.getFilters();
-    }
-    async getSearchResults(query) {
-        return this.controller.getSearchResults(query);
-    }
-    // Preference
-    async getUserPreferences() {
-        return preference_1.preferences;
-    }
-}
-exports.Target = Target;
-
-},{"./constants":1,"./controller":2,"./preference":5,"@suwatte/daisuke":10,"lodash":"lodash"}],4:[function(require,module,exports){
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Parser = void 0;
-const daisuke_1 = require("@suwatte/daisuke");
-const cheerio_1 = require("cheerio");
-const lodash_1 = require("lodash");
-const moment_1 = __importDefault(require("moment"));
-const constants_1 = require("./constants");
-const utils_1 = require("./utils");
-class Parser {
-    THUMBNAIL_URL = "";
-    thumbnail(html) {
-        const $ = (0, cheerio_1.load)(html);
-        const selector = ".SearchResult > .SearchResultCover img";
-        const url = $(selector).first().attr("ng-src");
-        if (!url)
-            throw new Error("Failed to parse thumbnail URL");
-        this.THUMBNAIL_URL = url;
-    }
-    hasThumbnail() {
-        return !!this.THUMBNAIL_URL;
-    }
-    homepageSection(entries) {
-        const highlights = [];
-        for (const entry of entries.slice(0, constants_1.HIGHLIGHT_LIMIT)) {
-            highlights.push({
-                contentId: entry.IndexName,
-                title: entry.SeriesName,
-                cover: this.coverFor(entry.IndexName),
-                // tags: entry.Genres,
-            });
-        }
-        return highlights;
-    }
-    filters(html) {
-        const filters = [];
-        const genreStr = html.match(constants_1.PATHS.genre_tag)?.[1].replace(/'/g, '"').trim();
-        const typesStr = html
-            .match(constants_1.PATHS.format_tag)?.[1]
-            .match(/(\[.*])/)?.[1]
-            .replace(/'/g, '"')
-            .trim();
-        if (!genreStr || !typesStr)
-            throw new Error("Failed to parse Filters");
-        const genres = JSON.parse(genreStr);
-        const types = JSON.parse(typesStr);
-        // Genres
-        filters.push({
-            id: constants_1.TAG_PREFIX.genres,
-            title: "Genres",
-            type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
-            options: genres.map((v) => ({
-                id: v.toLowerCase(),
-                label: v,
-            })),
-        });
-        // Types
-        filters.push({
-            id: constants_1.TAG_PREFIX.type,
-            title: "Types",
-            type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
-            options: types.map((v) => ({
-                id: v.toLowerCase(),
-                label: v,
-            })),
-        });
-        return [...filters, ...constants_1.DEFAULT_FILTERS];
-    }
-    coverFor(id) {
-        return this.THUMBNAIL_URL.replace("{{Result.i}}", id);
-    }
-    toHighlight(entry) {
-        return {
-            contentId: entry.i,
-            title: entry.s,
-            cover: this.coverFor(entry.i),
-        };
-    }
-    search(request) {
-        const { filters } = request;
-        const grouped = filters?.find((v) => v.id == "grouped");
-        const groupedTypes = grouped?.included
-            ?.filter((v) => v.startsWith(constants_1.TAG_PREFIX.type))
-            .map((v) => v.split(":")?.[1])
-            .filter((v) => v);
-        const groupedYear = grouped?.included
-            ?.filter((v) => v.startsWith(constants_1.TAG_PREFIX.year))
-            .map((v) => v.split(":")?.[1])
-            .filter((v) => v)?.[0];
-        const orig = grouped?.included?.includes(constants_1.TAG_PREFIX.translation);
-        return {
-            query: request.query?.toLowerCase(),
-            // Tags
-            includedTags: filters
-                ?.find((v) => v.id == constants_1.TAG_PREFIX.genres)
-                ?.included?.map(lodash_1.toLower),
-            excludedTags: filters
-                ?.find((v) => v.id == constants_1.TAG_PREFIX.genres)
-                ?.excluded?.map(lodash_1.toLower),
-            // Author
-            authors: filters
-                ?.find((v) => v.id == constants_1.TAG_PREFIX.author)
-                ?.included?.map(lodash_1.toLower),
-            // Status
-            p_status: filters
-                ?.find((v) => v.id == constants_1.TAG_PREFIX.publication)
-                ?.included?.map(lodash_1.toLower),
-            s_status: filters
-                ?.find((v) => v.id == constants_1.TAG_PREFIX.scanlation)
-                ?.included?.map(lodash_1.toLower),
-            // Types
-            includeTypes: filters?.find((v) => v.id == constants_1.TAG_PREFIX.type)?.included?.map(lodash_1.toLower) ??
-                groupedTypes,
-            excludeTypes: filters
-                ?.find((v) => v.id == constants_1.TAG_PREFIX.type)
-                ?.excluded?.map(lodash_1.toLower),
-            // Original Translation
-            originalTranslation: filters?.find((v) => v.id == constants_1.TAG_PREFIX.translation)?.bool ??
-                orig ??
-                false,
-            // Release Year
-            released: filters?.find((v) => v.id == constants_1.TAG_PREFIX.year)?.included?.[0] ??
-                groupedYear,
-        };
-    }
-    // Content
-    content(html, id, host) {
-        const $ = (0, cheerio_1.load)(html);
-        const body = $(".row");
-        const title = $("h1", body).text();
-        if (!title)
-            throw new Error("Failed to Parse Profile");
-        const summary = $(".Content", body).text().split("{")[0];
-        const additionalTitles = $(".list-group-item:has(span:contains(Alternate))", body)
-            .text()
-            .replace("Alternate Name(s):", "")
-            .trim()
-            .split(", ")
-            .map((v) => v.trim())
-            .filter((v) => v && v !== title);
-        const creators = $(".list-group-item:has(span:contains(Author)) a", body)
-            .map((_, v) => $(v).text())
-            .toArray()
-            .map((v) => v.trim())
-            .filter((v) => !!v);
-        // Properties
-        const properties = [];
-        const genres = $(".list-group-item:has(span:contains(Genre)) a", body)
-            .map((_, v) => $(v).text())
-            .toArray()
-            .map((v) => v.trim())
-            .filter((v) => !!v);
-        properties.push({
-            id: constants_1.TAG_PREFIX.genres,
-            label: "Genres",
-            tags: genres.map((v) => ({
-                id: v.toLowerCase(),
-                label: v,
-                adultContent: constants_1.ADULT_TAGS.includes(v.toLowerCase()),
-            })),
-        });
-        const adultContent = properties[0].tags.some((v) => v.adultContent);
-        // Grouped Types, Released, Official Translation
-        const groupedProperty = {
-            id: "grouped",
-            label: "Additional Tags",
-            tags: [],
-        };
-        const type = $(".list-group-item:has(span:contains(Type)) a", body)
-            .first()
-            .text();
-        const released = $(".list-group-item:has(span:contains(Released)) a", body)
-            .first()
-            .text();
-        const officialTranslation = $(".list-group-item:has(span:contains(Official Translation)) a", body)
-            .first()
-            .text();
-        // Type
-        groupedProperty.tags.push({
-            id: `${constants_1.TAG_PREFIX.type}:${type.toLowerCase()}`,
-            label: type,
-        });
-        // Released
-        groupedProperty.tags.push({
-            id: `${constants_1.TAG_PREFIX.year}:${released}`,
-            label: `Released in ${released}`,
-        });
-        // Reading Mode
-        let recommendedReadingMode = daisuke_1.ReadingMode.PAGED_MANGA;
-        if (constants_1.VERTICAL_TYPES.includes(type)) {
-            recommendedReadingMode = daisuke_1.ReadingMode.VERTICAL;
-        }
-        if (officialTranslation) {
-            groupedProperty.tags.push({
-                id: constants_1.TAG_PREFIX.lang,
-                label: "Official Translation",
-            });
-        }
-        properties.push(groupedProperty);
-        /// Authors
-        properties.push({
-            id: constants_1.TAG_PREFIX.author,
-            label: "Author(s)",
-            tags: creators.map((v) => ({
-                id: v.trim().toLowerCase(),
-                label: v.split(" ").map(lodash_1.capitalize).join(" ").trim(),
-            })),
-        });
-        const statusString = $(".list-group-item:has(span:contains(Status)) a:contains(Publish)", body)
-            .text()
-            .replace(" (Publish)", "")
-            .trim()
-            .toLowerCase();
-        const status = constants_1.STATUS_KEYS[statusString] ?? daisuke_1.Status.UNKNOWN;
-        // Related
-        const includedCollections = [];
-        const relatedString = html.match(constants_1.PATHS.related)?.[1];
-        if (relatedString) {
-            const entries = JSON.parse(relatedString);
-            const highlights = this.homepageSection(entries);
-            const collection = {
-                id: "related",
-                title: "Related Titles",
-                style: daisuke_1.CollectionStyle.NORMAL,
-                highlights,
-            };
-            includedCollections.push(collection);
-        }
-        const cover = this.coverFor(id);
-        const chapters = this.chapters(html, id);
-        return {
-            contentId: id,
-            additionalTitles,
-            summary,
-            cover,
-            includedCollections,
-            adultContent,
-            recommendedReadingMode,
-            title,
-            status,
-            properties,
-            creators,
-            webUrl: `${host}/manga/${id}`,
-            chapters,
-        };
-    }
-    chapters(html, contentId) {
-        const str = html.match(constants_1.PATHS.chapters)?.[1];
-        if (!str)
-            throw new Error("Failed to Parse Chapters");
-        const objects = JSON.parse(str);
-        let index = 0;
-        const chapters = [];
-        for (const object of objects) {
-            const chapterId = object.Chapter;
-            const numbers = (0, utils_1.parseChapterString)(chapterId);
-            chapters.push({
-                chapterId,
-                contentId,
-                ...numbers,
-                index,
-                date: (0, moment_1.default)(object.Date).subtract(1, "hour").toDate(),
-                language: "en_us",
-            });
-            index++;
-        }
         return chapters;
     }
-    chapterData(html, chapterId, contentId) {
-        const host = html.match(constants_1.PATHS.chapter_data_domain)?.[1].replaceAll(`"`, "");
-        const path = html.match(constants_1.PATHS.chapter_data_path)?.[1].replaceAll(`"`, "");
-        const chapterStr = html.match(constants_1.PATHS.chapter_data_chapter)?.[1];
-        if (!host || !path || !chapterStr)
-            throw new Error("Unable to find info");
-        const chapter = JSON.parse(chapterStr);
-        const directory = chapter.Directory && chapter.Directory.length > 0
-            ? `${chapter.Directory}/`
-            : "";
-        let c = (0, utils_1.parseChapterString)(chapter.Chapter).number.toString().split(".");
-        let chapterPath = c[0];
-        chapterPath = chapterPath.padStart(4, "0");
-        const decimal = c[1];
-        if (decimal) {
-            chapterPath += `.${decimal}`;
-        }
-        const base = `https://${host}/manga/${path}/${directory}${chapterPath}`;
-        const pageCount = chapter.Page ? parseInt(chapter.Page) : 0;
-        if (!pageCount)
-            throw new Error("Invalid Page Count");
-        const pages = Array.from(Array(pageCount), (_, n) => ({
-            url: `${base}-${(n + 1).toString().padStart(3, "0")}.png`,
-        }));
+    async getChapterData(contentId, chapterId) {
+        const url = `${this.API_URL}/chapter/${chapterId}?tachiyomi=true`;
+        const { data } = await this.client.get(url);
+        const images = JSON.parse(data).chapter.images;
+        const pages = images.map((v) => ({ url: v.url }));
         return {
-            chapterId,
             contentId,
+            chapterId,
             pages,
         };
     }
-}
-exports.Parser = Parser;
-
-},{"./constants":1,"./utils":7,"@suwatte/daisuke":10,"cheerio":"cheerio","lodash":"lodash","moment":"moment"}],5:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.preferences = void 0;
-const daisuke_1 = require("@suwatte/daisuke");
-const constants_1 = require("./constants");
-exports.preferences = [
-    {
-        id: "general",
-        header: "General",
-        children: [
+    async getSearchResults(query) {
+        const { queryString, core: params } = (0, utilts_1.parseSearchRequest)(query);
+        const url = `${this.API_URL}/v1.0/search?${queryString.replace("&", "")}`;
+        const response = await this.client.get(url, { params });
+        const data = JSON.parse(response.data);
+        return {
+            page: query.page ?? 1,
+            results: data.map((v) => (0, utilts_1.MangaToHighlight)(v)),
+            isLastPage: data.length < 30,
+        };
+    }
+    async getSourceTags() {
+        return (0, constants_1.getProperties)();
+    }
+    async getUserPreferences() {
+        return [
             {
-                key: "host",
-                label: "NepNep Site",
-                defaultValue: constants_1.NEPNEP_DOMAINS[0].id,
-                type: daisuke_1.PreferenceType.select,
-                options: constants_1.NEPNEP_DOMAINS.map((v) => ({ label: v.name, value: v.id })),
+                id: "lang",
+                header: "Language",
+                children: [
+                    {
+                        key: "content_lang",
+                        label: "Language",
+                        type: daisuke_1.PreferenceType.select,
+                        defaultValue: "en",
+                        options: constants_1.LANGUAGE_OPTIONS,
+                    },
+                ],
+                footer: "Languages in which chapters will be available",
             },
-        ],
-    },
-];
-
-},{"./constants":1,"@suwatte/daisuke":10}],6:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Store = void 0;
-const constants_1 = require("./constants");
-class Store {
-    store = new ValueStore();
-    async host() {
-        const value = await this.store.get("host");
-        const host = constants_1.NEPNEP_DOMAINS.find((v) => v.id === value) ?? constants_1.NEPNEP_DOMAINS[0];
-        return host.url;
+        ];
+    }
+    async getSearchSorters() {
+        return constants_1.SORT_OPTIONS;
+    }
+    async getSearchFilters() {
+        const properties = (0, constants_1.getProperties)();
+        return [
+            {
+                id: "content_type",
+                title: "Content Type",
+                type: daisuke_1.FilterType.SELECT,
+                options: properties[0].tags,
+            },
+            {
+                id: "demographic",
+                title: "Demographic",
+                type: daisuke_1.FilterType.MULTISELECT,
+                options: properties[1].tags,
+            },
+            {
+                id: "genres",
+                title: "Genres",
+                type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
+                options: properties[2].tags,
+            },
+            {
+                id: "completed",
+                title: "Content Status",
+                label: "Completed",
+                type: daisuke_1.FilterType.TOGGLE,
+            },
+        ];
+    }
+    // Helpers
+    async getManga(slug) {
+        const url = `${this.API_URL}/comic/${slug}`;
+        const response = await this.client.get(url, {
+            params: { tachiyomi: "true" },
+        });
+        return JSON.parse(response.data);
+    }
+    async willRequestImage(request) {
+        request.headers = {
+            ...request.headers,
+            referer: "https://comic.app/",
+        };
+        return request;
+    }
+    // Explore Page
+    homepage;
+    async willResolveExploreCollections() {
+        const { data } = await this.client.get("https://comick.app/home");
+        const str = data
+            .split(`<script id="__NEXT_DATA__" type="application/json">`)
+            .pop()
+            ?.split("</script>")?.[0];
+        if (!str)
+            throw new Error("Could not find Homepage JSON");
+        this.homepage = JSON.parse(str).props.pageProps;
+    }
+    async createExploreCollections() {
+        return constants_1.EXPLORE_COLLECTIONS;
+    }
+    async resolveExploreCollection(excerpt) {
+        let highlights;
+        switch (excerpt.id) {
+            case "hot_updates":
+                return {
+                    ...excerpt,
+                    highlights: await this.getUpdateHighlights(true),
+                };
+            case "recently_added":
+                highlights = this.homepage.news.map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "most_viewed_7":
+                highlights = this.homepage.trending["7"].map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "most_viewed_30":
+                highlights = this.homepage.trending["30"].map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "popular_new_7":
+                highlights = this.homepage.topFollowNewComics["7"].map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "popular_new_30":
+                highlights = this.homepage.topFollowNewComics["30"].map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "completed":
+                highlights = this.homepage.completions.map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "recently_followed":
+                highlights = this.homepage.follows.map((v) => (0, utilts_1.MDComicToHighlight)(v.md_comics));
+                return { ...excerpt, highlights };
+            case "popular_ongoing":
+                highlights = this.homepage.rank.map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "upcoming":
+                highlights = this.homepage.recentRank.map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "top_followed_7":
+                highlights = this.homepage.topFollowComics["7"].map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "top_followed_30":
+                highlights = this.homepage.topFollowComics["30"].map((v) => (0, utilts_1.MDComicToHighlight)(v));
+                return { ...excerpt, highlights };
+            case "latest":
+                return {
+                    ...excerpt,
+                    highlights: await this.getUpdateHighlights(false),
+                };
+        }
+        throw "Not Ready";
+    }
+    async getUpdateHighlights(hot) {
+        const { data: str } = await this.client.get("https://api.comick.app/chapter", {
+            params: {
+                page: "1",
+                order: hot ? "hot" : "new",
+            },
+        });
+        const data = JSON.parse(str)?.map((v) => (0, utilts_1.MDComicToHighlight)(v.md_comics));
+        return data;
     }
 }
-exports.Store = Store;
+exports.Target = Target;
+// Homepage
+// Chapter Info is in :
+// https://api.comick.app/chapter?page=1&order=hot&limit=60 -> Hot Updates
+// https://api.comick.app/chapter?page=1&order=new&limit=30 -> New Updates
+// Core data  is in : __NEXT_DATA__;
 
-},{"./constants":1}],7:[function(require,module,exports){
+},{"./constants":1,"./utilts":3,"@suwatte/daisuke":6}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prepareURLSuffix = exports.parseChapterString = exports.dynamicSort = void 0;
-const dynamicSort = (property) => {
-    let sortOrder = 1;
-    if (property[0] === "-") {
-        sortOrder = -1;
-        property = property.substr(1);
+exports.MDComicToHighlight = exports.CKChapterToChapter = exports.MangaToContent = exports.MangaToHighlight = exports.parseSearchRequest = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const parseSearchRequest = (request) => {
+    const limit = 30;
+    const sort = request.sort ?? "view";
+    const page = request.page ?? 1;
+    const type = "comic";
+    const advanced = "1";
+    const tachiyomi = "true";
+    let queryString = "";
+    for (const filter of request.filters ?? []) {
+        switch (filter.id) {
+            case "content_type":
+                if (filter.included)
+                    queryString +=
+                        "&" + filter.included.map((v) => `country=${v}`).join("&");
+                break;
+            case "demographic":
+                if (filter.included)
+                    queryString +=
+                        "&" + filter.included.map((v) => `demographic=${v}`).join("&");
+                break;
+            case "genres":
+                if (filter.included)
+                    queryString +=
+                        "&" + filter.included.map((v) => `genres=${v}`).join("&");
+                if (filter.excluded)
+                    "&" + filter.excluded.map((v) => `excluded=${v}`).join("&");
+                break;
+            case "completed":
+                if (filter.bool)
+                    queryString += `&completed=true`;
+                break;
+            case "tags":
+                if (filter.included)
+                    queryString +=
+                        "&" + filter.included.map((v) => `tags=${v}`).join("&");
+        }
     }
-    return function (a, b) {
-        const result = a[property] > b[property] ? -1 : a[property] < b[property] ? 1 : 0;
-        return result * sortOrder;
+    return {
+        queryString,
+        core: {
+            limit,
+            sort,
+            page,
+            type,
+            advanced,
+            tachiyomi,
+            q: request.query ?? "",
+        },
     };
 };
-exports.dynamicSort = dynamicSort;
-const parseChapterString = (str) => {
-    if (!str)
-        throw new Error("Invalid Chapter String");
-    let volume = parseInt(str[0]);
-    if (Number.isNaN(volume))
-        throw new Error("Invalid Chapter Volume String");
-    volume -= 1;
-    if (volume == 0)
-        volume = undefined;
-    let number = parseInt(str.slice(1));
+exports.parseSearchRequest = parseSearchRequest;
+const MangaToHighlight = (manga, fetchGenres = false) => {
+    return {
+        contentId: manga.slug,
+        title: manga.title,
+        cover: manga.cover_url,
+        stats: {
+            follows: manga.user_follow_count,
+            rating: manga.rating ? Number(manga.rating) : undefined,
+            views: manga.view_count,
+        },
+    };
+};
+exports.MangaToHighlight = MangaToHighlight;
+const MangaToContent = (data, contentId) => {
+    const { comic, artists, authors, genres: ckGenres, matureContent } = data;
+    const { country, title, links, hentai, user_follow_count, follow_rank, comment_count, follow_count, desc: summary, year, bayesian_rating, content_rating, md_titles, mu_comics, status: ckStatus, cover_url: cover, translation_completed, } = comic;
+    const creators = artists
+        .map((v) => v.name)
+        .concat(authors.map((v) => v.name));
+    // Additional Titles
+    const additionalTitles = [];
+    if (md_titles) {
+        additionalTitles.push(...md_titles.map((v) => v.title));
+    }
+    // Adult Content
+    const adultContent = (matureContent ?? false) || (hentai ?? false);
+    const muGenres = mu_comics?.mu_comic_categories?.map((v) => v.mu_categories);
+    const properties = [];
+    // Base Genres
+    properties.push({
+        id: "genres",
+        label: "Genres",
+        tags: ckGenres.map((v) => ({
+            id: v.slug,
+            label: v.name,
+            adultContent: false,
+        })),
+    });
+    // MU Tags
+    if (muGenres) {
+        properties.push({
+            id: "tags",
+            label: "Tags",
+            tags: muGenres.map((v) => ({
+                id: v.slug,
+                label: v.title,
+                adultContent: false,
+            })),
+        });
+    }
+    // * Reading Mode
+    let recommendedReadingMode = daisuke_1.ReadingMode.PAGED_MANGA;
+    const longStripId = "long-strip";
+    const fullColorId = "full-color";
+    const mapped = ckGenres.map((v) => v.slug);
+    if (mapped.includes(longStripId)) {
+        recommendedReadingMode = daisuke_1.ReadingMode.VERTICAL;
+    }
+    else if (mapped.includes(fullColorId)) {
+        recommendedReadingMode = daisuke_1.ReadingMode.PAGED_COMIC;
+    }
+    const webUrl = `https://comick.app/comic/${contentId}`;
+    const status = convertStatus(ckStatus ?? 99);
+    const genTags = [];
+    if (year)
+        genTags.push(`Released ${year}`);
+    if (bayesian_rating)
+        genTags.push(`Bayesian Rating: ${bayesian_rating}`);
+    if (follow_rank)
+        genTags.push(`No. ${follow_rank} Most Followed Title`);
+    if (follow_count) {
+        let b = follow_count;
+        if (user_follow_count)
+            b += user_follow_count;
+        genTags.push(`${b} Follows`);
+    }
+    if (translation_completed)
+        genTags.push("Translation Completed");
+    if (comment_count)
+        genTags.push(`${comment_count} Onsite Comments`);
+    const nonInteractive = {
+        id: "general",
+        label: "Additional Info",
+        tags: genTags,
+    };
+    const trackerInfo = Array.isArray(links) ? undefined : links;
+    return {
+        contentId,
+        title,
+        adultContent,
+        cover,
+        additionalTitles,
+        creators,
+        recommendedReadingMode,
+        webUrl,
+        status,
+        summary,
+        properties,
+        trackerInfo,
+        nonInteractiveProperties: [nonInteractive],
+    };
+};
+exports.MangaToContent = MangaToContent;
+const convertStatus = (val) => {
+    switch (val) {
+        case 1:
+            return daisuke_1.Status.ONGOING;
+        case 2:
+            return daisuke_1.Status.COMPLETED;
+        case 3:
+            return daisuke_1.Status.CANCELLED;
+        case 4:
+            return daisuke_1.Status.HIATUS;
+        default:
+            return daisuke_1.Status.UNKNOWN;
+    }
+};
+const CKChapterToChapter = (data) => {
+    const { title, chap, vol, slug, lang, created_at, hid: chapterId, group_name, } = data;
+    let number = Number(chap);
     if (Number.isNaN(number)) {
-        throw new Error("Invalid Chapter Number String");
+        number = 0.0;
     }
-    number = number / 10;
-    return { volume, number };
+    return {
+        date: new Date(created_at),
+        chapterId,
+        number,
+        language: lang,
+        ...(group_name && {
+            providers: group_name.map((v) => ({ id: v, name: v, links: [] })),
+        }),
+        ...(vol && Number(vol) && { volume: Number(vol) }),
+        ...(title && { title }),
+    };
 };
-exports.parseChapterString = parseChapterString;
-const prepareURLSuffix = (str) => {
-    const info = (0, exports.parseChapterString)(str);
-    const number = info.number;
-    const volume = (info.volume ?? 0) + 1;
-    let suffix = `-chapter-${number}`;
-    if (volume != 1) {
-        suffix += `-index-${volume}`;
-    }
-    suffix += ".html";
-    return suffix;
+exports.CKChapterToChapter = CKChapterToChapter;
+const MDComicToHighlight = (data) => {
+    return {
+        contentId: data.slug,
+        title: data.title,
+        cover: `https://meo.comick.pictures/${data.md_covers?.[0].b2key ?? ""}`,
+    };
 };
-exports.prepareURLSuffix = prepareURLSuffix;
+exports.MDComicToHighlight = MDComicToHighlight;
 
-},{}],8:[function(require,module,exports){
+},{"@suwatte/daisuke":6}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Source = void 0;
@@ -815,7 +681,7 @@ class Source {
 }
 exports.Source = Source;
 
-},{}],9:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -834,7 +700,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./Source"), exports);
 
-},{"./Source":8}],10:[function(require,module,exports){
+},{"./Source":4}],6:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -855,7 +721,7 @@ __exportStar(require("./classes"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./validation"), exports);
 
-},{"./classes":9,"./types":28,"./validation":32}],11:[function(require,module,exports){
+},{"./classes":5,"./types":24,"./validation":28}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZChapter = void 0;
@@ -911,7 +777,7 @@ exports.ZChapter = zod_1.z.object({
     providers: zod_1.z.array(Provider_1.ZProvider).optional(),
 });
 
-},{"../content/Provider":19,"./ChapterData":12,"zod":40}],12:[function(require,module,exports){
+},{"../content/Provider":15,"./ChapterData":8,"zod":36}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZChapterData = exports.ZChapterPage = void 0;
@@ -947,7 +813,7 @@ exports.ZChapterData = zod_1.z.object({
     pages: zod_1.z.array(exports.ZChapterPage).optional(),
 });
 
-},{"zod":40}],13:[function(require,module,exports){
+},{"zod":36}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZExploreCollection = exports.ZHighlightCollection = exports.ZCollectionExcerpt = exports.CollectionStyle = void 0;
@@ -1005,7 +871,7 @@ exports.ZExploreCollection = zod_1.z.object({
     highlights: zod_1.z.array(Highlight_1.ZHighlight),
 });
 
-},{"./Highlight":16,"./SearchRequest":20,"zod":40}],14:[function(require,module,exports){
+},{"./Highlight":12,"./SearchRequest":16,"zod":36}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZContent = exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.Status = void 0;
@@ -1126,7 +992,7 @@ const ZBaseContent = zod_1.z.object({
 });
 exports.ZContent = Highlight_1.ZBaseInfo.merge(ZBaseContent);
 
-},{"./Chapter":11,"./Collection":13,"./Highlight":16,"./Property":18,"./TrackerInfo":21,"zod":40}],15:[function(require,module,exports){
+},{"./Chapter":7,"./Collection":9,"./Highlight":12,"./Property":14,"./TrackerInfo":17,"zod":36}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZPopulatedFilter = exports.ZFilter = exports.FilterType = void 0;
@@ -1191,7 +1057,7 @@ exports.ZPopulatedFilter = zod_1.z.object({
     excluded: zod_1.z.array(zod_1.z.string()).optional(),
 });
 
-},{"./Property":18,"zod":40}],16:[function(require,module,exports){
+},{"./Property":14,"zod":36}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZHighlight = exports.ZBaseInfo = void 0;
@@ -1249,7 +1115,7 @@ exports.ZHighlight = exports.ZBaseInfo.merge(zod_1.z.object({
     info: zod_1.z.record(zod_1.z.string()).optional(),
 }));
 
-},{"zod":40}],17:[function(require,module,exports){
+},{"zod":36}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZPagedResult = void 0;
@@ -1276,7 +1142,7 @@ exports.ZPagedResult = zod_1.z.object({
     totalResultCount: zod_1.z.number().int().nonnegative().optional(),
 });
 
-},{"./Highlight":16,"zod":40}],18:[function(require,module,exports){
+},{"./Highlight":12,"zod":36}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZProperty = exports.ZExploreTag = exports.ZTag = exports.ZNonInteractiveProperty = exports.ZBaseInteractable = void 0;
@@ -1320,7 +1186,7 @@ exports.ZProperty = exports.ZBaseInteractable.extend({
     tags: zod_1.z.array(exports.ZTag),
 });
 
-},{"zod":40}],19:[function(require,module,exports){
+},{"zod":36}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZProvider = exports.ZProviderLink = exports.ProviderLinkType = void 0;
@@ -1359,7 +1225,7 @@ exports.ZProvider = zod_1.z.object({
     links: zod_1.z.array(exports.ZProviderLink).optional(),
 });
 
-},{"zod":40}],20:[function(require,module,exports){
+},{"zod":36}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZSearchRequest = void 0;
@@ -1381,7 +1247,7 @@ exports.ZSearchRequest = zod_1.z.object({
     filters: zod_1.z.array(Filter_1.ZPopulatedFilter).optional(),
 });
 
-},{"./Filter":15,"zod":40}],21:[function(require,module,exports){
+},{"./Filter":11,"zod":36}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZTrackerInfo = void 0;
@@ -1405,7 +1271,7 @@ exports.ZTrackerInfo = zod_1.z.object({
     mu: zod_1.z.string().optional(),
 });
 
-},{"zod":40}],22:[function(require,module,exports){
+},{"zod":36}],18:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1434,7 +1300,7 @@ __exportStar(require("./Collection"), exports);
 __exportStar(require("./Provider"), exports);
 __exportStar(require("./Filter"), exports);
 
-},{"./Chapter":11,"./ChapterData":12,"./Collection":13,"./Content":14,"./Filter":15,"./Highlight":16,"./PagedResult":17,"./Property":18,"./Provider":19,"./SearchRequest":20,"./TrackerInfo":21}],23:[function(require,module,exports){
+},{"./Chapter":7,"./ChapterData":8,"./Collection":9,"./Content":10,"./Filter":11,"./Highlight":12,"./PagedResult":13,"./Property":14,"./Provider":15,"./SearchRequest":16,"./TrackerInfo":17}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZActionGroup = exports.ZAction = void 0;
@@ -1472,7 +1338,7 @@ exports.ZActionGroup = Preferences_1.ZUIGroup.extend({
     children: zod_1.z.array(exports.ZAction),
 });
 
-},{"../core/Preferences":25,"zod":40}],24:[function(require,module,exports){
+},{"../core/Preferences":21,"zod":36}],20:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZDownSyncedContent = exports.ZUpSyncedContent = exports.ZUser = exports.AuthMethod = void 0;
@@ -1533,7 +1399,7 @@ exports.ZDownSyncedContent = zod_1.z.object({
     readingFlag: zod_1.z.nativeEnum(Content_1.ReadingFlag).optional(),
 });
 
-},{"../content/Content":14,"zod":40}],25:[function(require,module,exports){
+},{"../content/Content":10,"zod":36}],21:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZPreferenceGroup = exports.ZUIGroup = exports.ZPreference = exports.ZSelectionOption = exports.PreferenceType = void 0;
@@ -1639,11 +1505,11 @@ exports.ZPreferenceGroup = exports.ZUIGroup.extend({
     children: zod_1.z.array(exports.ZPreference),
 });
 
-},{"zod":40}],26:[function(require,module,exports){
+},{"zod":36}],22:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],27:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1665,7 +1531,7 @@ __exportStar(require("./Preferences"), exports);
 __exportStar(require("./RunnerInfo"), exports);
 __exportStar(require("./Actions"), exports);
 
-},{"./Actions":23,"./Authentication":24,"./Preferences":25,"./RunnerInfo":26}],28:[function(require,module,exports){
+},{"./Actions":19,"./Authentication":20,"./Preferences":21,"./RunnerInfo":22}],24:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1686,11 +1552,11 @@ __exportStar(require("./core"), exports);
 __exportStar(require("./content"), exports);
 __exportStar(require("./networking"), exports);
 
-},{"./content":22,"./core":27,"./networking":31}],29:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],30:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],31:[function(require,module,exports){
+},{"./content":18,"./core":23,"./networking":27}],25:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22}],26:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22}],27:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1710,7 +1576,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./NetworkRequest"), exports);
 __exportStar(require("./NetworkResponse"), exports);
 
-},{"./NetworkRequest":29,"./NetworkResponse":30}],32:[function(require,module,exports){
+},{"./NetworkRequest":25,"./NetworkResponse":26}],28:[function(require,module,exports){
 "use strict";
 /**
  * These help with schema validation checks in tests
@@ -1816,7 +1682,7 @@ exports.Validate = {
     array,
 };
 
-},{"../types":28,"zod":40}],33:[function(require,module,exports){
+},{"../types":24,"zod":36}],29:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZodError = exports.quotelessJson = exports.ZodIssueCode = void 0;
@@ -1950,7 +1816,7 @@ ZodError.create = (issues) => {
     return error;
 };
 
-},{"./helpers/util":39}],34:[function(require,module,exports){
+},{"./helpers/util":35}],30:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1969,7 +1835,7 @@ function getErrorMap() {
 }
 exports.getErrorMap = getErrorMap;
 
-},{"./locales/en":41}],35:[function(require,module,exports){
+},{"./locales/en":37}],31:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1989,7 +1855,7 @@ __exportStar(require("./helpers/util"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./ZodError"), exports);
 
-},{"./ZodError":33,"./errors":34,"./helpers/parseUtil":37,"./helpers/typeAliases":38,"./helpers/util":39,"./types":42}],36:[function(require,module,exports){
+},{"./ZodError":29,"./errors":30,"./helpers/parseUtil":33,"./helpers/typeAliases":34,"./helpers/util":35,"./types":38}],32:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorUtil = void 0;
@@ -1999,7 +1865,7 @@ var errorUtil;
     errorUtil.toString = (message) => typeof message === "string" ? message : message === null || message === void 0 ? void 0 : message.message;
 })(errorUtil = exports.errorUtil || (exports.errorUtil = {}));
 
-},{}],37:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -2115,9 +1981,9 @@ exports.isValid = isValid;
 const isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
 exports.isAsync = isAsync;
 
-},{"../errors":34,"../locales/en":41}],38:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],39:[function(require,module,exports){
+},{"../errors":30,"../locales/en":37}],34:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22}],35:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getParsedType = exports.ZodParsedType = exports.util = void 0;
@@ -2252,7 +2118,7 @@ const getParsedType = (data) => {
 };
 exports.getParsedType = getParsedType;
 
-},{}],40:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2283,7 +2149,7 @@ exports.z = mod;
 __exportStar(require("./external"), exports);
 exports.default = mod;
 
-},{"./external":35}],41:[function(require,module,exports){
+},{"./external":31}],37:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("../helpers/util");
@@ -2402,7 +2268,7 @@ const errorMap = (issue, _ctx) => {
 };
 exports.default = errorMap;
 
-},{"../ZodError":33,"../helpers/util":39}],42:[function(require,module,exports){
+},{"../ZodError":29,"../helpers/util":35}],38:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.date = exports.boolean = exports.bigint = exports.array = exports.any = exports.coerce = exports.ZodFirstPartyTypeKind = exports.late = exports.ZodSchema = exports.Schema = exports.custom = exports.ZodPipeline = exports.ZodBranded = exports.BRAND = exports.ZodNaN = exports.ZodCatch = exports.ZodDefault = exports.ZodNullable = exports.ZodOptional = exports.ZodTransformer = exports.ZodEffects = exports.ZodPromise = exports.ZodNativeEnum = exports.ZodEnum = exports.ZodLiteral = exports.ZodLazy = exports.ZodFunction = exports.ZodSet = exports.ZodMap = exports.ZodRecord = exports.ZodTuple = exports.ZodIntersection = exports.ZodDiscriminatedUnion = exports.ZodUnion = exports.ZodObject = exports.objectUtil = exports.ZodArray = exports.ZodVoid = exports.ZodNever = exports.ZodUnknown = exports.ZodAny = exports.ZodNull = exports.ZodUndefined = exports.ZodSymbol = exports.ZodDate = exports.ZodBoolean = exports.ZodBigInt = exports.ZodNumber = exports.ZodString = exports.ZodType = void 0;
@@ -5548,5 +5414,5 @@ exports.coerce = {
 };
 exports.NEVER = parseUtil_1.INVALID;
 
-},{"./ZodError":33,"./errors":34,"./helpers/errorUtil":36,"./helpers/parseUtil":37,"./helpers/util":39}]},{},[3])(3)
+},{"./ZodError":29,"./errors":30,"./helpers/errorUtil":32,"./helpers/parseUtil":33,"./helpers/util":35}]},{},[2])(2)
 });

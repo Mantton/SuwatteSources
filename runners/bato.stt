@@ -3,387 +3,387 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllGenreTags = exports.SORTERS = exports.LANG_TAGS = exports.ORIGIN_TAGS = exports.STATUS_TAGS = exports.GENERIC_TAGS = exports.ADULT_TAGS = exports.DEMOGRAPHIC_TAGS = exports.CONTENT_TYPE_TAGS = void 0;
 exports.CONTENT_TYPE_TAGS = [
-    { id: "genre:artbook", label: "Artbook", adultContent: false },
-    { id: "genre:cartoon", label: "Cartoon", adultContent: false },
-    { id: "genre:comic", label: "Comic", adultContent: false },
-    { id: "genre:doujinshi", label: "Doujinshi", adultContent: false },
-    { id: "genre:imageset", label: "Imageset", adultContent: false },
-    { id: "genre:manga", label: "Manga", adultContent: false },
-    { id: "genre:manhua", label: "Manhua", adultContent: false },
-    { id: "genre:manhwa", label: "Manhwa", adultContent: false },
-    { id: "genre:webtoon", label: "Webtoon", adultContent: false },
-    { id: "genre:western", label: "Western", adultContent: false },
+    { id: "artbook", label: "Artbook", adultContent: false },
+    { id: "cartoon", label: "Cartoon", adultContent: false },
+    { id: "comic", label: "Comic", adultContent: false },
+    { id: "doujinshi", label: "Doujinshi", adultContent: false },
+    { id: "imageset", label: "Imageset", adultContent: false },
+    { id: "manga", label: "Manga", adultContent: false },
+    { id: "manhua", label: "Manhua", adultContent: false },
+    { id: "manhwa", label: "Manhwa", adultContent: false },
+    { id: "webtoon", label: "Webtoon", adultContent: false },
+    { id: "western", label: "Western", adultContent: false },
 ];
 exports.DEMOGRAPHIC_TAGS = [
-    { id: "genre:shoujo", label: "Shoujo(G)", adultContent: false },
-    { id: "genre:shounen", label: "Shounen(B)", adultContent: false },
-    { id: "genre:josei", label: "Josei(W)", adultContent: false },
-    { id: "genre:seinen", label: "Seinen(M)", adultContent: false },
-    { id: "genre:yuri", label: "Yuri(GL)", adultContent: false },
-    { id: "genre:yaoi", label: "Yaoi(BL)", adultContent: false },
-    { id: "genre:futa", label: "Futa(WL)", adultContent: true },
-    { id: "genre:bara", label: "Bara(ML)", adultContent: true },
+    { id: "shoujo", label: "Shoujo(G)", adultContent: false },
+    { id: "shounen", label: "Shounen(B)", adultContent: false },
+    { id: "josei", label: "Josei(W)", adultContent: false },
+    { id: "seinen", label: "Seinen(M)", adultContent: false },
+    { id: "yuri", label: "Yuri(GL)", adultContent: false },
+    { id: "yaoi", label: "Yaoi(BL)", adultContent: false },
+    { id: "futa", label: "Futa(WL)", adultContent: true },
+    { id: "bara", label: "Bara(ML)", adultContent: true },
 ];
 exports.ADULT_TAGS = [
-    { id: "genre:gore", label: "Gore", adultContent: true },
-    { id: "genre:bloody", label: "Bloody", adultContent: true },
-    { id: "genre:violence", label: "Violence", adultContent: true },
-    { id: "genre:ecchi", label: "Ecchi", adultContent: true },
-    { id: "genre:adult", label: "Adult", adultContent: true },
-    { id: "genre:mature", label: "Mature", adultContent: true },
-    { id: "genre:smut", label: "Smut", adultContent: true },
-    { id: "genre:hentai", label: "Hentai", adultContent: true },
+    { id: "gore", label: "Gore", adultContent: true },
+    { id: "bloody", label: "Bloody", adultContent: true },
+    { id: "violence", label: "Violence", adultContent: true },
+    { id: "ecchi", label: "Ecchi", adultContent: true },
+    { id: "adult", label: "Adult", adultContent: true },
+    { id: "mature", label: "Mature", adultContent: true },
+    { id: "smut", label: "Smut", adultContent: true },
+    { id: "hentai", label: "Hentai", adultContent: true },
 ];
 exports.GENERIC_TAGS = [
-    { id: "genre:_4_koma", label: "4-Koma", adultContent: false },
-    { id: "genre:action", label: "Action", adultContent: false },
-    { id: "genre:adaptation", label: "Adaptation", adultContent: false },
-    { id: "genre:adventure", label: "Adventure", adultContent: false },
-    { id: "genre:age_gap", label: "Age Gap", adultContent: false },
-    { id: "genre:aliens", label: "Aliens", adultContent: false },
-    { id: "genre:animals", label: "Animals", adultContent: false },
-    { id: "genre:anthology", label: "Anthology", adultContent: false },
-    { id: "genre:beasts", label: "Beasts", adultContent: false },
-    { id: "genre:bodyswap", label: "Bodyswap", adultContent: false },
-    { id: "genre:cars", label: "Cars", adultContent: false },
+    { id: "_4_koma", label: "4-Koma", adultContent: false },
+    { id: "action", label: "Action", adultContent: false },
+    { id: "adaptation", label: "Adaptation", adultContent: false },
+    { id: "adventure", label: "Adventure", adultContent: false },
+    { id: "age_gap", label: "Age Gap", adultContent: false },
+    { id: "aliens", label: "Aliens", adultContent: false },
+    { id: "animals", label: "Animals", adultContent: false },
+    { id: "anthology", label: "Anthology", adultContent: false },
+    { id: "beasts", label: "Beasts", adultContent: false },
+    { id: "bodyswap", label: "Bodyswap", adultContent: false },
+    { id: "cars", label: "Cars", adultContent: false },
     {
-        id: "genre:cheating_infidelity",
+        id: "cheating_infidelity",
         label: "Cheating/Infidelity",
         adultContent: false,
     },
     {
-        id: "genre:childhood_friends",
+        id: "childhood_friends",
         label: "Childhood Friends",
         adultContent: false,
     },
-    { id: "genre:college_life", label: "College life ", adultContent: false },
-    { id: "genre:comedy", label: "Comedy", adultContent: false },
+    { id: "college_life", label: "College life ", adultContent: false },
+    { id: "comedy", label: "Comedy", adultContent: false },
     {
-        id: "genre:contest_winning",
+        id: "contest_winning",
         label: "Contest winning",
         adultContent: false,
     },
-    { id: "genre:cooking", label: "Cooking", adultContent: false },
-    { id: "genre:crime", label: "Crime", adultContent: false },
-    { id: "genre:crossdressing", label: "Crossdressing", adultContent: false },
-    { id: "genre:delinquents", label: "Delinquents", adultContent: false },
-    { id: "genre:dementia", label: "Dementia", adultContent: false },
-    { id: "genre:demons", label: "Demons", adultContent: false },
-    { id: "genre:drama", label: "Drama", adultContent: false },
-    { id: "genre:dungeons", label: "Dungeons", adultContent: false },
+    { id: "cooking", label: "Cooking", adultContent: false },
+    { id: "crime", label: "Crime", adultContent: false },
+    { id: "crossdressing", label: "Crossdressing", adultContent: false },
+    { id: "delinquents", label: "Delinquents", adultContent: false },
+    { id: "dementia", label: "Dementia", adultContent: false },
+    { id: "demons", label: "Demons", adultContent: false },
+    { id: "drama", label: "Drama", adultContent: false },
+    { id: "dungeons", label: "Dungeons", adultContent: false },
     {
-        id: "genre:emperor_daughte",
+        id: "emperor_daughte",
         label: "Emperor's daughte",
         adultContent: false,
     },
-    { id: "genre:fantasy", label: "Fantasy", adultContent: false },
-    { id: "genre:fan_colored", label: "Fan-Colored", adultContent: false },
-    { id: "genre:fetish", label: "Fetish", adultContent: false },
-    { id: "genre:full_color", label: "Full Color", adultContent: false },
-    { id: "genre:game", label: "Game", adultContent: false },
-    { id: "genre:gender_bender", label: "Gender Bender", adultContent: false },
-    { id: "genre:genderswap", label: "Genderswap", adultContent: false },
-    { id: "genre:ghosts", label: "Ghosts", adultContent: false },
-    { id: "genre:gyaru", label: "Gyaru", adultContent: false },
-    { id: "genre:harem", label: "Harem", adultContent: false },
-    { id: "genre:harlequin", label: "Harlequin", adultContent: false },
-    { id: "genre:historical", label: "Historical", adultContent: false },
-    { id: "genre:horror", label: "Horror", adultContent: false },
-    { id: "genre:incest", label: "Incest", adultContent: false },
-    { id: "genre:isekai", label: "Isekai", adultContent: false },
-    { id: "genre:kids", label: "Kids", adultContent: false },
-    { id: "genre:loli", label: "Loli", adultContent: false },
-    { id: "genre:magic", label: "Magic", adultContent: false },
-    { id: "genre:magical_girls", label: "Magical Girls", adultContent: false },
-    { id: "genre:martial_arts", label: "Martial Arts", adultContent: false },
-    { id: "genre:mecha", label: "Mecha", adultContent: false },
-    { id: "genre:medical", label: "Medical", adultContent: false },
-    { id: "genre:military", label: "Military", adultContent: false },
-    { id: "genre:monster_girls", label: "Monster Girls", adultContent: false },
-    { id: "genre:monsters", label: "Monsters", adultContent: false },
-    { id: "genre:music", label: "Music", adultContent: false },
-    { id: "genre:mystery", label: "Mystery", adultContent: false },
-    { id: "genre:netorare", label: "Netorare/NTR", adultContent: false },
-    { id: "genre:ninja", label: "Ninja", adultContent: false },
-    { id: "genre:office_workers", label: "Office Workers", adultContent: false },
-    { id: "genre:omegaverse", label: "Omegaverse", adultContent: false },
-    { id: "genre:oneshot", label: "Oneshot", adultContent: false },
-    { id: "genre:parody", label: "parody", adultContent: false },
-    { id: "genre:philosophical", label: "Philosophical", adultContent: false },
-    { id: "genre:police", label: "Police", adultContent: false },
+    { id: "fantasy", label: "Fantasy", adultContent: false },
+    { id: "fan_colored", label: "Fan-Colored", adultContent: false },
+    { id: "fetish", label: "Fetish", adultContent: false },
+    { id: "full_color", label: "Full Color", adultContent: false },
+    { id: "game", label: "Game", adultContent: false },
+    { id: "gender_bender", label: "Gender Bender", adultContent: false },
+    { id: "genderswap", label: "Genderswap", adultContent: false },
+    { id: "ghosts", label: "Ghosts", adultContent: false },
+    { id: "gyaru", label: "Gyaru", adultContent: false },
+    { id: "harem", label: "Harem", adultContent: false },
+    { id: "harlequin", label: "Harlequin", adultContent: false },
+    { id: "historical", label: "Historical", adultContent: false },
+    { id: "horror", label: "Horror", adultContent: false },
+    { id: "incest", label: "Incest", adultContent: false },
+    { id: "isekai", label: "Isekai", adultContent: false },
+    { id: "kids", label: "Kids", adultContent: false },
+    { id: "loli", label: "Loli", adultContent: false },
+    { id: "magic", label: "Magic", adultContent: false },
+    { id: "magical_girls", label: "Magical Girls", adultContent: false },
+    { id: "martial_arts", label: "Martial Arts", adultContent: false },
+    { id: "mecha", label: "Mecha", adultContent: false },
+    { id: "medical", label: "Medical", adultContent: false },
+    { id: "military", label: "Military", adultContent: false },
+    { id: "monster_girls", label: "Monster Girls", adultContent: false },
+    { id: "monsters", label: "Monsters", adultContent: false },
+    { id: "music", label: "Music", adultContent: false },
+    { id: "mystery", label: "Mystery", adultContent: false },
+    { id: "netorare", label: "Netorare/NTR", adultContent: false },
+    { id: "ninja", label: "Ninja", adultContent: false },
+    { id: "office_workers", label: "Office Workers", adultContent: false },
+    { id: "omegaverse", label: "Omegaverse", adultContent: false },
+    { id: "oneshot", label: "Oneshot", adultContent: false },
+    { id: "parody", label: "parody", adultContent: false },
+    { id: "philosophical", label: "Philosophical", adultContent: false },
+    { id: "police", label: "Police", adultContent: false },
     {
-        id: "genre:post_apocalyptic",
+        id: "post_apocalyptic",
         label: "Post-Apocalyptic",
         adultContent: false,
     },
-    { id: "genre:psychological", label: "Psychological", adultContent: false },
-    { id: "genre:regression", label: "Regression", adultContent: false },
-    { id: "genre:reincarnation", label: "Reincarnation", adultContent: false },
-    { id: "genre:reverse_harem", label: "Reverse Harem", adultContent: false },
-    { id: "genre:revenge", label: "Revenge", adultContent: false },
-    { id: "genre:reverse_isekai", label: "Reverse Isekai ", adultContent: false },
-    { id: "genre:romance", label: "Romance", adultContent: false },
-    { id: "genre:royal_family", label: "Royal family", adultContent: false },
-    { id: "genre:royalty", label: "Royalty", adultContent: false },
-    { id: "genre:samurai", label: "Samurai", adultContent: false },
-    { id: "genre:school_life", label: "School Life", adultContent: false },
-    { id: "genre:sci_fi", label: "Sci-Fi", adultContent: false },
-    { id: "genre:shota", label: "Shota", adultContent: false },
-    { id: "genre:shoujo_ai", label: "Shoujo ai", adultContent: false },
-    { id: "genre:shounen_ai", label: "Shounen ai", adultContent: false },
-    { id: "genre:showbiz", label: "Showbiz", adultContent: false },
-    { id: "genre:slice_of_life", label: "Slice of Life", adultContent: false },
-    { id: "genre:sm_bdsm", label: "SM/BDSM/SUB-DOM", adultContent: false },
-    { id: "genre:space", label: "Space", adultContent: false },
-    { id: "genre:sports", label: "Sports", adultContent: false },
-    { id: "genre:super_power", label: "Super Power", adultContent: false },
-    { id: "genre:superhero", label: "Superhero", adultContent: false },
-    { id: "genre:supernatural", label: "Supernatural", adultContent: false },
-    { id: "genre:survival", label: "Survival", adultContent: false },
-    { id: "genre:thriller", label: "Thriller", adultContent: false },
-    { id: "genre:time_travel", label: "Time Travel", adultContent: false },
-    { id: "genre:tower_climbing", label: "Tower Climbing", adultContent: false },
+    { id: "psychological", label: "Psychological", adultContent: false },
+    { id: "regression", label: "Regression", adultContent: false },
+    { id: "reincarnation", label: "Reincarnation", adultContent: false },
+    { id: "reverse_harem", label: "Reverse Harem", adultContent: false },
+    { id: "revenge", label: "Revenge", adultContent: false },
+    { id: "reverse_isekai", label: "Reverse Isekai ", adultContent: false },
+    { id: "romance", label: "Romance", adultContent: false },
+    { id: "royal_family", label: "Royal family", adultContent: false },
+    { id: "royalty", label: "Royalty", adultContent: false },
+    { id: "samurai", label: "Samurai", adultContent: false },
+    { id: "school_life", label: "School Life", adultContent: false },
+    { id: "sci_fi", label: "Sci-Fi", adultContent: false },
+    { id: "shota", label: "Shota", adultContent: false },
+    { id: "shoujo_ai", label: "Shoujo ai", adultContent: false },
+    { id: "shounen_ai", label: "Shounen ai", adultContent: false },
+    { id: "showbiz", label: "Showbiz", adultContent: false },
+    { id: "slice_of_life", label: "Slice of Life", adultContent: false },
+    { id: "sm_bdsm", label: "SM/BDSM/SUB-DOM", adultContent: false },
+    { id: "space", label: "Space", adultContent: false },
+    { id: "sports", label: "Sports", adultContent: false },
+    { id: "super_power", label: "Super Power", adultContent: false },
+    { id: "superhero", label: "Superhero", adultContent: false },
+    { id: "supernatural", label: "Supernatural", adultContent: false },
+    { id: "survival", label: "Survival", adultContent: false },
+    { id: "thriller", label: "Thriller", adultContent: false },
+    { id: "time_travel", label: "Time Travel", adultContent: false },
+    { id: "tower_climbing", label: "Tower Climbing", adultContent: false },
     {
-        id: "genre:traditional_games",
+        id: "traditional_games",
         label: "Traditional Games",
         adultContent: false,
     },
-    { id: "genre:tragedy", label: "Tragedy", adultContent: false },
-    { id: "genre:transmigration", label: "Transmigration", adultContent: false },
-    { id: "genre:vampires", label: "Vampires", adultContent: false },
-    { id: "genre:villainess", label: "Villainess", adultContent: false },
-    { id: "genre:video_games", label: "Video Games", adultContent: false },
+    { id: "tragedy", label: "Tragedy", adultContent: false },
+    { id: "transmigration", label: "Transmigration", adultContent: false },
+    { id: "vampires", label: "Vampires", adultContent: false },
+    { id: "villainess", label: "Villainess", adultContent: false },
+    { id: "video_games", label: "Video Games", adultContent: false },
     {
-        id: "genre:virtual_reality",
+        id: "virtual_reality",
         label: "Virtual Reality",
         adultContent: false,
     },
-    { id: "genre:wuxia", label: "Wuxia", adultContent: false },
-    { id: "genre:xianxia", label: "Xianxia", adultContent: false },
-    { id: "genre:xuanhuan", label: "Xuanhuan", adultContent: false },
-    { id: "genre:yakuzas", label: "Yakuzas", adultContent: false },
-    { id: "genre:zombies", label: "Zombies", adultContent: false },
+    { id: "wuxia", label: "Wuxia", adultContent: false },
+    { id: "xianxia", label: "Xianxia", adultContent: false },
+    { id: "xuanhuan", label: "Xuanhuan", adultContent: false },
+    { id: "yakuzas", label: "Yakuzas", adultContent: false },
+    { id: "zombies", label: "Zombies", adultContent: false },
 ];
 exports.STATUS_TAGS = [
-    { id: "status:pending", label: "Pending", adultContent: false },
-    { id: "status:ongoing", label: "Ongoing", adultContent: false },
-    { id: "status:completed", label: "Completed", adultContent: false },
-    { id: "status:hiatus", label: "Hiatus", adultContent: false },
-    { id: "status:cancelled", label: "Cancelled", adultContent: false },
+    { id: "pending", label: "Pending", adultContent: false },
+    { id: "ongoing", label: "Ongoing", adultContent: false },
+    { id: "completed", label: "Completed", adultContent: false },
+    { id: "hiatus", label: "Hiatus", adultContent: false },
+    { id: "cancelled", label: "Cancelled", adultContent: false },
 ];
 exports.ORIGIN_TAGS = [
-    { id: "origin:zh", label: "Chinese", adultContent: false },
-    { id: "origin:en", label: "English", adultContent: false },
-    { id: "origin:ja", label: "Japanese", adultContent: false },
-    { id: "origin:ko", label: "Korean", adultContent: false },
-    { id: "origin:af", label: "Afrikaans", adultContent: false },
-    { id: "origin:sq", label: "Albanian", adultContent: false },
-    { id: "origin:am", label: "Amharic", adultContent: false },
-    { id: "origin:ar", label: "Arabic", adultContent: false },
-    { id: "origin:hy", label: "Armenian", adultContent: false },
-    { id: "origin:az", label: "Azerbaijani", adultContent: false },
-    { id: "origin:be", label: "Belarusian", adultContent: false },
-    { id: "origin:bn", label: "Bengali", adultContent: false },
-    { id: "origin:bs", label: "Bosnian", adultContent: false },
-    { id: "origin:bg", label: "Bulgarian", adultContent: false },
-    { id: "origin:my", label: "Burmese", adultContent: false },
-    { id: "origin:km", label: "Cambodian", adultContent: false },
-    { id: "origin:ca", label: "Catalan", adultContent: false },
-    { id: "origin:ceb", label: "Cebuano", adultContent: false },
-    { id: "origin:zh_hk", label: "Chinese (Cantonese)", adultContent: false },
-    { id: "origin:zh_tw", label: "Chinese (Traditional)", adultContent: false },
-    { id: "origin:hr", label: "Croatian", adultContent: false },
-    { id: "origin:cs", label: "Czech", adultContent: false },
-    { id: "origin:da", label: "Danish", adultContent: false },
-    { id: "origin:nl", label: "Dutch", adultContent: false },
-    { id: "origin:en_us", label: "English (United States)", adultContent: false },
-    { id: "origin:eo", label: "Esperanto", adultContent: false },
-    { id: "origin:et", label: "Estonian", adultContent: false },
-    { id: "origin:fo", label: "Faroese", adultContent: false },
-    { id: "origin:fil", label: "Filipino", adultContent: false },
-    { id: "origin:fi", label: "Finnish", adultContent: false },
-    { id: "origin:fr", label: "French", adultContent: false },
-    { id: "origin:ka", label: "Georgian", adultContent: false },
-    { id: "origin:de", label: "German", adultContent: false },
-    { id: "origin:el", label: "Greek", adultContent: false },
-    { id: "origin:gn", label: "Guarani", adultContent: false },
-    { id: "origin:gu", label: "Gujarati", adultContent: false },
-    { id: "origin:ht", label: "Haitian Creole", adultContent: false },
-    { id: "origin:ha", label: "Hausa", adultContent: false },
-    { id: "origin:he", label: "Hebrew", adultContent: false },
-    { id: "origin:hi", label: "Hindi", adultContent: false },
-    { id: "origin:hu", label: "Hungarian", adultContent: false },
-    { id: "origin:is", label: "Icelandic", adultContent: false },
-    { id: "origin:ig", label: "Igbo", adultContent: false },
-    { id: "origin:id", label: "Indonesian", adultContent: false },
-    { id: "origin:ga", label: "Irish", adultContent: false },
-    { id: "origin:it", label: "Italian", adultContent: false },
-    { id: "origin:jv", label: "Javanese", adultContent: false },
-    { id: "origin:kn", label: "Kannada", adultContent: false },
-    { id: "origin:kk", label: "Kazakh", adultContent: false },
-    { id: "origin:ku", label: "Kurdish", adultContent: false },
-    { id: "origin:ky", label: "Kyrgyz", adultContent: false },
-    { id: "origin:lo", label: "Laothian", adultContent: false },
-    { id: "origin:lv", label: "Latvian", adultContent: false },
-    { id: "origin:lt", label: "Lithuanian", adultContent: false },
-    { id: "origin:lb", label: "Luxembourgish", adultContent: false },
-    { id: "origin:mk", label: "Macedonian", adultContent: false },
-    { id: "origin:mg", label: "Malagasy", adultContent: false },
-    { id: "origin:ms", label: "Malay", adultContent: false },
-    { id: "origin:ml", label: "Malayalam", adultContent: false },
-    { id: "origin:mt", label: "Maltese", adultContent: false },
-    { id: "origin:mi", label: "Maori", adultContent: false },
-    { id: "origin:mr", label: "Marathi", adultContent: false },
-    { id: "origin:mo", label: "Moldavian", adultContent: false },
-    { id: "origin:mn", label: "Mongolian", adultContent: false },
-    { id: "origin:ne", label: "Nepali", adultContent: false },
-    { id: "origin:no", label: "Norwegian", adultContent: false },
-    { id: "origin:ny", label: "Nyanja", adultContent: false },
-    { id: "origin:ps", label: "Pashto", adultContent: false },
-    { id: "origin:fa", label: "Persian", adultContent: false },
-    { id: "origin:pl", label: "Polish", adultContent: false },
-    { id: "origin:pt", label: "Portuguese", adultContent: false },
-    { id: "origin:pt_br", label: "Portuguese (Brazil)", adultContent: false },
-    { id: "origin:ro", label: "Romanian", adultContent: false },
-    { id: "origin:rm", label: "Romansh", adultContent: false },
-    { id: "origin:ru", label: "Russian", adultContent: false },
-    { id: "origin:sm", label: "Samoan", adultContent: false },
-    { id: "origin:sr", label: "Serbian", adultContent: false },
-    { id: "origin:sh", label: "Serbo-Croatian", adultContent: false },
-    { id: "origin:st", label: "Sesotho", adultContent: false },
-    { id: "origin:sn", label: "Shona", adultContent: false },
-    { id: "origin:sd", label: "Sindhi", adultContent: false },
-    { id: "origin:si", label: "Sinhalese", adultContent: false },
-    { id: "origin:sk", label: "Slovak", adultContent: false },
-    { id: "origin:sl", label: "Slovenian", adultContent: false },
-    { id: "origin:so", label: "Somali", adultContent: false },
-    { id: "origin:es", label: "Spanish", adultContent: false },
+    { id: "zh", label: "Chinese", adultContent: false },
+    { id: "en", label: "English", adultContent: false },
+    { id: "ja", label: "Japanese", adultContent: false },
+    { id: "ko", label: "Korean", adultContent: false },
+    { id: "af", label: "Afrikaans", adultContent: false },
+    { id: "sq", label: "Albanian", adultContent: false },
+    { id: "am", label: "Amharic", adultContent: false },
+    { id: "ar", label: "Arabic", adultContent: false },
+    { id: "hy", label: "Armenian", adultContent: false },
+    { id: "az", label: "Azerbaijani", adultContent: false },
+    { id: "be", label: "Belarusian", adultContent: false },
+    { id: "bn", label: "Bengali", adultContent: false },
+    { id: "bs", label: "Bosnian", adultContent: false },
+    { id: "bg", label: "Bulgarian", adultContent: false },
+    { id: "my", label: "Burmese", adultContent: false },
+    { id: "km", label: "Cambodian", adultContent: false },
+    { id: "ca", label: "Catalan", adultContent: false },
+    { id: "ceb", label: "Cebuano", adultContent: false },
+    { id: "zh_hk", label: "Chinese (Cantonese)", adultContent: false },
+    { id: "zh_tw", label: "Chinese (Traditional)", adultContent: false },
+    { id: "hr", label: "Croatian", adultContent: false },
+    { id: "cs", label: "Czech", adultContent: false },
+    { id: "da", label: "Danish", adultContent: false },
+    { id: "nl", label: "Dutch", adultContent: false },
+    { id: "en_us", label: "English (United States)", adultContent: false },
+    { id: "eo", label: "Esperanto", adultContent: false },
+    { id: "et", label: "Estonian", adultContent: false },
+    { id: "fo", label: "Faroese", adultContent: false },
+    { id: "fil", label: "Filipino", adultContent: false },
+    { id: "fi", label: "Finnish", adultContent: false },
+    { id: "fr", label: "French", adultContent: false },
+    { id: "ka", label: "Georgian", adultContent: false },
+    { id: "de", label: "German", adultContent: false },
+    { id: "el", label: "Greek", adultContent: false },
+    { id: "gn", label: "Guarani", adultContent: false },
+    { id: "gu", label: "Gujarati", adultContent: false },
+    { id: "ht", label: "Haitian Creole", adultContent: false },
+    { id: "ha", label: "Hausa", adultContent: false },
+    { id: "he", label: "Hebrew", adultContent: false },
+    { id: "hi", label: "Hindi", adultContent: false },
+    { id: "hu", label: "Hungarian", adultContent: false },
+    { id: "is", label: "Icelandic", adultContent: false },
+    { id: "ig", label: "Igbo", adultContent: false },
+    { id: "id", label: "Indonesian", adultContent: false },
+    { id: "ga", label: "Irish", adultContent: false },
+    { id: "it", label: "Italian", adultContent: false },
+    { id: "jv", label: "Javanese", adultContent: false },
+    { id: "kn", label: "Kannada", adultContent: false },
+    { id: "kk", label: "Kazakh", adultContent: false },
+    { id: "ku", label: "Kurdish", adultContent: false },
+    { id: "ky", label: "Kyrgyz", adultContent: false },
+    { id: "lo", label: "Laothian", adultContent: false },
+    { id: "lv", label: "Latvian", adultContent: false },
+    { id: "lt", label: "Lithuanian", adultContent: false },
+    { id: "lb", label: "Luxembourgish", adultContent: false },
+    { id: "mk", label: "Macedonian", adultContent: false },
+    { id: "mg", label: "Malagasy", adultContent: false },
+    { id: "ms", label: "Malay", adultContent: false },
+    { id: "ml", label: "Malayalam", adultContent: false },
+    { id: "mt", label: "Maltese", adultContent: false },
+    { id: "mi", label: "Maori", adultContent: false },
+    { id: "mr", label: "Marathi", adultContent: false },
+    { id: "mo", label: "Moldavian", adultContent: false },
+    { id: "mn", label: "Mongolian", adultContent: false },
+    { id: "ne", label: "Nepali", adultContent: false },
+    { id: "no", label: "Norwegian", adultContent: false },
+    { id: "ny", label: "Nyanja", adultContent: false },
+    { id: "ps", label: "Pashto", adultContent: false },
+    { id: "fa", label: "Persian", adultContent: false },
+    { id: "pl", label: "Polish", adultContent: false },
+    { id: "pt", label: "Portuguese", adultContent: false },
+    { id: "pt_br", label: "Portuguese (Brazil)", adultContent: false },
+    { id: "ro", label: "Romanian", adultContent: false },
+    { id: "rm", label: "Romansh", adultContent: false },
+    { id: "ru", label: "Russian", adultContent: false },
+    { id: "sm", label: "Samoan", adultContent: false },
+    { id: "sr", label: "Serbian", adultContent: false },
+    { id: "sh", label: "Serbo-Croatian", adultContent: false },
+    { id: "st", label: "Sesotho", adultContent: false },
+    { id: "sn", label: "Shona", adultContent: false },
+    { id: "sd", label: "Sindhi", adultContent: false },
+    { id: "si", label: "Sinhalese", adultContent: false },
+    { id: "sk", label: "Slovak", adultContent: false },
+    { id: "sl", label: "Slovenian", adultContent: false },
+    { id: "so", label: "Somali", adultContent: false },
+    { id: "es", label: "Spanish", adultContent: false },
     {
-        id: "origin:es_419",
+        id: "es_419",
         label: "Spanish (Latin America)",
         adultContent: false,
     },
-    { id: "origin:sw", label: "Swahili", adultContent: false },
-    { id: "origin:sv", label: "Swedish", adultContent: false },
-    { id: "origin:tg", label: "Tajik", adultContent: false },
-    { id: "origin:ta", label: "Tamil", adultContent: false },
-    { id: "origin:th", label: "Thai", adultContent: false },
-    { id: "origin:ti", label: "Tigrinya", adultContent: false },
-    { id: "origin:to", label: "Tonga", adultContent: false },
-    { id: "origin:tr", label: "Turkish", adultContent: false },
-    { id: "origin:tk", label: "Turkmen", adultContent: false },
-    { id: "origin:uk", label: "Ukrainian", adultContent: false },
-    { id: "origin:ur", label: "Urdu", adultContent: false },
-    { id: "origin:uz", label: "Uzbek", adultContent: false },
-    { id: "origin:vi", label: "Vietnamese", adultContent: false },
-    { id: "origin:yo", label: "Yoruba", adultContent: false },
-    { id: "origin:zu", label: "Zulu", adultContent: false },
-    { id: "origin:_t", label: "Other", adultContent: false },
+    { id: "sw", label: "Swahili", adultContent: false },
+    { id: "sv", label: "Swedish", adultContent: false },
+    { id: "tg", label: "Tajik", adultContent: false },
+    { id: "ta", label: "Tamil", adultContent: false },
+    { id: "th", label: "Thai", adultContent: false },
+    { id: "ti", label: "Tigrinya", adultContent: false },
+    { id: "to", label: "Tonga", adultContent: false },
+    { id: "tr", label: "Turkish", adultContent: false },
+    { id: "tk", label: "Turkmen", adultContent: false },
+    { id: "uk", label: "Ukrainian", adultContent: false },
+    { id: "ur", label: "Urdu", adultContent: false },
+    { id: "uz", label: "Uzbek", adultContent: false },
+    { id: "vi", label: "Vietnamese", adultContent: false },
+    { id: "yo", label: "Yoruba", adultContent: false },
+    { id: "zu", label: "Zulu", adultContent: false },
+    { id: "_t", label: "Other", adultContent: false },
 ];
 exports.LANG_TAGS = [
-    { id: "lang:en", label: "English", adultContent: false },
-    { id: "lang:ar", label: "Arabic", adultContent: false },
-    { id: "lang:bg", label: "Bulgarian", adultContent: false },
-    { id: "lang:zh", label: "Chinese", adultContent: false },
-    { id: "lang:cs", label: "Czech", adultContent: false },
-    { id: "lang:da", label: "Danish", adultContent: false },
-    { id: "lang:nl", label: "Dutch", adultContent: false },
-    { id: "lang:fil", label: "Filipino", adultContent: false },
-    { id: "lang:fi", label: "Finnish", adultContent: false },
-    { id: "lang:fr", label: "French", adultContent: false },
-    { id: "lang:de", label: "German", adultContent: false },
-    { id: "lang:el", label: "Greek", adultContent: false },
-    { id: "lang:he", label: "Hebrew", adultContent: false },
-    { id: "lang:hi", label: "Hindi", adultContent: false },
-    { id: "lang:hu", label: "Hungarian", adultContent: false },
-    { id: "lang:id", label: "Indonesian", adultContent: false },
-    { id: "lang:it", label: "Italian", adultContent: false },
-    { id: "lang:ja", label: "Japanese", adultContent: false },
-    { id: "lang:ko", label: "Korean", adultContent: false },
-    { id: "lang:ms", label: "Malay", adultContent: false },
-    { id: "lang:pl", label: "Polish", adultContent: false },
-    { id: "lang:pt", label: "Portuguese", adultContent: false },
-    { id: "lang:pt_br", label: "Portuguese (Brazil)", adultContent: false },
-    { id: "lang:ro", label: "Romanian", adultContent: false },
-    { id: "lang:ru", label: "Russian", adultContent: false },
-    { id: "lang:es", label: "Spanish", adultContent: false },
-    { id: "lang:es_419", label: "Spanish (Latin America)", adultContent: false },
-    { id: "lang:sv", label: "Swedish", adultContent: false },
-    { id: "lang:th", label: "Thai", adultContent: false },
-    { id: "lang:tr", label: "Turkish", adultContent: false },
-    { id: "lang:uk", label: "Ukrainian", adultContent: false },
-    { id: "lang:vi", label: "Vietnamese", adultContent: false },
-    { id: "lang:af", label: "Afrikaans", adultContent: false },
-    { id: "lang:sq", label: "Albanian", adultContent: false },
-    { id: "lang:am", label: "Amharic", adultContent: false },
-    { id: "lang:hy", label: "Armenian", adultContent: false },
-    { id: "lang:az", label: "Azerbaijani", adultContent: false },
-    { id: "lang:be", label: "Belarusian", adultContent: false },
-    { id: "lang:bn", label: "Bengali", adultContent: false },
-    { id: "lang:bs", label: "Bosnian", adultContent: false },
-    { id: "lang:my", label: "Burmese", adultContent: false },
-    { id: "lang:km", label: "Cambodian", adultContent: false },
-    { id: "lang:ca", label: "Catalan", adultContent: false },
-    { id: "lang:ceb", label: "Cebuano", adultContent: false },
-    { id: "lang:zh_hk", label: "Chinese (Cantonese)", adultContent: false },
-    { id: "lang:zh_tw", label: "Chinese (Traditional)", adultContent: false },
-    { id: "lang:hr", label: "Croatian", adultContent: false },
-    { id: "lang:en_us", label: "English (United States)", adultContent: false },
-    { id: "lang:eo", label: "Esperanto", adultContent: false },
-    { id: "lang:et", label: "Estonian", adultContent: false },
-    { id: "lang:fo", label: "Faroese", adultContent: false },
-    { id: "lang:ka", label: "Georgian", adultContent: false },
-    { id: "lang:gn", label: "Guarani", adultContent: false },
-    { id: "lang:gu", label: "Gujarati", adultContent: false },
-    { id: "lang:ht", label: "Haitian Creole", adultContent: false },
-    { id: "lang:ha", label: "Hausa", adultContent: false },
-    { id: "lang:is", label: "Icelandic", adultContent: false },
-    { id: "lang:ig", label: "Igbo", adultContent: false },
-    { id: "lang:ga", label: "Irish", adultContent: false },
-    { id: "lang:jv", label: "Javanese", adultContent: false },
-    { id: "lang:kn", label: "Kannada", adultContent: false },
-    { id: "lang:kk", label: "Kazakh", adultContent: false },
-    { id: "lang:ku", label: "Kurdish", adultContent: false },
-    { id: "lang:ky", label: "Kyrgyz", adultContent: false },
-    { id: "lang:lo", label: "Laothian", adultContent: false },
-    { id: "lang:lv", label: "Latvian", adultContent: false },
-    { id: "lang:lt", label: "Lithuanian", adultContent: false },
-    { id: "lang:lb", label: "Luxembourgish", adultContent: false },
-    { id: "lang:mk", label: "Macedonian", adultContent: false },
-    { id: "lang:mg", label: "Malagasy", adultContent: false },
-    { id: "lang:ml", label: "Malayalam", adultContent: false },
-    { id: "lang:mt", label: "Maltese", adultContent: false },
-    { id: "lang:mi", label: "Maori", adultContent: false },
-    { id: "lang:mr", label: "Marathi", adultContent: false },
-    { id: "lang:mo", label: "Moldavian", adultContent: false },
-    { id: "lang:mn", label: "Mongolian", adultContent: false },
-    { id: "lang:ne", label: "Nepali", adultContent: false },
-    { id: "lang:no", label: "Norwegian", adultContent: false },
-    { id: "lang:ny", label: "Nyanja", adultContent: false },
-    { id: "lang:ps", label: "Pashto", adultContent: false },
-    { id: "lang:fa", label: "Persian", adultContent: false },
-    { id: "lang:rm", label: "Romansh", adultContent: false },
-    { id: "lang:sm", label: "Samoan", adultContent: false },
-    { id: "lang:sr", label: "Serbian", adultContent: false },
-    { id: "lang:sh", label: "Serbo-Croatian", adultContent: false },
-    { id: "lang:st", label: "Sesotho", adultContent: false },
-    { id: "lang:sn", label: "Shona", adultContent: false },
-    { id: "lang:sd", label: "Sindhi", adultContent: false },
-    { id: "lang:si", label: "Sinhalese", adultContent: false },
-    { id: "lang:sk", label: "Slovak", adultContent: false },
-    { id: "lang:sl", label: "Slovenian", adultContent: false },
-    { id: "lang:so", label: "Somali", adultContent: false },
-    { id: "lang:sw", label: "Swahili", adultContent: false },
-    { id: "lang:tg", label: "Tajik", adultContent: false },
-    { id: "lang:ta", label: "Tamil", adultContent: false },
-    { id: "lang:ti", label: "Tigrinya", adultContent: false },
-    { id: "lang:to", label: "Tonga", adultContent: false },
-    { id: "lang:tk", label: "Turkmen", adultContent: false },
-    { id: "lang:ur", label: "Urdu", adultContent: false },
-    { id: "lang:uz", label: "Uzbek", adultContent: false },
-    { id: "lang:yo", label: "Yoruba", adultContent: false },
-    { id: "lang:zu", label: "Zulu", adultContent: false },
-    { id: "lang:_t", label: "Other", adultContent: false },
+    { id: "en", label: "English", adultContent: false },
+    { id: "ar", label: "Arabic", adultContent: false },
+    { id: "bg", label: "Bulgarian", adultContent: false },
+    { id: "zh", label: "Chinese", adultContent: false },
+    { id: "cs", label: "Czech", adultContent: false },
+    { id: "da", label: "Danish", adultContent: false },
+    { id: "nl", label: "Dutch", adultContent: false },
+    { id: "fil", label: "Filipino", adultContent: false },
+    { id: "fi", label: "Finnish", adultContent: false },
+    { id: "fr", label: "French", adultContent: false },
+    { id: "de", label: "German", adultContent: false },
+    { id: "el", label: "Greek", adultContent: false },
+    { id: "he", label: "Hebrew", adultContent: false },
+    { id: "hi", label: "Hindi", adultContent: false },
+    { id: "hu", label: "Hungarian", adultContent: false },
+    { id: "id", label: "Indonesian", adultContent: false },
+    { id: "it", label: "Italian", adultContent: false },
+    { id: "ja", label: "Japanese", adultContent: false },
+    { id: "ko", label: "Korean", adultContent: false },
+    { id: "ms", label: "Malay", adultContent: false },
+    { id: "pl", label: "Polish", adultContent: false },
+    { id: "pt", label: "Portuguese", adultContent: false },
+    { id: "pt_br", label: "Portuguese (Brazil)", adultContent: false },
+    { id: "ro", label: "Romanian", adultContent: false },
+    { id: "ru", label: "Russian", adultContent: false },
+    { id: "es", label: "Spanish", adultContent: false },
+    { id: "es_419", label: "Spanish (Latin America)", adultContent: false },
+    { id: "sv", label: "Swedish", adultContent: false },
+    { id: "th", label: "Thai", adultContent: false },
+    { id: "tr", label: "Turkish", adultContent: false },
+    { id: "uk", label: "Ukrainian", adultContent: false },
+    { id: "vi", label: "Vietnamese", adultContent: false },
+    { id: "af", label: "Afrikaans", adultContent: false },
+    { id: "sq", label: "Albanian", adultContent: false },
+    { id: "am", label: "Amharic", adultContent: false },
+    { id: "hy", label: "Armenian", adultContent: false },
+    { id: "az", label: "Azerbaijani", adultContent: false },
+    { id: "be", label: "Belarusian", adultContent: false },
+    { id: "bn", label: "Bengali", adultContent: false },
+    { id: "bs", label: "Bosnian", adultContent: false },
+    { id: "my", label: "Burmese", adultContent: false },
+    { id: "km", label: "Cambodian", adultContent: false },
+    { id: "ca", label: "Catalan", adultContent: false },
+    { id: "ceb", label: "Cebuano", adultContent: false },
+    { id: "zh_hk", label: "Chinese (Cantonese)", adultContent: false },
+    { id: "zh_tw", label: "Chinese (Traditional)", adultContent: false },
+    { id: "hr", label: "Croatian", adultContent: false },
+    { id: "en_us", label: "English (United States)", adultContent: false },
+    { id: "eo", label: "Esperanto", adultContent: false },
+    { id: "et", label: "Estonian", adultContent: false },
+    { id: "fo", label: "Faroese", adultContent: false },
+    { id: "ka", label: "Georgian", adultContent: false },
+    { id: "gn", label: "Guarani", adultContent: false },
+    { id: "gu", label: "Gujarati", adultContent: false },
+    { id: "ht", label: "Haitian Creole", adultContent: false },
+    { id: "ha", label: "Hausa", adultContent: false },
+    { id: "is", label: "Icelandic", adultContent: false },
+    { id: "ig", label: "Igbo", adultContent: false },
+    { id: "ga", label: "Irish", adultContent: false },
+    { id: "jv", label: "Javanese", adultContent: false },
+    { id: "kn", label: "Kannada", adultContent: false },
+    { id: "kk", label: "Kazakh", adultContent: false },
+    { id: "ku", label: "Kurdish", adultContent: false },
+    { id: "ky", label: "Kyrgyz", adultContent: false },
+    { id: "lo", label: "Laothian", adultContent: false },
+    { id: "lv", label: "Latvian", adultContent: false },
+    { id: "lt", label: "Lithuanian", adultContent: false },
+    { id: "lb", label: "Luxembourgish", adultContent: false },
+    { id: "mk", label: "Macedonian", adultContent: false },
+    { id: "mg", label: "Malagasy", adultContent: false },
+    { id: "ml", label: "Malayalam", adultContent: false },
+    { id: "mt", label: "Maltese", adultContent: false },
+    { id: "mi", label: "Maori", adultContent: false },
+    { id: "mr", label: "Marathi", adultContent: false },
+    { id: "mo", label: "Moldavian", adultContent: false },
+    { id: "mn", label: "Mongolian", adultContent: false },
+    { id: "ne", label: "Nepali", adultContent: false },
+    { id: "no", label: "Norwegian", adultContent: false },
+    { id: "ny", label: "Nyanja", adultContent: false },
+    { id: "ps", label: "Pashto", adultContent: false },
+    { id: "fa", label: "Persian", adultContent: false },
+    { id: "rm", label: "Romansh", adultContent: false },
+    { id: "sm", label: "Samoan", adultContent: false },
+    { id: "sr", label: "Serbian", adultContent: false },
+    { id: "sh", label: "Serbo-Croatian", adultContent: false },
+    { id: "st", label: "Sesotho", adultContent: false },
+    { id: "sn", label: "Shona", adultContent: false },
+    { id: "sd", label: "Sindhi", adultContent: false },
+    { id: "si", label: "Sinhalese", adultContent: false },
+    { id: "sk", label: "Slovak", adultContent: false },
+    { id: "sl", label: "Slovenian", adultContent: false },
+    { id: "so", label: "Somali", adultContent: false },
+    { id: "sw", label: "Swahili", adultContent: false },
+    { id: "tg", label: "Tajik", adultContent: false },
+    { id: "ta", label: "Tamil", adultContent: false },
+    { id: "ti", label: "Tigrinya", adultContent: false },
+    { id: "to", label: "Tonga", adultContent: false },
+    { id: "tk", label: "Turkmen", adultContent: false },
+    { id: "ur", label: "Urdu", adultContent: false },
+    { id: "uz", label: "Uzbek", adultContent: false },
+    { id: "yo", label: "Yoruba", adultContent: false },
+    { id: "zu", label: "Zulu", adultContent: false },
+    { id: "_t", label: "Other", adultContent: false },
 ];
 exports.SORTERS = [
     { label: "Most Views Totally", id: "views_a" },
@@ -410,6 +410,7 @@ exports.getAllGenreTags = getAllGenreTags;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Controller = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
 const constants_1 = require("./constants");
 const parser_1 = require("./parser");
 class Controller {
@@ -428,53 +429,47 @@ class Controller {
         if (query.page) {
             params["page"] = query.page;
         }
-        // Filters
-        const includedTags = this.getMappedFilters(query.includedTags ?? []);
-        const excludedTags = this.getMappedFilters(query.excludedTags ?? []);
-        // TODO: This can be simplified by changing the tag prefix to match the Query Param, so something like a forEach could just prepare the values
-        params.genres = this.prepareFilterString(includedTags.genre, excludedTags.genre);
-        const preparedLangs = this.prepareFilterString(includedTags.lang, excludedTags.lang);
-        if (preparedLangs) {
-            params.langs = preparedLangs;
-        }
-        else {
-            const values = await this.store.get("content_search_langs");
-            if (values) {
-                const langs = values.split(", ");
-                params.lang = this.prepareFilterString(langs, []);
+        const includedTags = [];
+        const excludedTags = [];
+        for (const filter of query.filters ?? []) {
+            switch (filter.id) {
+                case "creators":
+                    if (!filter.included || !filter.included[0] || params.word)
+                        break;
+                    params.word = filter.included[0];
+                    break;
+                case "origin":
+                    params.origs = this.prepareFilterString(filter.included ?? [], filter.excluded ?? []);
+                    break;
+                case "translated":
+                    params.lang = this.prepareFilterString(filter.included ?? [], filter.excluded ?? []);
+                    if (!params.lang) {
+                        const values = await this.store.get("content_search_langs");
+                        if (values) {
+                            const langs = values.split(", ");
+                            params.lang = this.prepareFilterString(langs, []);
+                        }
+                    }
+                    break;
+                case "status":
+                    if (!filter.included)
+                        break;
+                    params.release = this.prepareFilterString(filter.included, []);
+                    break;
+                default:
+                    if (filter.included)
+                        includedTags.push(...filter.included);
+                    if (filter.excluded)
+                        excludedTags.push(...filter.excluded);
+                    break;
             }
         }
-        params.origs = this.prepareFilterString(includedTags.origin, excludedTags.origin);
-        params.chapters = this.prepareFilterString(includedTags.chapters, excludedTags.chapters);
-        const includedWord = this.prepareFilterString(includedTags.word, []);
-        if (!params.word && includedWord)
-            params.word = includedWord;
-        params.release = this.prepareFilterString(includedTags.status, []);
-        params.sort = query.sort?.id ?? "";
+        params.sort = query.sort ?? "";
         const response = await this.client.get(`${this.BASE}/browse`, {
             params,
         });
         const results = this.parser.parsePagedResponse(response.data);
         return { page: query.page ?? 1, results, isLastPage: results.length > 60 };
-    }
-    getMappedFilters(data) {
-        const object = data.reduce((result, value) => {
-            // Split Tag Group & Key
-            const [group, key] = value.split(this.TAG_DIVIDER);
-            // Return Result if Key or Group is Invalid
-            if (!group || !key)
-                return result;
-            result[group].push(key);
-            return result;
-        }, {
-            genre: [],
-            lang: [],
-            origin: [],
-            chapters: [],
-            status: [],
-            word: [],
-        });
-        return object;
     }
     prepareFilterString(included, excluded) {
         let str = included.join(",");
@@ -488,66 +483,85 @@ class Controller {
         return [
             {
                 id: "content_type",
-                property: {
-                    id: "content_type",
-                    label: "Content Type",
-                    tags: constants_1.CONTENT_TYPE_TAGS,
-                },
-                canExclude: true,
+                title: "Content Type",
+                type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
+                options: constants_1.CONTENT_TYPE_TAGS,
             },
             {
                 id: "demographic",
-                property: {
-                    id: "demographic",
-                    label: "Demographics",
-                    tags: constants_1.DEMOGRAPHIC_TAGS,
-                },
-                canExclude: true,
+                title: "Demographics",
+                type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
+                options: constants_1.DEMOGRAPHIC_TAGS,
             },
             {
                 id: "adult",
-                property: {
-                    id: "adult",
-                    label: "Mature",
-                    tags: constants_1.ADULT_TAGS,
-                },
-                canExclude: true,
+                title: "Mature",
+                type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
+                options: constants_1.ADULT_TAGS,
             },
             {
                 id: "general",
-                property: {
-                    id: "general",
-                    label: "Genres",
-                    tags: constants_1.GENERIC_TAGS,
-                },
-                canExclude: true,
+                title: "Genres",
+                type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
+                options: constants_1.GENERIC_TAGS,
             },
             {
                 id: "origin",
-                property: {
-                    id: "origin",
-                    label: "Original Language",
-                    tags: constants_1.ORIGIN_TAGS,
-                },
-                canExclude: false,
+                title: "Original Language",
+                type: daisuke_1.FilterType.SELECT,
+                options: constants_1.ORIGIN_TAGS,
             },
             {
                 id: "translated",
-                property: {
-                    id: "translated",
-                    label: "Translated Language",
-                    tags: constants_1.LANG_TAGS,
-                },
-                canExclude: false,
+                title: "Translated Language",
+                subtitle: "NOTE: When Selected, This will override your language preferences",
+                type: daisuke_1.FilterType.SELECT,
+                options: constants_1.LANG_TAGS,
             },
             {
                 id: "status",
-                property: {
-                    id: "status",
-                    label: "Content Status",
-                    tags: constants_1.STATUS_TAGS,
-                },
-                canExclude: false,
+                title: "Content Status",
+                type: daisuke_1.FilterType.SELECT,
+                options: constants_1.STATUS_TAGS,
+            },
+        ];
+    }
+    getProperties() {
+        return [
+            {
+                id: "content_type",
+                label: "Content Type",
+                tags: constants_1.CONTENT_TYPE_TAGS,
+            },
+            {
+                id: "demographic",
+                label: "Demographics",
+                tags: constants_1.DEMOGRAPHIC_TAGS,
+            },
+            {
+                id: "adult",
+                label: "Mature",
+                tags: constants_1.ADULT_TAGS,
+            },
+            {
+                id: "general",
+                label: "Genres",
+                tags: constants_1.GENERIC_TAGS,
+            },
+            {
+                id: "origin",
+                label: "Original Language",
+                tags: constants_1.ORIGIN_TAGS,
+            },
+            {
+                id: "translated",
+                label: "Translated Language",
+                tags: constants_1.LANG_TAGS,
+            },
+            {
+                id: "status",
+                label: "Content Status",
+                tags: constants_1.STATUS_TAGS,
             },
         ];
     }
@@ -570,7 +584,7 @@ class Controller {
 }
 exports.Controller = Controller;
 
-},{"./constants":1,"./parser":4}],3:[function(require,module,exports){
+},{"./constants":1,"./parser":4,"@suwatte/daisuke":7}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
@@ -586,6 +600,7 @@ class Target extends daisuke_1.Source {
         supportedLanguages: [],
         nsfw: false,
         thumbnail: "bato.png",
+        minSupportedAppVersion: "4.6.0",
     };
     controller = new controller_1.Controller();
     getContent(contentId) {
@@ -601,7 +616,7 @@ class Target extends daisuke_1.Source {
         return this.controller.getSearchResults(query);
     }
     async getSourceTags() {
-        return this.controller.getFilters().map((v) => v.property);
+        return this.controller.getProperties();
     }
     async getSearchFilters() {
         return this.controller.getFilters();
@@ -722,7 +737,7 @@ class Parser {
             id: "creators",
             label: "Credits",
             tags: [artist, author].map((v) => ({
-                id: `word:${(0, he_1.encode)(v)}`,
+                id: (0, he_1.encode)(v),
                 label: v,
                 adultContent: false,
             })),
@@ -919,12 +934,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./classes"), exports);
 __exportStar(require("./types"), exports);
+__exportStar(require("./validation"), exports);
 
-},{"./classes":6,"./types":24}],8:[function(require,module,exports){
+},{"./classes":6,"./types":25,"./validation":29}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZChapter = void 0;
-const _1 = require(".");
+const Provider_1 = require("../content/Provider");
 const ChapterData_1 = require("./ChapterData");
 const zod_1 = require("zod");
 exports.ZChapter = zod_1.z.object({
@@ -939,7 +955,7 @@ exports.ZChapter = zod_1.z.object({
     /**
      * The Chapters Number
      */
-    number: zod_1.z.number().int(),
+    number: zod_1.z.number().nonnegative(),
     /**
      * The index of this chapter in relation to all chapters of the content.
      *
@@ -957,7 +973,7 @@ exports.ZChapter = zod_1.z.object({
     /**
      * Volume to which this chapter belongs
      */
-    volume: zod_1.z.number().int().nonnegative().optional(),
+    volume: zod_1.z.number().nonnegative().optional(),
     /**
      * Language Code of this chapter
      */
@@ -973,10 +989,10 @@ exports.ZChapter = zod_1.z.object({
     /**
      * The Chapters {@link Provider}'s
      */
-    providers: zod_1.z.array(_1.ZProvider).optional(),
+    providers: zod_1.z.array(Provider_1.ZProvider).optional(),
 });
 
-},{".":18,"./ChapterData":9,"zod":35}],9:[function(require,module,exports){
+},{"../content/Provider":16,"./ChapterData":9,"zod":37}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZChapterData = exports.ZChapterPage = void 0;
@@ -1012,7 +1028,7 @@ exports.ZChapterData = zod_1.z.object({
     pages: zod_1.z.array(exports.ZChapterPage).optional(),
 });
 
-},{"zod":35}],10:[function(require,module,exports){
+},{"zod":37}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZExploreCollection = exports.ZHighlightCollection = exports.ZCollectionExcerpt = exports.CollectionStyle = void 0;
@@ -1070,7 +1086,7 @@ exports.ZExploreCollection = zod_1.z.object({
     highlights: zod_1.z.array(Highlight_1.ZHighlight),
 });
 
-},{"./Highlight":12,"./SearchRequest":16,"zod":35}],11:[function(require,module,exports){
+},{"./Highlight":13,"./SearchRequest":17,"zod":37}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZContent = exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.Status = void 0;
@@ -1191,7 +1207,72 @@ const ZBaseContent = zod_1.z.object({
 });
 exports.ZContent = Highlight_1.ZBaseInfo.merge(ZBaseContent);
 
-},{"./Chapter":8,"./Collection":10,"./Highlight":12,"./Property":14,"./TrackerInfo":17,"zod":35}],12:[function(require,module,exports){
+},{"./Chapter":8,"./Collection":10,"./Highlight":13,"./Property":15,"./TrackerInfo":18,"zod":37}],12:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ZPopulatedFilter = exports.ZFilter = exports.FilterType = void 0;
+const zod_1 = require("zod");
+const Property_1 = require("./Property");
+var FilterType;
+(function (FilterType) {
+    FilterType[FilterType["TOGGLE"] = 0] = "TOGGLE";
+    FilterType[FilterType["SELECT"] = 1] = "SELECT";
+    FilterType[FilterType["MULTISELECT"] = 2] = "MULTISELECT";
+    FilterType[FilterType["EXCLUDABLE_MULTISELECT"] = 3] = "EXCLUDABLE_MULTISELECT";
+    FilterType[FilterType["TEXT"] = 4] = "TEXT";
+    FilterType[FilterType["INFO"] = 5] = "INFO";
+})(FilterType = exports.FilterType || (exports.FilterType = {}));
+exports.ZFilter = zod_1.z.object({
+    /**
+     * The ID of the filter
+     */
+    id: zod_1.z.string().min(1),
+    /**
+     * The Title of the Filter
+     */
+    title: zod_1.z.string().min(1),
+    /**
+     * The subtitle of the filter
+     */
+    subtitle: zod_1.z.string().min(1).optional(),
+    label: zod_1.z.string().min(1).optional(),
+    /**
+     * The Filter Type
+     */
+    type: zod_1.z.nativeEnum(FilterType),
+    /**
+     * The Filter's Options if the filter type is SELECT,MULTISELECT,EXCLUDABLE_SELECT
+     */
+    options: zod_1.z.array(Property_1.ZBaseInteractable).optional(),
+});
+exports.ZPopulatedFilter = zod_1.z.object({
+    /**
+     * The Id of the Filter
+     */
+    id: zod_1.z.string().min(1),
+    /**
+     * The Boolean value if the filter is of type TOGGLE
+     */
+    bool: zod_1.z.boolean().optional(),
+    /**
+     * The Text Value of the filter if the filter is of type TEXT
+     */
+    text: zod_1.z.string().optional(),
+    /**
+     * The Selected ID if the filter if of type SELECT
+     */
+    selected: zod_1.z.string().optional(),
+    /**
+     * The Included IDS of options if the filter is of type MULTISELECT,EXCLUDABLE_SELECT
+     */
+    included: zod_1.z.array(zod_1.z.string()).optional(),
+    /**
+     * The Excluded Option IDS if the filter is of text EXCLUDABLE_MULTISELECT
+     */
+    excluded: zod_1.z.array(zod_1.z.string()).optional(),
+});
+
+},{"./Property":15,"zod":37}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZHighlight = exports.ZBaseInfo = void 0;
@@ -1249,7 +1330,7 @@ exports.ZHighlight = exports.ZBaseInfo.merge(zod_1.z.object({
     info: zod_1.z.record(zod_1.z.string()).optional(),
 }));
 
-},{"zod":35}],13:[function(require,module,exports){
+},{"zod":37}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZPagedResult = void 0;
@@ -1276,10 +1357,10 @@ exports.ZPagedResult = zod_1.z.object({
     totalResultCount: zod_1.z.number().int().nonnegative().optional(),
 });
 
-},{"./Highlight":12,"zod":35}],14:[function(require,module,exports){
+},{"./Highlight":13,"zod":37}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ZFilter = exports.ZProperty = exports.ZTag = exports.ZNonInteractiveProperty = exports.ZBaseInteractable = void 0;
+exports.ZProperty = exports.ZExploreTag = exports.ZTag = exports.ZNonInteractiveProperty = exports.ZBaseInteractable = void 0;
 const zod_1 = require("zod");
 // Schemas
 exports.ZBaseInteractable = zod_1.z.object({
@@ -1302,7 +1383,10 @@ exports.ZTag = exports.ZBaseInteractable.extend({
     /**
      * A boolean indicating the titles marked with this tag contain Adult Content
      */
-    adultContent: zod_1.z.boolean(),
+    adultContent: zod_1.z.boolean().optional(),
+});
+exports.ZExploreTag = exports.ZBaseInteractable.extend({
+    filterId: zod_1.z.string(),
     /**
      * A URL pointing to an image to display with this tag.
      *
@@ -1316,22 +1400,8 @@ exports.ZProperty = exports.ZBaseInteractable.extend({
      */
     tags: zod_1.z.array(exports.ZTag),
 });
-exports.ZFilter = zod_1.z.object({
-    /**
-     * The ID of this filter
-     */
-    id: zod_1.z.string().min(1),
-    /**
-     * A boolean indicating this filter's tags can be excluded.
-     */
-    canExclude: zod_1.z.boolean(),
-    /**
-     *  The Property this filter represents
-     */
-    property: exports.ZProperty,
-});
 
-},{"zod":35}],15:[function(require,module,exports){
+},{"zod":37}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZProvider = exports.ZProviderLink = exports.ProviderLinkType = void 0;
@@ -1370,12 +1440,12 @@ exports.ZProvider = zod_1.z.object({
     links: zod_1.z.array(exports.ZProviderLink).optional(),
 });
 
-},{"zod":35}],16:[function(require,module,exports){
+},{"zod":37}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZSearchRequest = void 0;
-const Property_1 = require("./Property");
 const zod_1 = require("zod");
+const Filter_1 = require("./Filter");
 exports.ZSearchRequest = zod_1.z.object({
     /**
      * The Keywords the User would like to search
@@ -1386,20 +1456,13 @@ exports.ZSearchRequest = zod_1.z.object({
      */
     page: zod_1.z.number().int().nonnegative().optional(),
     /**
-     * IDS of all included Tags
+     * The User Selected Sort ID
      */
-    includedTags: zod_1.z.array(zod_1.z.string()).optional(),
-    /**
-     * ids of all excluded Tags
-     */
-    excludedTags: zod_1.z.array(zod_1.z.string()).optional(),
-    /**
-     * The User Selected Sort Option
-     */
-    sort: Property_1.ZBaseInteractable.optional(),
+    sort: zod_1.z.string().optional(),
+    filters: zod_1.z.array(Filter_1.ZPopulatedFilter).optional(),
 });
 
-},{"./Property":14,"zod":35}],17:[function(require,module,exports){
+},{"./Filter":12,"zod":37}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZTrackerInfo = void 0;
@@ -1423,7 +1486,7 @@ exports.ZTrackerInfo = zod_1.z.object({
     mu: zod_1.z.string().optional(),
 });
 
-},{"zod":35}],18:[function(require,module,exports){
+},{"zod":37}],19:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1450,13 +1513,14 @@ __exportStar(require("./TrackerInfo"), exports);
 __exportStar(require("./Property"), exports);
 __exportStar(require("./Collection"), exports);
 __exportStar(require("./Provider"), exports);
+__exportStar(require("./Filter"), exports);
 
-},{"./Chapter":8,"./ChapterData":9,"./Collection":10,"./Content":11,"./Highlight":12,"./PagedResult":13,"./Property":14,"./Provider":15,"./SearchRequest":16,"./TrackerInfo":17}],19:[function(require,module,exports){
+},{"./Chapter":8,"./ChapterData":9,"./Collection":10,"./Content":11,"./Filter":12,"./Highlight":13,"./PagedResult":14,"./Property":15,"./Provider":16,"./SearchRequest":17,"./TrackerInfo":18}],20:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZActionGroup = exports.ZAction = void 0;
 const zod_1 = require("zod");
-const _1 = require(".");
+const Preferences_1 = require("../core/Preferences");
 // Schemas
 exports.ZAction = zod_1.z.object({
     /**
@@ -1482,19 +1546,19 @@ exports.ZAction = zod_1.z.object({
      */
     isDestructive: zod_1.z.boolean().optional(),
 });
-exports.ZActionGroup = _1.ZUIGroup.extend({
+exports.ZActionGroup = Preferences_1.ZUIGroup.extend({
     /**
      * The Child Actions Within this Group
      */
     children: zod_1.z.array(exports.ZAction),
 });
 
-},{".":23,"zod":35}],20:[function(require,module,exports){
+},{"../core/Preferences":22,"zod":37}],21:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZDownSyncedContent = exports.ZUpSyncedContent = exports.ZUser = exports.AuthMethod = void 0;
 const zod_1 = require("zod");
-const __1 = require("..");
+const Content_1 = require("../content/Content");
 var AuthMethod;
 (function (AuthMethod) {
     AuthMethod[AuthMethod["USERNAME_PW"] = 0] = "USERNAME_PW";
@@ -1529,7 +1593,7 @@ exports.ZUpSyncedContent = zod_1.z.object({
     /**
      * The Reading/Library flag of the title to be synced
      */
-    flag: zod_1.z.nativeEnum(__1.ReadingFlag),
+    flag: zod_1.z.nativeEnum(Content_1.ReadingFlag),
 });
 exports.ZDownSyncedContent = zod_1.z.object({
     /**
@@ -1547,10 +1611,10 @@ exports.ZDownSyncedContent = zod_1.z.object({
     /**
      * The Reading Flag of the title synced
      */
-    readingFlag: zod_1.z.nativeEnum(__1.ReadingFlag).optional(),
+    readingFlag: zod_1.z.nativeEnum(Content_1.ReadingFlag).optional(),
 });
 
-},{"..":24,"zod":35}],21:[function(require,module,exports){
+},{"../content/Content":11,"zod":37}],22:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZPreferenceGroup = exports.ZUIGroup = exports.ZPreference = exports.ZSelectionOption = exports.PreferenceType = void 0;
@@ -1656,11 +1720,11 @@ exports.ZPreferenceGroup = exports.ZUIGroup.extend({
     children: zod_1.z.array(exports.ZPreference),
 });
 
-},{"zod":35}],22:[function(require,module,exports){
+},{"zod":37}],23:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1682,7 +1746,7 @@ __exportStar(require("./Preferences"), exports);
 __exportStar(require("./RunnerInfo"), exports);
 __exportStar(require("./Actions"), exports);
 
-},{"./Actions":19,"./Authentication":20,"./Preferences":21,"./RunnerInfo":22}],24:[function(require,module,exports){
+},{"./Actions":20,"./Authentication":21,"./Preferences":22,"./RunnerInfo":23}],25:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1703,11 +1767,11 @@ __exportStar(require("./core"), exports);
 __exportStar(require("./content"), exports);
 __exportStar(require("./networking"), exports);
 
-},{"./content":18,"./core":23,"./networking":27}],25:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],26:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],27:[function(require,module,exports){
+},{"./content":19,"./core":24,"./networking":28}],26:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],27:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],28:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1727,7 +1791,113 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./NetworkRequest"), exports);
 __exportStar(require("./NetworkResponse"), exports);
 
-},{"./NetworkRequest":25,"./NetworkResponse":26}],28:[function(require,module,exports){
+},{"./NetworkRequest":26,"./NetworkResponse":27}],29:[function(require,module,exports){
+"use strict";
+/**
+ * These help with schema validation checks in tests
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Validate = void 0;
+const zod_1 = require("zod");
+const types_1 = require("../types");
+const object = {
+    content: (object) => {
+        types_1.ZContent.parse(object);
+        return true;
+    },
+    chapter: (object) => {
+        types_1.ZChapter.parse(object);
+        return true;
+    },
+    pagedResult: (object) => {
+        types_1.ZPagedResult.parse(object);
+        return true;
+    },
+    chapterData: (object) => {
+        types_1.ZChapterData.parse(object);
+        return true;
+    },
+    chapterPage: (object) => {
+        types_1.ZChapterPage.parse(object);
+        return true;
+    },
+    collectionExcerpt: (object) => {
+        types_1.ZCollectionExcerpt.parse(object);
+        return true;
+    },
+    highlight: (object) => {
+        types_1.ZHighlight.parse(object);
+        return true;
+    },
+    highlightCollection: (object) => {
+        types_1.ZHighlightCollection.parse(object);
+        return true;
+    },
+    property: (object) => {
+        types_1.ZProperty.parse(object);
+        return true;
+    },
+    filter: (object) => {
+        types_1.ZFilter.parse(object);
+        return true;
+    },
+    downSyncedContent: (object) => {
+        types_1.ZDownSyncedContent.parse(object);
+        return true;
+    },
+};
+const array = {
+    content: (object) => {
+        zod_1.z.array(types_1.ZContent).parse(object);
+        return true;
+    },
+    chapter: (object) => {
+        zod_1.z.array(types_1.ZChapter).parse(object);
+        return true;
+    },
+    pagedResult: (object) => {
+        zod_1.z.array(types_1.ZPagedResult).parse(object);
+        return true;
+    },
+    chapterData: (object) => {
+        zod_1.z.array(types_1.ZChapterData).parse(object);
+        return true;
+    },
+    chapterPage: (object) => {
+        zod_1.z.array(types_1.ZChapterPage).parse(object);
+        return true;
+    },
+    collectionExcerpt: (object) => {
+        zod_1.z.array(types_1.ZCollectionExcerpt).parse(object);
+        return true;
+    },
+    highlight: (object) => {
+        zod_1.z.array(types_1.ZHighlight).parse(object);
+        return true;
+    },
+    highlightCollection: (object) => {
+        zod_1.z.array(types_1.ZHighlightCollection).parse(object);
+        return true;
+    },
+    property: (object) => {
+        zod_1.z.array(types_1.ZProperty).parse(object);
+        return true;
+    },
+    filter: (object) => {
+        zod_1.z.array(types_1.ZFilter).parse(object);
+        return true;
+    },
+    downSyncedContent: (object) => {
+        zod_1.z.array(types_1.ZDownSyncedContent).parse(object);
+        return true;
+    },
+};
+exports.Validate = {
+    object,
+    array,
+};
+
+},{"../types":25,"zod":37}],30:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZodError = exports.quotelessJson = exports.ZodIssueCode = void 0;
@@ -1861,7 +2031,7 @@ ZodError.create = (issues) => {
     return error;
 };
 
-},{"./helpers/util":34}],29:[function(require,module,exports){
+},{"./helpers/util":36}],31:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1880,7 +2050,7 @@ function getErrorMap() {
 }
 exports.getErrorMap = getErrorMap;
 
-},{"./locales/en":36}],30:[function(require,module,exports){
+},{"./locales/en":38}],32:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1900,7 +2070,7 @@ __exportStar(require("./helpers/util"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./ZodError"), exports);
 
-},{"./ZodError":28,"./errors":29,"./helpers/parseUtil":32,"./helpers/typeAliases":33,"./helpers/util":34,"./types":37}],31:[function(require,module,exports){
+},{"./ZodError":30,"./errors":31,"./helpers/parseUtil":34,"./helpers/typeAliases":35,"./helpers/util":36,"./types":39}],33:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorUtil = void 0;
@@ -1910,7 +2080,7 @@ var errorUtil;
     errorUtil.toString = (message) => typeof message === "string" ? message : message === null || message === void 0 ? void 0 : message.message;
 })(errorUtil = exports.errorUtil || (exports.errorUtil = {}));
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -2023,12 +2193,12 @@ const isDirty = (x) => x.status === "dirty";
 exports.isDirty = isDirty;
 const isValid = (x) => x.status === "valid";
 exports.isValid = isValid;
-const isAsync = (x) => typeof Promise !== undefined && x instanceof Promise;
+const isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
 exports.isAsync = isAsync;
 
-},{"../errors":29,"../locales/en":36}],33:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],34:[function(require,module,exports){
+},{"../errors":31,"../locales/en":38}],35:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],36:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getParsedType = exports.ZodParsedType = exports.util = void 0;
@@ -2163,7 +2333,7 @@ const getParsedType = (data) => {
 };
 exports.getParsedType = getParsedType;
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2194,7 +2364,7 @@ exports.z = mod;
 __exportStar(require("./external"), exports);
 exports.default = mod;
 
-},{"./external":30}],36:[function(require,module,exports){
+},{"./external":32}],38:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("../helpers/util");
@@ -2313,7 +2483,7 @@ const errorMap = (issue, _ctx) => {
 };
 exports.default = errorMap;
 
-},{"../ZodError":28,"../helpers/util":34}],37:[function(require,module,exports){
+},{"../ZodError":30,"../helpers/util":36}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.date = exports.boolean = exports.bigint = exports.array = exports.any = exports.coerce = exports.ZodFirstPartyTypeKind = exports.late = exports.ZodSchema = exports.Schema = exports.custom = exports.ZodPipeline = exports.ZodBranded = exports.BRAND = exports.ZodNaN = exports.ZodCatch = exports.ZodDefault = exports.ZodNullable = exports.ZodOptional = exports.ZodTransformer = exports.ZodEffects = exports.ZodPromise = exports.ZodNativeEnum = exports.ZodEnum = exports.ZodLiteral = exports.ZodLazy = exports.ZodFunction = exports.ZodSet = exports.ZodMap = exports.ZodRecord = exports.ZodTuple = exports.ZodIntersection = exports.ZodDiscriminatedUnion = exports.ZodUnion = exports.ZodObject = exports.objectUtil = exports.ZodArray = exports.ZodVoid = exports.ZodNever = exports.ZodUnknown = exports.ZodAny = exports.ZodNull = exports.ZodUndefined = exports.ZodSymbol = exports.ZodDate = exports.ZodBoolean = exports.ZodBigInt = exports.ZodNumber = exports.ZodString = exports.ZodType = void 0;
@@ -2544,28 +2714,29 @@ class ZodType {
         return this._refinement(refinement);
     }
     optional() {
-        return ZodOptional.create(this);
+        return ZodOptional.create(this, this._def);
     }
     nullable() {
-        return ZodNullable.create(this);
+        return ZodNullable.create(this, this._def);
     }
     nullish() {
-        return this.optional().nullable();
+        return this.nullable().optional();
     }
     array() {
-        return ZodArray.create(this);
+        return ZodArray.create(this, this._def);
     }
     promise() {
-        return ZodPromise.create(this);
+        return ZodPromise.create(this, this._def);
     }
     or(option) {
-        return ZodUnion.create([this, option]);
+        return ZodUnion.create([this, option], this._def);
     }
     and(incoming) {
-        return ZodIntersection.create(this, incoming);
+        return ZodIntersection.create(this, incoming, this._def);
     }
     transform(transform) {
         return new ZodEffects({
+            ...processCreateParams(this._def),
             schema: this,
             typeName: ZodFirstPartyTypeKind.ZodEffects,
             effect: { type: "transform", transform },
@@ -2574,6 +2745,7 @@ class ZodType {
     default(def) {
         const defaultValueFunc = typeof def === "function" ? def : () => def;
         return new ZodDefault({
+            ...processCreateParams(this._def),
             innerType: this,
             defaultValue: defaultValueFunc,
             typeName: ZodFirstPartyTypeKind.ZodDefault,
@@ -2583,14 +2755,15 @@ class ZodType {
         return new ZodBranded({
             typeName: ZodFirstPartyTypeKind.ZodBranded,
             type: this,
-            ...processCreateParams(undefined),
+            ...processCreateParams(this._def),
         });
     }
     catch(def) {
-        const defaultValueFunc = typeof def === "function" ? def : () => def;
+        const catchValueFunc = typeof def === "function" ? def : () => def;
         return new ZodCatch({
+            ...processCreateParams(this._def),
             innerType: this,
-            defaultValue: defaultValueFunc,
+            catchValue: catchValueFunc,
             typeName: ZodFirstPartyTypeKind.ZodCatch,
         });
     }
@@ -2615,12 +2788,15 @@ exports.ZodType = ZodType;
 exports.Schema = ZodType;
 exports.ZodSchema = ZodType;
 const cuidRegex = /^c[^\s-]{8,}$/i;
+const cuid2Regex = /^[a-z][a-z0-9]*$/;
 const uuidRegex = /^([a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}|00000000-0000-0000-0000-000000000000)$/i;
 // from https://stackoverflow.com/a/46181/1550155
 // old version: too slow, didn't support unicode
 // const emailRegex = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i;
+//old email regex
+// const emailRegex = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((?!-)([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{1,})[^-<>()[\].,;:\s@"]$/i;
 // eslint-disable-next-line
-const emailRegex = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|([^-]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}))$/;
 // interface IsDateStringOptions extends StringDateOptions {
 /**
  * Match any configuration
@@ -2631,7 +2807,7 @@ const emailRegex = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\")
 const datetimeRegex = (args) => {
     if (args.precision) {
         if (args.offset) {
-            return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{${args.precision}}(([+-]\\d{2}:\\d{2})|Z)$`);
+            return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{${args.precision}}(([+-]\\d{2}(:?\\d{2})?)|Z)$`);
         }
         else {
             return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{${args.precision}}Z$`);
@@ -2639,7 +2815,7 @@ const datetimeRegex = (args) => {
     }
     else if (args.precision === 0) {
         if (args.offset) {
-            return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(([+-]\\d{2}:\\d{2})|Z)$`);
+            return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(([+-]\\d{2}(:?\\d{2})?)|Z)$`);
         }
         else {
             return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$`);
@@ -2647,7 +2823,7 @@ const datetimeRegex = (args) => {
     }
     else {
         if (args.offset) {
-            return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(([+-]\\d{2}:\\d{2})|Z)$`);
+            return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(([+-]\\d{2}(:?\\d{2})?)|Z)$`);
         }
         else {
             return new RegExp(`^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$`);
@@ -2780,6 +2956,17 @@ class ZodString extends ZodType {
                     status.dirty();
                 }
             }
+            else if (check.kind === "cuid2") {
+                if (!cuid2Regex.test(input.data)) {
+                    ctx = this._getOrReturnCtx(input, ctx);
+                    (0, parseUtil_1.addIssueToContext)(ctx, {
+                        validation: "cuid2",
+                        code: ZodError_1.ZodIssueCode.invalid_string,
+                        message: check.message,
+                    });
+                    status.dirty();
+                }
+            }
             else if (check.kind === "url") {
                 try {
                     new URL(input.data);
@@ -2868,6 +3055,9 @@ class ZodString extends ZodType {
     cuid(message) {
         return this._addCheck({ kind: "cuid", ...errorUtil_1.errorUtil.errToObj(message) });
     }
+    cuid2(message) {
+        return this._addCheck({ kind: "cuid2", ...errorUtil_1.errorUtil.errToObj(message) });
+    }
     datetime(options) {
         var _a;
         if (typeof options === "string") {
@@ -2941,6 +3131,9 @@ class ZodString extends ZodType {
     }
     get isCUID() {
         return !!this._def.checks.find((ch) => ch.kind === "cuid");
+    }
+    get isCUID2() {
+        return !!this._def.checks.find((ch) => ch.kind === "cuid2");
     }
     get minLength() {
         let min = null;
@@ -3183,7 +3376,27 @@ class ZodNumber extends ZodType {
         return max;
     }
     get isInt() {
-        return !!this._def.checks.find((ch) => ch.kind === "int");
+        return !!this._def.checks.find((ch) => ch.kind === "int" ||
+            (ch.kind === "multipleOf" && util_1.util.isInteger(ch.value)));
+    }
+    get isFinite() {
+        let max = null, min = null;
+        for (const ch of this._def.checks) {
+            if (ch.kind === "finite" ||
+                ch.kind === "int" ||
+                ch.kind === "multipleOf") {
+                return true;
+            }
+            else if (ch.kind === "min") {
+                if (min === null || ch.value > min)
+                    min = ch.value;
+            }
+            else if (ch.kind === "max") {
+                if (max === null || ch.value < max)
+                    max = ch.value;
+            }
+        }
+        return Number.isFinite(min) && Number.isFinite(max);
     }
 }
 exports.ZodNumber = ZodNumber;
@@ -3555,13 +3768,13 @@ class ZodArray extends ZodType {
             }
         }
         if (ctx.common.async) {
-            return Promise.all(ctx.data.map((item, i) => {
+            return Promise.all([...ctx.data].map((item, i) => {
                 return def.type._parseAsync(new ParseInputLazyPath(ctx, item, ctx.path, i));
             })).then((result) => {
                 return parseUtil_1.ParseStatus.mergeArray(status, result);
             });
         }
-        const result = ctx.data.map((item, i) => {
+        const result = [...ctx.data].map((item, i) => {
             return def.type._parseSync(new ParseInputLazyPath(ctx, item, ctx.path, i));
         });
         return parseUtil_1.ParseStatus.mergeArray(status, result);
@@ -3618,15 +3831,6 @@ var objectUtil;
         };
     };
 })(objectUtil = exports.objectUtil || (exports.objectUtil = {}));
-const AugmentFactory = (def) => (augmentation) => {
-    return new ZodObject({
-        ...def,
-        shape: () => ({
-            ...def.shape(),
-            ...augmentation,
-        }),
-    });
-};
 function deepPartialify(schema) {
     if (schema instanceof ZodObject) {
         const newShape = {};
@@ -3664,8 +3868,43 @@ class ZodObject extends ZodType {
          * If you want to pass through unknown properties, use `.passthrough()` instead.
          */
         this.nonstrict = this.passthrough;
-        this.augment = AugmentFactory(this._def);
-        this.extend = AugmentFactory(this._def);
+        // extend<
+        //   Augmentation extends ZodRawShape,
+        //   NewOutput extends util.flatten<{
+        //     [k in keyof Augmentation | keyof Output]: k extends keyof Augmentation
+        //       ? Augmentation[k]["_output"]
+        //       : k extends keyof Output
+        //       ? Output[k]
+        //       : never;
+        //   }>,
+        //   NewInput extends util.flatten<{
+        //     [k in keyof Augmentation | keyof Input]: k extends keyof Augmentation
+        //       ? Augmentation[k]["_input"]
+        //       : k extends keyof Input
+        //       ? Input[k]
+        //       : never;
+        //   }>
+        // >(
+        //   augmentation: Augmentation
+        // ): ZodObject<
+        //   extendShape<T, Augmentation>,
+        //   UnknownKeys,
+        //   Catchall,
+        //   NewOutput,
+        //   NewInput
+        // > {
+        //   return new ZodObject({
+        //     ...this._def,
+        //     shape: () => ({
+        //       ...this._def.shape(),
+        //       ...augmentation,
+        //     }),
+        //   }) as any;
+        // }
+        /**
+         * @deprecated Use `.extend` instead
+         *  */
+        this.augment = this.extend;
     }
     _getCached() {
         if (this._cached !== null)
@@ -3803,8 +4042,31 @@ class ZodObject extends ZodType {
             unknownKeys: "passthrough",
         });
     }
-    setKey(key, schema) {
-        return this.augment({ [key]: schema });
+    // const AugmentFactory =
+    //   <Def extends ZodObjectDef>(def: Def) =>
+    //   <Augmentation extends ZodRawShape>(
+    //     augmentation: Augmentation
+    //   ): ZodObject<
+    //     extendShape<ReturnType<Def["shape"]>, Augmentation>,
+    //     Def["unknownKeys"],
+    //     Def["catchall"]
+    //   > => {
+    //     return new ZodObject({
+    //       ...def,
+    //       shape: () => ({
+    //         ...def.shape(),
+    //         ...augmentation,
+    //       }),
+    //     }) as any;
+    //   };
+    extend(augmentation) {
+        return new ZodObject({
+            ...this._def,
+            shape: () => ({
+                ...this._def.shape(),
+                ...augmentation,
+            }),
+        });
     }
     /**
      * Prior to zod@1.0.12 there was a bug in the
@@ -3812,10 +4074,6 @@ class ZodObject extends ZodType {
      * upgrade if you are experiencing issues.
      */
     merge(merging) {
-        // const mergedShape = objectUtil.mergeShapes(
-        //   this._def.shape(),
-        //   merging._def.shape()
-        // );
         const merged = new ZodObject({
             unknownKeys: merging._def.unknownKeys,
             catchall: merging._def.catchall,
@@ -3824,6 +4082,65 @@ class ZodObject extends ZodType {
         });
         return merged;
     }
+    // merge<
+    //   Incoming extends AnyZodObject,
+    //   Augmentation extends Incoming["shape"],
+    //   NewOutput extends {
+    //     [k in keyof Augmentation | keyof Output]: k extends keyof Augmentation
+    //       ? Augmentation[k]["_output"]
+    //       : k extends keyof Output
+    //       ? Output[k]
+    //       : never;
+    //   },
+    //   NewInput extends {
+    //     [k in keyof Augmentation | keyof Input]: k extends keyof Augmentation
+    //       ? Augmentation[k]["_input"]
+    //       : k extends keyof Input
+    //       ? Input[k]
+    //       : never;
+    //   }
+    // >(
+    //   merging: Incoming
+    // ): ZodObject<
+    //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
+    //   Incoming["_def"]["unknownKeys"],
+    //   Incoming["_def"]["catchall"],
+    //   NewOutput,
+    //   NewInput
+    // > {
+    //   const merged: any = new ZodObject({
+    //     unknownKeys: merging._def.unknownKeys,
+    //     catchall: merging._def.catchall,
+    //     shape: () =>
+    //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+    //     typeName: ZodFirstPartyTypeKind.ZodObject,
+    //   }) as any;
+    //   return merged;
+    // }
+    setKey(key, schema) {
+        return this.augment({ [key]: schema });
+    }
+    // merge<Incoming extends AnyZodObject>(
+    //   merging: Incoming
+    // ): //ZodObject<T & Incoming["_shape"], UnknownKeys, Catchall> = (merging) => {
+    // ZodObject<
+    //   extendShape<T, ReturnType<Incoming["_def"]["shape"]>>,
+    //   Incoming["_def"]["unknownKeys"],
+    //   Incoming["_def"]["catchall"]
+    // > {
+    //   // const mergedShape = objectUtil.mergeShapes(
+    //   //   this._def.shape(),
+    //   //   merging._def.shape()
+    //   // );
+    //   const merged: any = new ZodObject({
+    //     unknownKeys: merging._def.unknownKeys,
+    //     catchall: merging._def.catchall,
+    //     shape: () =>
+    //       objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+    //     typeName: ZodFirstPartyTypeKind.ZodObject,
+    //   }) as any;
+    //   return merged;
+    // }
     catchall(index) {
         return new ZodObject({
             ...this._def,
@@ -3832,10 +4149,10 @@ class ZodObject extends ZodType {
     }
     pick(mask) {
         const shape = {};
-        util_1.util.objectKeys(mask).map((key) => {
-            // only add to shape if key corresponds to an element of the current shape
-            if (this.shape[key])
+        util_1.util.objectKeys(mask).forEach((key) => {
+            if (mask[key] && this.shape[key]) {
                 shape[key] = this.shape[key];
+            }
         });
         return new ZodObject({
             ...this._def,
@@ -3844,8 +4161,8 @@ class ZodObject extends ZodType {
     }
     omit(mask) {
         const shape = {};
-        util_1.util.objectKeys(this.shape).map((key) => {
-            if (util_1.util.objectKeys(mask).indexOf(key) === -1) {
+        util_1.util.objectKeys(this.shape).forEach((key) => {
+            if (!mask[key]) {
                 shape[key] = this.shape[key];
             }
         });
@@ -3859,26 +4176,15 @@ class ZodObject extends ZodType {
     }
     partial(mask) {
         const newShape = {};
-        if (mask) {
-            util_1.util.objectKeys(this.shape).map((key) => {
-                if (util_1.util.objectKeys(mask).indexOf(key) === -1) {
-                    newShape[key] = this.shape[key];
-                }
-                else {
-                    newShape[key] = this.shape[key].optional();
-                }
-            });
-            return new ZodObject({
-                ...this._def,
-                shape: () => newShape,
-            });
-        }
-        else {
-            for (const key in this.shape) {
-                const fieldSchema = this.shape[key];
+        util_1.util.objectKeys(this.shape).forEach((key) => {
+            const fieldSchema = this.shape[key];
+            if (mask && !mask[key]) {
+                newShape[key] = fieldSchema;
+            }
+            else {
                 newShape[key] = fieldSchema.optional();
             }
-        }
+        });
         return new ZodObject({
             ...this._def,
             shape: () => newShape,
@@ -3886,23 +4192,11 @@ class ZodObject extends ZodType {
     }
     required(mask) {
         const newShape = {};
-        if (mask) {
-            util_1.util.objectKeys(this.shape).map((key) => {
-                if (util_1.util.objectKeys(mask).indexOf(key) === -1) {
-                    newShape[key] = this.shape[key];
-                }
-                else {
-                    const fieldSchema = this.shape[key];
-                    let newField = fieldSchema;
-                    while (newField instanceof ZodOptional) {
-                        newField = newField._def.innerType;
-                    }
-                    newShape[key] = newField;
-                }
-            });
-        }
-        else {
-            for (const key in this.shape) {
+        util_1.util.objectKeys(this.shape).forEach((key) => {
+            if (mask && !mask[key]) {
+                newShape[key] = this.shape[key];
+            }
+            else {
                 const fieldSchema = this.shape[key];
                 let newField = fieldSchema;
                 while (newField instanceof ZodOptional) {
@@ -3910,7 +4204,7 @@ class ZodObject extends ZodType {
                 }
                 newShape[key] = newField;
             }
-        }
+        });
         return new ZodObject({
             ...this._def,
             shape: () => newShape,
@@ -4295,7 +4589,7 @@ class ZodTuple extends ZodType {
             });
             status.dirty();
         }
-        const items = ctx.data
+        const items = [...ctx.data]
             .map((item, itemIndex) => {
             const schema = this._def.items[itemIndex] || this._def.rest;
             if (!schema)
@@ -4681,6 +4975,7 @@ class ZodLiteral extends ZodType {
         if (input.data !== this._def.value) {
             const ctx = this._getOrReturnCtx(input);
             (0, parseUtil_1.addIssueToContext)(ctx, {
+                received: ctx.data,
                 code: ZodError_1.ZodIssueCode.invalid_literal,
                 expected: this._def.value,
             });
@@ -4755,6 +5050,12 @@ class ZodEnum extends ZodType {
         }
         return enumValues;
     }
+    extract(values) {
+        return ZodEnum.create(values);
+    }
+    exclude(values) {
+        return ZodEnum.create(this.options.filter((opt) => !values.includes(opt)));
+    }
 }
 exports.ZodEnum = ZodEnum;
 ZodEnum.create = createZodEnum;
@@ -4796,6 +5097,9 @@ ZodNativeEnum.create = (values, params) => {
     });
 };
 class ZodPromise extends ZodType {
+    unwrap() {
+        return this._def.type;
+    }
     _parse(input) {
         const { ctx } = this._processInputParams(input);
         if (ctx.parsedType !== util_1.ZodParsedType.promise &&
@@ -5041,24 +5345,30 @@ class ZodCatch extends ZodType {
         const result = this._def.innerType._parse({
             data: ctx.data,
             path: ctx.path,
-            parent: ctx,
+            parent: {
+                ...ctx,
+                common: {
+                    ...ctx.common,
+                    issues: [], // don't collect issues from inner type
+                },
+            },
         });
         if ((0, parseUtil_1.isAsync)(result)) {
             return result.then((result) => {
                 return {
                     status: "valid",
-                    value: result.status === "valid" ? result.value : this._def.defaultValue(),
+                    value: result.status === "valid" ? result.value : this._def.catchValue(),
                 };
             });
         }
         else {
             return {
                 status: "valid",
-                value: result.status === "valid" ? result.value : this._def.defaultValue(),
+                value: result.status === "valid" ? result.value : this._def.catchValue(),
             };
         }
     }
-    removeDefault() {
+    removeCatch() {
         return this._def.innerType;
     }
 }
@@ -5067,9 +5377,7 @@ ZodCatch.create = (type, params) => {
     return new ZodCatch({
         innerType: type,
         typeName: ZodFirstPartyTypeKind.ZodCatch,
-        defaultValue: typeof params.default === "function"
-            ? params.default
-            : () => params.default,
+        catchValue: typeof params.catch === "function" ? params.catch : () => params.catch,
         ...processCreateParams(params),
     });
 };
@@ -5312,11 +5620,14 @@ exports.oboolean = oboolean;
 exports.coerce = {
     string: ((arg) => ZodString.create({ ...arg, coerce: true })),
     number: ((arg) => ZodNumber.create({ ...arg, coerce: true })),
-    boolean: ((arg) => ZodBoolean.create({ ...arg, coerce: true })),
+    boolean: ((arg) => ZodBoolean.create({
+        ...arg,
+        coerce: true,
+    })),
     bigint: ((arg) => ZodBigInt.create({ ...arg, coerce: true })),
     date: ((arg) => ZodDate.create({ ...arg, coerce: true })),
 };
 exports.NEVER = parseUtil_1.INVALID;
 
-},{"./ZodError":28,"./errors":29,"./helpers/errorUtil":31,"./helpers/parseUtil":32,"./helpers/util":34}]},{},[3])(3)
+},{"./ZodError":30,"./errors":31,"./helpers/errorUtil":33,"./helpers/parseUtil":34,"./helpers/util":36}]},{},[3])(3)
 });
