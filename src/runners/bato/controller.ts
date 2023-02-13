@@ -1,13 +1,12 @@
 import {
   ChapterData,
   Filter,
-  Highlight,
+  FilterType,
   PagedResult,
+  Property,
   SearchRequest,
   Tag,
 } from "@suwatte/daisuke";
-import { load, Element } from "cheerio";
-import { decode } from "he";
 import {
   ADULT_TAGS,
   CONTENT_TYPE_TAGS,
@@ -38,75 +37,49 @@ export class Controller {
       params["page"] = query.page;
     }
 
-    // Filters
-    const includedTags = this.getMappedFilters(query.includedTags ?? []);
-    const excludedTags = this.getMappedFilters(query.excludedTags ?? []);
-
-    // TODO: This can be simplified by changing the tag prefix to match the Query Param, so something like a forEach could just prepare the values
-    params.genres = this.prepareFilterString(
-      includedTags.genre,
-      excludedTags.genre
-    );
-
-    const preparedLangs = this.prepareFilterString(
-      includedTags.lang,
-      excludedTags.lang
-    );
-    if (preparedLangs) {
-      params.langs = preparedLangs;
-    } else {
-      const values = await this.store.get("content_search_langs");
-      if (values) {
-        const langs = values.split(", ");
-        params.lang = this.prepareFilterString(langs, []);
+    const includedTags: string[] = [];
+    const excludedTags: string[] = [];
+    for (const filter of query.filters ?? []) {
+      switch (filter.id) {
+        case "creators":
+          if (!filter.included || !filter.included[0] || params.word) break;
+          params.word = filter.included[0];
+          break;
+        case "origin":
+          params.origs = this.prepareFilterString(
+            filter.included ?? [],
+            filter.excluded ?? []
+          );
+          break;
+        case "translated":
+          params.lang = this.prepareFilterString(
+            filter.included ?? [],
+            filter.excluded ?? []
+          );
+          if (!params.lang) {
+            const values = await this.store.get("content_search_langs");
+            if (values) {
+              const langs = values.split(", ");
+              params.lang = this.prepareFilterString(langs, []);
+            }
+          }
+          break;
+        case "status":
+          if (!filter.included) break;
+          params.release = this.prepareFilterString(filter.included, []);
+          break;
+        default:
+          if (filter.included) includedTags.push(...filter.included);
+          if (filter.excluded) excludedTags.push(...filter.excluded);
+          break;
       }
     }
-    params.origs = this.prepareFilterString(
-      includedTags.origin,
-      excludedTags.origin
-    );
-    params.chapters = this.prepareFilterString(
-      includedTags.chapters,
-      excludedTags.chapters
-    );
-
-    const includedWord = this.prepareFilterString(includedTags.word, []);
-    if (!params.word && includedWord) params.word = includedWord;
-
-    params.release = this.prepareFilterString(includedTags.status, []);
-    params.sort = query.sort?.id ?? "";
-
+    params.sort = query.sort ?? "";
     const response = await this.client.get(`${this.BASE}/browse`, {
       params,
     });
     const results = this.parser.parsePagedResponse(response.data);
     return { page: query.page ?? 1, results, isLastPage: results.length > 60 };
-  }
-
-  getMappedFilters(data: string[]) {
-    type T = Record<string, string[]>;
-    const object: T = data.reduce(
-      (result: T, value) => {
-        // Split Tag Group & Key
-        const [group, key] = value.split(this.TAG_DIVIDER);
-
-        // Return Result if Key or Group is Invalid
-        if (!group || !key) return result;
-
-        result[group].push(key);
-        return result;
-      },
-      {
-        genre: [],
-        lang: [],
-        origin: [],
-        chapters: [],
-        status: [],
-        word: [],
-      }
-    );
-
-    return object;
   }
 
   prepareFilterString(included: string[], excluded: string[]) {
@@ -124,66 +97,87 @@ export class Controller {
     return [
       {
         id: "content_type",
-        property: {
-          id: "content_type",
-          label: "Content Type",
-          tags: CONTENT_TYPE_TAGS,
-        },
-        canExclude: true,
+        title: "Content Type",
+        type: FilterType.EXCLUDABLE_MULTISELECT,
+        options: CONTENT_TYPE_TAGS,
       },
       {
         id: "demographic",
-        property: {
-          id: "demographic",
-          label: "Demographics",
-          tags: DEMOGRAPHIC_TAGS,
-        },
-        canExclude: true,
+        title: "Demographics",
+        type: FilterType.EXCLUDABLE_MULTISELECT,
+        options: DEMOGRAPHIC_TAGS,
       },
       {
         id: "adult",
-        property: {
-          id: "adult",
-          label: "Mature",
-          tags: ADULT_TAGS,
-        },
-        canExclude: true,
+        title: "Mature",
+        type: FilterType.EXCLUDABLE_MULTISELECT,
+        options: ADULT_TAGS,
       },
       {
         id: "general",
-        property: {
-          id: "general",
-          label: "Genres",
-          tags: GENERIC_TAGS,
-        },
-        canExclude: true,
+        title: "Genres",
+        type: FilterType.EXCLUDABLE_MULTISELECT,
+        options: GENERIC_TAGS,
       },
       {
         id: "origin",
-        property: {
-          id: "origin",
-          label: "Original Language",
-          tags: ORIGIN_TAGS,
-        },
-        canExclude: false,
+        title: "Original Language",
+        type: FilterType.SELECT,
+        options: ORIGIN_TAGS,
       },
       {
         id: "translated",
-        property: {
-          id: "translated",
-          label: "Translated Language",
-          tags: LANG_TAGS,
-        },
-        canExclude: false,
+        title: "Translated Language",
+        subtitle:
+          "NOTE: When Selected, This will override your language preferences",
+        type: FilterType.SELECT,
+        options: LANG_TAGS,
       },
       {
         id: "status",
-        property: {
-          id: "status",
-          label: "Content Status",
-          tags: STATUS_TAGS,
-        },
-        canExclude: false,
+        title: "Content Status",
+        type: FilterType.SELECT,
+        options: STATUS_TAGS,
+      },
+    ];
+  }
+
+  getProperties(): Property[] {
+    return [
+      {
+        id: "content_type",
+        label: "Content Type",
+        tags: CONTENT_TYPE_TAGS,
+      },
+      {
+        id: "demographic",
+        label: "Demographics",
+        tags: DEMOGRAPHIC_TAGS,
+      },
+      {
+        id: "adult",
+        label: "Mature",
+        tags: ADULT_TAGS,
+      },
+      {
+        id: "general",
+        label: "Genres",
+        tags: GENERIC_TAGS,
+      },
+      {
+        id: "origin",
+        label: "Original Language",
+        tags: ORIGIN_TAGS,
+      },
+      {
+        id: "translated",
+        label: "Translated Language",
+        tags: LANG_TAGS,
+      },
+      {
+        id: "status",
+        label: "Content Status",
+        tags: STATUS_TAGS,
       },
     ];
   }

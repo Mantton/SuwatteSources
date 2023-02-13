@@ -58,8 +58,8 @@ const generateAJAXRequest = (
     body["vars[meta_query][0][value]"] = "manga";
   }
 
-  if (request.sort?.id) {
-    switch (request.sort.id) {
+  if (request.sort) {
+    switch (request.sort) {
       case "latest":
         body["vars[orderby]"] = "meta_value_num";
         body["vars[order]"] = "DESC";

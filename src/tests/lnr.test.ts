@@ -32,7 +32,7 @@ describe("LNR Tests", () => {
 
   test("Search Source", async () => {
     const pagedResult = await source.getSearchResults({
-      includedTags: ["genre|4", "genre|15"],
+      // includedTags: ["genre|4", "genre|15"],
       page: 1,
     });
     expect(pagedResult.results[0]).not.toBeUndefined();

@@ -1,7 +1,7 @@
 import { Target } from "../runners/mangadex";
 import emulate from "@suwatte/emulator";
+import { Validate } from "@suwatte/daisuke";
 
-// Shitty ass tests but hey, TESTS!
 describe("MangaDex Tests", () => {
   const source = emulate(Target);
   const testIds = [
@@ -10,6 +10,18 @@ describe("MangaDex Tests", () => {
     "d8a959f7-648e-4c8d-8f23-f1f3f8e129f3",
   ];
   const seasonalList = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
+
+  test("Search", async () => {
+    const data = await source.getSearchResults({
+      filters: [
+        {
+          id: "content_rating",
+          included: ["suggestive"],
+        },
+      ],
+    });
+    expect(Validate.object.pagedResult(data)).toBe(true);
+  });
   test("Get Tags", async () => {
     const tags = await source.getSourceTags();
     expect(tags).not.toBe(null);

@@ -280,7 +280,7 @@ export const parseTags = (html: string) => {
     const id = $("span", element).attr("data-id");
 
     if (!id) continue;
-    genres.tags.push({ label, id: `genre|${id}`, adultContent: false });
+    genres.tags.push({ label, id, adultContent: false });
   }
 
   // Novel Type
@@ -295,7 +295,7 @@ export const parseTags = (html: string) => {
     const label = $("span", element).text().trim();
     const id = $("input", element).attr("value");
     if (!id) continue;
-    types.tags.push({ id: `type|${id}`, label, adultContent: false });
+    types.tags.push({ id, label, adultContent: false });
   }
 
   // Languages
@@ -310,7 +310,7 @@ export const parseTags = (html: string) => {
     const label = $("label", element).text().trim();
     const id = $("span", element).attr("data-value");
     if (!id) continue;
-    langs.tags.push({ id: `lang|${id}`, label, adultContent: false });
+    langs.tags.push({ id, label, adultContent: false });
   }
   return [genres, types, langs];
 };

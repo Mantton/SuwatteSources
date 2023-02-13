@@ -4,6 +4,7 @@ import {
   CollectionExcerpt,
   Content,
   ExploreCollection,
+  ExploreTag,
   Filter,
   NetworkRequest,
   PagedResult,
@@ -11,13 +12,8 @@ import {
   SearchRequest,
   SearchSort,
   Source,
-  SourceInfo,
-  Tag,
 } from "@suwatte/daisuke";
-import {
-  DEFAULT_CONTEXT,
-  EXPLORE_SECTIONS as EXPLORE_COLLECTIONS,
-} from "./constants";
+import { EXPLORE_SECTIONS as EXPLORE_COLLECTIONS } from "./constants";
 import { Controller } from "./controller";
 import { Context } from "./types";
 
@@ -73,7 +69,7 @@ export abstract class MadaraTemplate extends Source {
   }
 
   //
-  getExplorePageTags(): Promise<Tag[]> {
+  getExplorePageTags(): Promise<ExploreTag[]> {
     return this.controller.getExploreTags();
   }
 

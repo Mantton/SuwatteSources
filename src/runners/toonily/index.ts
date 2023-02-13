@@ -13,6 +13,7 @@ export class Target extends MadaraTemplate {
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
     nsfw: true,
+    minSupportedAppVersion: "4.6.0",
   };
 
   constructor() {

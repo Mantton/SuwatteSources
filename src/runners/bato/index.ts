@@ -24,6 +24,7 @@ export class Target extends Source {
     supportedLanguages: [],
     nsfw: false,
     thumbnail: "bato.png",
+    minSupportedAppVersion: "4.6.0",
   };
 
   private controller = new Controller();
@@ -40,7 +41,7 @@ export class Target extends Source {
     return this.controller.getSearchResults(query);
   }
   async getSourceTags(): Promise<Property[]> {
-    return this.controller.getFilters().map((v) => v.property);
+    return this.controller.getProperties();
   }
 
   async getSearchFilters(): Promise<Filter[]> {

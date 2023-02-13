@@ -17,7 +17,7 @@ export class Controller {
 
   private directory: DirectoryEntry[] = [];
   private directoryHTML = "";
-
+  private homepage = "";
   // Directory
 
   private async getDirectoryString() {
@@ -46,20 +46,19 @@ export class Controller {
     this.parser.thumbnail(html);
   }
 
-  private async fetchHomePage(): Promise<string> {
+  async fetchHomePage() {
     const host = await this.store.host();
     const response = await this.client.get(host);
-    return response.data;
+    this.homepage = response.data;
+    if (!this.parser.hasThumbnail()) {
+      await this.setThumbnail();
+    }
   }
 
   // Explore
   async resolveExcerpt(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
-    if (!this.parser.hasThumbnail()) {
-      await this.setThumbnail();
-    }
-    const html = await this.fetchHomePage();
     const regex = PATHS[excerpt.id];
-    const str = html.match(regex)?.[1];
+    const str = this.homepage.match(regex)?.[1];
 
     if (!str) throw new Error("Failed to Match HomePage Section");
     const highlights = this.parser.homepageSection(JSON.parse(str));
@@ -79,7 +78,7 @@ export class Controller {
       await this.fetchDirectory();
     }
 
-    const key = SORT_KEYS[request.sort?.id ?? ""] ?? "v";
+    const key = SORT_KEYS[request.sort ?? ""] ?? "v";
 
     const parsed = this.parser.search(request);
 

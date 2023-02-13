@@ -141,19 +141,21 @@ export class Parser {
       const value = $(element).attr("value");
       if (!value) continue;
       properties[0].tags.push({
-        id: `genre:${value}`,
+        id: value,
         label: $(element).text().trim(),
         adultContent: false,
       });
     }
     // Publisher
+
     const publisherElement = $("p:contains(Publisher) + div button", body);
     if (!publisherElement.attr("value"))
       throw new Error("Failed to parse publisher");
+    properties.push({ id: "publisher", label: "Publisher", tags: [] });
 
-    properties[0].tags.push({
-      id: `publisher:${publisherElement.attr("value")}`,
-      label: "Published By " + publisherElement.text().trim(),
+    properties[1].tags.push({
+      id: publisherElement.attr("value") ?? "",
+      label: publisherElement.text().trim(),
       adultContent: false,
     });
     // Credits
@@ -164,7 +166,7 @@ export class Parser {
       const value = $(element).attr("value");
       if (!value) continue;
       properties[1].tags.push({
-        id: `writer:${value}`,
+        id: value,
         label: $(element).text().trim(),
         adultContent: false,
       });

@@ -4,7 +4,9 @@ import {
   CollectionExcerpt,
   Content,
   ExploreCollection,
+  ExploreTag,
   Filter,
+  FilterType,
   PagedResult,
   Property,
   SearchRequest,
@@ -32,6 +34,7 @@ export class Target extends Source {
     website: "https://lightnovelreader.me",
     nsfw: false,
     thumbnail: "lnr.png",
+    minSupportedAppVersion: "4.6.0",
   };
   CLIENT = new NetworkClient();
   BASE_URL = "https://lightnovelreader.me";
@@ -61,36 +64,30 @@ export class Target extends Source {
       params["keyword"] = query.query;
     }
 
-    if (query.includedTags && query.includedTags.length != 0) {
-      const genres = [],
-        langs = [],
-        types = [];
-
-      for (const tag of query.includedTags) {
-        const [pre, val] = tag.split("|");
-        switch (pre) {
-          case "genre":
-            genres.push(val);
-            break;
-          case "type":
-            types.push(val);
-            break;
-          case "lang":
-            langs.push(val);
-        }
+    const genres = [],
+      langs = [],
+      types = [],
+      excluded = [];
+    for (const filter of query.filters ?? []) {
+      switch (filter.id) {
+        case "genre":
+          genres.push(...(filter.included ?? []));
+          excluded.push(...(filter.excluded ?? []));
+          break;
+        case "type":
+          types.push(...(filter.included ?? []));
+          break;
+        case "lang":
+          langs.push(...(filter.included ?? []));
+          break;
       }
-
-      if (genres.length != 0) params["include[genre]"] = genres;
-      if (types.length != 0) params["include[novel_type]"] = types;
-      if (langs.length != 0) params["include[language]"] = langs;
     }
 
-    if (query.excludedTags && query.excludedTags.length != 0) {
-      const excludedGenres = query.excludedTags
-        .map((v) => v.split("|").pop() ?? "")
-        .filter((v) => v);
-      if (excludedGenres.length != 0) params["exclude[genre]"] = excludedGenres;
-    }
+    if (genres.length != 0) params["include[genre]"] = genres;
+    if (types.length != 0) params["include[novel_type]"] = types;
+    if (langs.length != 0) params["include[language]"] = langs;
+    if (excluded.length != 0) params["exclude[genre]"] = excluded;
+
     const response = await this.CLIENT.post(
       this.BASE_URL + "/detailed-search-lnr",
       {
@@ -121,13 +118,15 @@ export class Target extends Source {
     this.HOMEPAGE = (await this.CLIENT.get(`${this.BASE_URL}`)).data;
   }
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
+    return getExploreCollections();
+  }
+
+  async willResolveExploreCollections(): Promise<void> {
     // Parse Homepage
     try {
       await this.getHomePage();
     } catch {}
-    return getExploreCollections();
   }
-
   async resolveExploreCollection(
     excerpt: CollectionExcerpt
   ): Promise<ExploreCollection> {
@@ -151,12 +150,15 @@ export class Target extends Source {
     };
   }
 
-  async getExplorePageTags(): Promise<Tag[]> {
+  async getExplorePageTags(): Promise<ExploreTag[]> {
     const response = await this.CLIENT.get(
       this.BASE_URL + "/detailed-search-lnr"
     );
     const props = parseTags(response.data);
-    return sampleSize(props[0].tags, 7);
+    return sampleSize(props[0].tags, 7).map((v) => ({
+      ...v,
+      filterId: "genre",
+    }));
   }
 
   async getRankedHighlights(key: string) {
@@ -172,8 +174,12 @@ export class Target extends Source {
     const props = parseTags(response.data);
     return props.map((v) => ({
       id: v.id,
-      canExclude: v.id === "genre",
-      property: v,
+      title: v.label,
+      options: v.tags,
+      type:
+        v.id === "genre"
+          ? FilterType.EXCLUDABLE_MULTISELECT
+          : FilterType.MULTISELECT,
     }));
   }
 }

@@ -119,10 +119,10 @@ export const properties = () => {
 
   // Genres
   properties.push({
-    id: "genres",
+    id: "genre",
     label: "Genres",
     tags: GENRE_LIST.map((v) => ({
-      id: `genre:${v}`,
+      id: v,
       label: v,
       adultContent: false,
     })),
@@ -130,10 +130,10 @@ export const properties = () => {
 
   // Publishers
   properties.push({
-    id: "publishers",
+    id: "publisher",
     label: "Publishers",
     tags: PUBLISHER_LIST.map((v) => ({
-      id: `publisher:${v}`,
+      id: v,
       label: v,
       adultContent: false,
     })),
@@ -141,10 +141,10 @@ export const properties = () => {
 
   // Years
   properties.push({
-    id: "years",
+    id: "year",
     label: "Years",
     tags: YEAR_LIST.map((v) => ({
-      id: `year:${v}`,
+      id: v.toString(),
       label: v.toString(),
       adultContent: false,
     })),

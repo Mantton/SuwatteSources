@@ -82,7 +82,7 @@ describe("Comic Castle Tests", () => {
   });
   test("Get Search Results", async () => {
     const data = await source.getSearchResults({
-      includedTags: ["publisher:Marvel"],
+      filters: [{ id: "publisher", included: ["Marvel"] }],
     });
     expect(data.results.length).toBeGreaterThan(1);
   });

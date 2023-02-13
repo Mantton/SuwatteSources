@@ -5,6 +5,7 @@ import {
   CollectionStyle,
   Content,
   Filter,
+  FilterType,
   Highlight,
   HighlightCollection,
   Property,
@@ -13,7 +14,7 @@ import {
   Status,
 } from "@suwatte/daisuke";
 import { load } from "cheerio";
-import { capitalize } from "lodash";
+import { capitalize, toLower } from "lodash";
 import moment from "moment";
 import {
   ADULT_TAGS,
@@ -75,32 +76,24 @@ export class Parser {
     const types: string[] = JSON.parse(typesStr);
     // Genres
     filters.push({
-      id: "genres",
-      canExclude: true,
-      property: {
-        id: "genres",
-        label: "Genres",
-        tags: genres.map((v) => ({
-          id: v.toLowerCase(),
-          label: v,
-          adultContent: ADULT_TAGS.includes(v.toLowerCase()),
-        })),
-      },
+      id: TAG_PREFIX.genres,
+      title: "Genres",
+      type: FilterType.EXCLUDABLE_MULTISELECT,
+      options: genres.map((v) => ({
+        id: v.toLowerCase(),
+        label: v,
+      })),
     });
 
     // Types
     filters.push({
-      id: "types",
-      canExclude: true,
-      property: {
-        id: "types",
-        label: "Types",
-        tags: types.map((v) => ({
-          id: `${TAG_PREFIX.type}${v.toLowerCase()}`,
-          label: v,
-          adultContent: ADULT_TAGS.includes(v.toLowerCase()),
-        })),
-      },
+      id: TAG_PREFIX.type,
+      title: "Types",
+      type: FilterType.EXCLUDABLE_MULTISELECT,
+      options: types.map((v) => ({
+        id: v.toLowerCase(),
+        label: v,
+      })),
     });
 
     return [...filters, ...DEFAULT_FILTERS];
@@ -117,50 +110,57 @@ export class Parser {
   }
 
   search(request: SearchRequest): ParsedRequest {
+    const { filters } = request;
+    const grouped = filters?.find((v) => v.id == "grouped");
+    const groupedTypes = grouped?.included
+      ?.filter((v) => v.startsWith(TAG_PREFIX.type))
+      .map((v) => v.split(":")?.[1])
+      .filter((v) => v);
+    const groupedYear = grouped?.included
+      ?.filter((v) => v.startsWith(TAG_PREFIX.year))
+      .map((v) => v.split(":")?.[1])
+      .filter((v) => v)?.[0];
+    const orig = grouped?.included?.includes(TAG_PREFIX.translation);
     return {
       query: request.query?.toLowerCase(),
 
       // Tags
-      includedTags: request.includedTags
-        ?.filter((v) => !v.includes("|"))
-        .map((v) => v.toLowerCase()),
-      excludedTags: request.excludedTags
-        ?.filter((v) => !v.includes("|"))
-        .map((v) => v.toLowerCase()),
+      includedTags: filters
+        ?.find((v) => v.id == TAG_PREFIX.genres)
+        ?.included?.map(toLower),
+      excludedTags: filters
+        ?.find((v) => v.id == TAG_PREFIX.genres)
+        ?.excluded?.map(toLower),
 
       // Author
-      authors: request.includedTags
-        ?.filter((tag) => tag.includes(TAG_PREFIX.author))
-        .map((tag) => tag.toLowerCase().split("|").pop() ?? "")
-        .filter((v) => !!v),
+      authors: filters
+        ?.find((v) => v.id == TAG_PREFIX.author)
+        ?.included?.map(toLower),
       // Status
-      p_status: request.includedTags
-        ?.filter((tag) => tag.includes(TAG_PREFIX.publication))
-        .map((tag) => tag.toLowerCase().split("|").pop() ?? "")
-        .filter((v) => !!v),
-      s_status: request.includedTags
-        ?.filter((tag) => tag.includes(TAG_PREFIX.scanlation))
-        .map((tag) => tag.toLowerCase().split("|").pop() ?? "")
-        .filter((v) => !!v),
+      p_status: filters
+        ?.find((v) => v.id == TAG_PREFIX.publication)
+        ?.included?.map(toLower),
+      s_status: filters
+        ?.find((v) => v.id == TAG_PREFIX.scanlation)
+        ?.included?.map(toLower),
 
       // Types
-      includeTypes: request.includedTags
-        ?.filter((tag) => tag.includes(TAG_PREFIX.type))
-        .map((tag) => tag.toLowerCase().split("|").pop() ?? "")
-        .filter((v) => !!v),
-      excludeTypes: request.excludedTags
-        ?.filter((tag) => tag.includes(TAG_PREFIX.type))
-        .map((tag) => tag.toLowerCase().split("|").pop() ?? "")
-        .filter((v) => !!v),
+      includeTypes:
+        filters?.find((v) => v.id == TAG_PREFIX.type)?.included?.map(toLower) ??
+        groupedTypes,
+      excludeTypes: filters
+        ?.find((v) => v.id == TAG_PREFIX.type)
+        ?.excluded?.map(toLower),
 
       // Original Translation
       originalTranslation:
-        request.includedTags?.includes(TAG_PREFIX.lang) ?? false,
+        filters?.find((v) => v.id == TAG_PREFIX.translation)?.bool ??
+        orig ??
+        false,
       // Release Year
-      released: request.includedTags
-        ?.find((v) => v.includes(TAG_PREFIX.year))
-        ?.split("|")
-        .pop(),
+      released:
+        filters?.find((v) => v.id == TAG_PREFIX.year)?.included?.[0] ??
+        groupedYear,
     };
   }
 
@@ -197,11 +197,8 @@ export class Parser {
       .toArray()
       .map((v) => v.trim())
       .filter((v) => !!v);
-    const adultContent = ADULT_TAGS.some((v) =>
-      genres.includes(v.toLowerCase())
-    );
     properties.push({
-      id: "genres",
+      id: TAG_PREFIX.genres,
       label: "Genres",
       tags: genres.map((v) => ({
         id: v.toLowerCase(),
@@ -209,6 +206,8 @@ export class Parser {
         adultContent: ADULT_TAGS.includes(v.toLowerCase()),
       })),
     });
+
+    const adultContent = properties[0].tags.some((v) => v.adultContent);
 
     // Grouped Types, Released, Official Translation
     const groupedProperty: Property = {
@@ -232,17 +231,15 @@ export class Parser {
 
     // Type
     groupedProperty.tags.push({
-      id: `${TAG_PREFIX.type}${type.toLowerCase()}`,
+      id: `${TAG_PREFIX.type}:${type.toLowerCase()}`,
       label: type,
-      adultContent: false,
     });
 
     // Released
 
     groupedProperty.tags.push({
-      id: `${TAG_PREFIX.year}${released}`,
+      id: `${TAG_PREFIX.year}:${released}`,
       label: `Released in ${released}`,
-      adultContent: false,
     });
 
     // Reading Mode
@@ -255,19 +252,17 @@ export class Parser {
       groupedProperty.tags.push({
         id: TAG_PREFIX.lang,
         label: "Official Translation",
-        adultContent: false,
       });
     }
     properties.push(groupedProperty);
 
     /// Authors
     properties.push({
-      id: "authors",
+      id: TAG_PREFIX.author,
       label: "Author(s)",
       tags: creators.map((v) => ({
-        id: `${TAG_PREFIX.author}${v.trim().toLowerCase()}`,
+        id: v.trim().toLowerCase(),
         label: v.split(" ").map(capitalize).join(" ").trim(),
-        adultContent: false,
       })),
     });
 
@@ -300,7 +295,6 @@ export class Parser {
 
     const cover = this.coverFor(id);
     const chapters = this.chapters(html, id);
-
     return {
       contentId: id,
       additionalTitles,

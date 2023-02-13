@@ -4,7 +4,9 @@ import {
   CollectionExcerpt,
   Content,
   ExploreCollection,
+  ExploreTag,
   Filter,
+  FilterType,
   PagedResult,
   Property,
   SearchRequest,
@@ -29,7 +31,7 @@ export class Controller {
   // Resolve Explore Collection
   async getCollection(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
     const request = AJAXDirectoryRequest(this.context, {
-      sort: { id: excerpt.id, label: "" },
+      sort: excerpt.id,
     });
     const response = await this.client.request(request);
     const highlights = this.parser.AJAXResponse(this.context, response.data);
@@ -77,48 +79,43 @@ export class Controller {
     );
     const tags = this.parser.genres(this.context, response.data);
     return {
-      id: "main",
+      id: "genres",
       label: "Genres",
       tags,
     };
   }
 
-  async getExploreTags(): Promise<Tag[]> {
+  async getExploreTags(): Promise<ExploreTag[]> {
     const tags = (await this.getTags()).tags;
-    return sampleSize(tags, 7);
+    return sampleSize(tags, 7).map((v) => ({ ...v, filterId: "genres" }));
   }
 
   async getFilters(): Promise<Filter[]> {
     const main: Filter = {
-      id: "main",
-      property: await this.getTags(),
-      canExclude: false,
+      id: "genres",
+      title: "Genres",
+      type: FilterType.MULTISELECT,
+      options: (await this.getTags()).tags,
     };
 
     const adult: Filter = {
       id: "adult",
-      property: {
-        id: "adult",
-        label: "Adults",
-        tags: [
-          {
-            id: "wp_adult|all",
-            label: "All",
-            adultContent: true,
-          },
-          {
-            id: "wp_adult|hidden",
-            label: "Mature Hidden",
-            adultContent: false,
-          },
-          {
-            id: "wp_adult|only",
-            label: "Mature Only",
-            adultContent: true,
-          },
-        ],
-      },
-      canExclude: false,
+      title: "Adult Content",
+      type: FilterType.SELECT,
+      options: [
+        {
+          id: "all",
+          label: "Show All",
+        },
+        {
+          id: "hidden",
+          label: "Hide Adult Titles",
+        },
+        {
+          id: "only",
+          label: "Show Only Adult Content",
+        },
+      ],
     };
     return [main, adult];
   }
@@ -133,20 +130,21 @@ export class Controller {
 
   async searchWithQueryParams(request: SearchRequest): Promise<PagedResult> {
     const base = `${this.context.baseUrl}/page/${request.page ?? 1}/`;
-
-    const tags = request.includedTags?.filter((v) => !v.includes("|"));
-    const adult = request.includedTags
-      ?.filter((v) => v.includes("wp_adult|"))
-      .map((v) => v.split("|").pop() ?? "")
-      .filter((v) => v)?.[0];
     const params: Record<string, any> = {
       s: request.query,
       post_type: "wp-manga",
-      adult: adult ? (adult == "hidden" ? "0" : "1") : "",
     };
-
-    if (tags && tags.length > 0) {
-      params["genres[]"] = tags;
+    for (const filter of request.filters ?? []) {
+      switch (filter.id) {
+        case "genres":
+          if (!filter.included) break;
+          params["genres[]"] = filter.included;
+          break;
+        case "adult":
+          if (!filter.included || !filter.included[0]) break; // Guard
+          params["adult"] = filter.included[0] == "hidden" ? "0" : "1";
+          break;
+      }
     }
 
     const response = await this.client.get(base, {

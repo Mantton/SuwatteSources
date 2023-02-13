@@ -6,9 +6,12 @@ describe("Bato Tests", () => {
   const source = emulate(Target);
 
   test("Get Search Results", async () => {
-    const includedTags = ["genre:action", "lang:en"];
-    const excludedTags = ["genre:crime"];
-    const data = await source.getSearchResults({ includedTags, excludedTags });
+    const data = await source.getSearchResults({
+      filters: [
+        { id: "genre", included: ["action"], excluded: ["crime"] },
+        { id: "lang", included: ["en"] },
+      ],
+    });
     expect(data.results.length).toBeGreaterThan(0);
   });
 

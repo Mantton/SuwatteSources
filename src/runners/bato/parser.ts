@@ -101,7 +101,7 @@ export class Parser {
       id: "creators",
       label: "Credits",
       tags: [artist, author].map((v) => ({
-        id: `word:${encode(v)}`,
+        id: encode(v),
         label: v,
         adultContent: false,
       })),

@@ -32,6 +32,8 @@ import {
   ActionGroup,
   DownSyncedContent,
   UpSyncedContent,
+  FilterType,
+  ExploreTag,
 } from "@suwatte/daisuke";
 import explore_tags from "./explore.json";
 import { decode, encode } from "he";
@@ -59,7 +61,7 @@ export class Target extends Source {
     ),
     nsfw: false,
     thumbnail: "mangadex.png",
-    minSupportedAppVersion: "4.5.0",
+    minSupportedAppVersion: "4.6.0",
   };
   private API_URL = "https://api.mangadex.org";
   private COVER_URL = "https://uploads.mangadex.org/covers";
@@ -170,7 +172,7 @@ export class Target extends Source {
     if (attributes.contentRating) {
       const tags: Tag[] = [];
       const tag: Tag = {
-        id: `cr|${attributes.contentRating.toLowerCase()}`,
+        id: attributes.contentRating.toLowerCase(),
         label: capitalize(attributes.contentRating),
         adultContent: attributes.contentRating == "pornographic",
       };
@@ -190,7 +192,7 @@ export class Target extends Source {
     if (originalLang) {
       const tags: Tag[] = [];
       const languageTag: Tag = {
-        id: `lang|${originalLang}`,
+        id: originalLang,
         label: languageLabel(originalLang ?? "unknown"),
         adultContent: false,
       };
@@ -199,7 +201,7 @@ export class Target extends Source {
 
       tags.push(languageTag);
       const languageTags: Property = {
-        id: "language",
+        id: "lang",
         label: "Original Language",
         tags,
       };
@@ -226,7 +228,7 @@ export class Target extends Source {
 
         credits.forEach((obj: any) => {
           const tag: Tag = {
-            id: `author|${obj.id}`,
+            id: obj.id,
             label: decode(obj.attributes.name),
             adultContent: false,
           };
@@ -237,7 +239,7 @@ export class Target extends Source {
           }
         });
         const creditsProperty: Property = {
-          id: "credits",
+          id: "authors",
           label: "Credits",
           tags,
         };
@@ -570,14 +572,11 @@ export class Target extends Source {
         } else {
           const sort = (await this.getSearchSorters()).find(
             (v) => v.id === excerpt.id
-          );
-          const tags = (await this.STORE.getContentRatings()).map(
-            (v) => `cr|${v}`
-          );
+          )?.id;
+          const content_ratings = await this.STORE.getContentRatings();
           const query: SearchRequest = {
             page: 1,
-            includedTags: tags,
-            excludedTags: [],
+            filters: [{ id: "content_rating", included: content_ratings }],
             sort,
           };
 
@@ -619,8 +618,8 @@ export class Target extends Source {
 
     return this.parsePagedResponse(response, 1, true, false);
   }
-  async getExplorePageTags(): Promise<Tag[]> {
-    return explore_tags;
+  async getExplorePageTags(): Promise<ExploreTag[]> {
+    return explore_tags.map((v) => ({ ...v, filterId: "general" }));
   }
 
   // * Search
@@ -655,13 +654,15 @@ export class Target extends Source {
     for (const property of await this.getMDTags()) {
       const filter: Filter = {
         id: property.id,
-        canExclude: !nonExcludable.includes(property.id),
-        property,
+        title: property.label,
+        options: property.tags,
+        type: nonExcludable.includes(property.id)
+          ? FilterType.MULTISELECT
+          : FilterType.EXCLUDABLE_MULTISELECT,
       };
 
       filters.push(filter);
     }
-
     return filters;
   }
 
@@ -968,7 +969,7 @@ export class Target extends Source {
       label: "Publication Status",
       tags: this.PUBLICATION_STATUS.map((v) => {
         return {
-          id: `s|${v}`,
+          id: v,
           label: capitalize(v),
           adultContent: false,
         };
@@ -980,7 +981,7 @@ export class Target extends Source {
       label: "Publication Demographic",
       tags: this.DEMOGRAPHICS.map((v) => {
         return {
-          id: `pd|${v}`,
+          id: v,
           label: capitalize(v),
           adultContent: false,
         };
@@ -992,7 +993,7 @@ export class Target extends Source {
       label: "Content Rating",
       tags: this.CONTENT_RATINGS.map((v) => {
         return {
-          id: `cr|${v}`,
+          id: v,
           label: capitalize(v),
           adultContent: v === "pornographic",
         };
@@ -1004,7 +1005,7 @@ export class Target extends Source {
       label: "Original Language",
       tags: this.LANGUAGES.map((v) => {
         return {
-          id: `lang|${v}`,
+          id: v,
           label: languageLabel(v),
           adultContent: false,
         };
@@ -1227,58 +1228,42 @@ export class Target extends Source {
 
     // Order
     if (query.sort) {
-      params[`order[${query.sort.id}]`] = "desc";
+      params[`order[${query.sort}]`] = "desc";
     } else {
       params["order[followedCount]"] = "desc";
     }
 
-    // Included
-    if (query.includedTags) {
-      // Content Rating
-      const includedCR = query.includedTags
-        .filter((tag) => tag.includes("cr|"))
-        .map((tag) => tag.split("|").pop()!);
-      params.contentRating =
-        includedCR.length == 0
-          ? ["safe", "suggestive", "erotica", "pornographic"]
-          : includedCR;
+    for (const filter of query.filters ?? []) {
+      const included = filter.included ?? [];
+      const excluded = filter.excluded ?? [];
+      switch (filter.id) {
+        case "demographic":
+          params.publicationDemographic = included;
+          break;
+        case "content_rating":
+          params.contentRating =
+            included.length == 0
+              ? ["safe", "suggestive", "erotica", "pornographic"]
+              : included;
+          break;
+        case "lang":
+        case "language":
+          params.originalLanguage = included;
+          break;
+        case "pb_status":
+        case "status":
+          params.status = included;
+          break;
+        case "author":
+        case "credits":
+          params.authors = included;
+          break;
+        default:
+          params.includedTags = included;
+          params.excludedTags = excluded;
 
-      // Publication Demographic
-      const includedPD = query.includedTags
-        ?.filter((tag) => tag.includes("pd|"))
-        .map((tag) => tag.split("|").pop()!);
-      params.publicationDemographic = includedPD;
-
-      // Original Language
-      const includedLANG = query.includedTags
-        ?.filter((tag) => tag.includes("lang|"))
-        .map((tag) => tag.split("|").pop()!);
-      params.originalLanguage = includedLANG;
-
-      // Status
-      const includedSTS = query.includedTags
-        ?.filter((tag) => tag.includes("s|"))
-        .map((tag) => tag.split("|").pop());
-      params.status = includedSTS;
-
-      // Creators
-      const includedCreators = query.includedTags
-        ?.filter((tag) => tag.includes("author|"))
-        .map((tag) => tag.split("|").pop());
-      params.authors = includedCreators;
-
-      // Included Tags
-      const includedTAG = query.includedTags.filter(
-        (tag) => !tag.includes("|")
-      );
-      params.includedTags = includedTAG;
-    }
-
-    if (query.excludedTags) {
-      const excludedTAG = query.excludedTags.filter(
-        (tag) => !tag.includes("|")
-      );
-      params.excludedTags = excludedTAG;
+          break;
+      }
     }
     const response = await this.NETWORK_CLIENT.get(url, { params });
 

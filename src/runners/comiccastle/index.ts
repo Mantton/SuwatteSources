@@ -5,6 +5,7 @@ import {
   Content,
   ExploreCollection,
   Filter,
+  FilterType,
   PagedResult,
   Property,
   SearchRequest,
@@ -24,6 +25,7 @@ export class Target extends Source {
     website: "https://comicastle.org",
     supportedLanguages: ["en_US"],
     thumbnail: "comic_castle.png",
+    minSupportedAppVersion: "4.6.0",
   };
 
   private client = new NetworkClient();
@@ -55,7 +57,7 @@ export class Target extends Source {
     };
   }
   async getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    const { page, query: text, includedTags } = query;
+    const { page, query: text, filters } = query;
     let path = "/library/search/result";
     let config: any = {
       method: "POST",
@@ -72,11 +74,11 @@ export class Target extends Source {
       config.body.search = encode(text);
     }
 
-    if (includedTags && includedTags.length != 0) {
-      // Tag Search, Can Only Search Single Tag
-      const [lastPathExtension, search] = includedTags[0].split(":");
-      path = `/library/search/${lastPathExtension}`;
-      config.body.search = encode(search);
+    const filter = filters?.[0];
+
+    if (filter && filter.included && filter.included.length != 0) {
+      path = `/library/search/${filter.id}`;
+      config.body.search = encode(filter.included?.[0] ?? filter.text ?? "");
     }
 
     if (query.page) {
@@ -96,11 +98,26 @@ export class Target extends Source {
   }
 
   async getSearchFilters(): Promise<Filter[]> {
-    return properties().map((v) => ({
-      id: v.id,
-      property: v,
-      canExclude: false,
-    }));
+    const props = properties();
+    return [
+      {
+        id: "genre",
+        title: "Genres",
+        type: FilterType.SELECT,
+        options: props[0].tags,
+      },
+      {
+        id: "publisher",
+        title: "Publishers",
+        type: FilterType.SELECT,
+        options: props[1].tags,
+      },
+      {
+        id: "year",
+        title: "Release Year",
+        type: FilterType.TEXT,
+      },
+    ];
   }
 
   async createExploreCollections(): Promise<CollectionExcerpt[]> {

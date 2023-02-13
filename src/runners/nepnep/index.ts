@@ -4,6 +4,7 @@ import {
   CollectionExcerpt,
   Content,
   ExploreCollection,
+  ExploreTag,
   Filter,
   PagedResult,
   PreferenceGroup,
@@ -12,10 +13,14 @@ import {
   SearchSort,
   Source,
   SourceInfo,
-  Tag,
 } from "@suwatte/daisuke";
 import { sampleSize } from "lodash";
-import { BASE_EXPLORE_COLLECTIONS, SEARCH_SORTERS } from "./constants";
+import {
+  ADULT_TAGS,
+  BASE_EXPLORE_COLLECTIONS,
+  SEARCH_SORTERS,
+  TAG_PREFIX,
+} from "./constants";
 import { Controller } from "./controller";
 import { preferences } from "./preference";
 // Wanted to make this less bloated than MangaDex LMAO
@@ -29,6 +34,7 @@ export class Target extends Source {
     nsfw: false,
     authors: ["Mantton"],
     thumbnail: "nepnep.png",
+    minSupportedAppVersion: "4.6.0",
   };
   private controller = new Controller();
 
@@ -47,12 +53,25 @@ export class Target extends Source {
 
   async getSourceTags(): Promise<Property[]> {
     const filters = await this.controller.getFilters();
-    return filters.map((v) => v.property);
+    return filters
+      .map((v) => ({
+        id: v.id,
+        label: v.title,
+        tags: (v.options ?? []).map((v) => ({
+          ...v,
+          adultContent: ADULT_TAGS.includes(v.id),
+        })),
+      }))
+      .filter((v) => v.tags.length != 0);
   }
 
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
     // Refresh
     return BASE_EXPLORE_COLLECTIONS;
+  }
+
+  async willResolveExploreCollections(): Promise<void> {
+    await this.controller.fetchHomePage();
   }
 
   async resolveExploreCollection(
@@ -61,9 +80,14 @@ export class Target extends Source {
     return await this.controller.resolveExcerpt(excerpt);
   }
 
-  async getExplorePageTags(): Promise<Tag[]> {
-    const tags = (await this.controller.getFilters())[0].property.tags;
-    return sampleSize(tags, 7);
+  async getExplorePageTags(): Promise<ExploreTag[]> {
+    const tags = (await this.getSourceTags())[0].tags.filter(
+      (v) => !v.adultContent
+    );
+    return sampleSize(tags, 7).map((v) => ({
+      ...v,
+      filterId: TAG_PREFIX.genres,
+    }));
   }
   // Searching
   async getSearchSorters(): Promise<SearchSort[]> {

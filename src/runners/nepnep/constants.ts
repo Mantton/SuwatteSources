@@ -2,6 +2,7 @@ import {
   CollectionExcerpt,
   CollectionStyle,
   Filter,
+  FilterType,
   SearchSort,
   Status,
 } from "@suwatte/daisuke";
@@ -92,12 +93,14 @@ export const SORT_KEYS: Record<string, string> = {
 };
 
 export const TAG_PREFIX = {
-  publication: "p_status|",
-  scanlation: "s_status|",
-  type: "type|",
-  year: "released|",
-  lang: "tls|o_translation",
-  author: "author|",
+  publication: "p_status",
+  scanlation: "s_status",
+  type: "type",
+  year: "released",
+  lang: "o_translation",
+  author: "author",
+  translation: "translation",
+  genres: "genres",
 };
 
 export const SEARCH_SORTERS: SearchSort[] = [
@@ -122,43 +125,20 @@ export const SEARCH_SORTERS: SearchSort[] = [
 export const DEFAULT_FILTERS: Filter[] = [
   {
     id: TAG_PREFIX.publication,
-    canExclude: false,
-    property: {
-      id: TAG_PREFIX.publication,
-      label: "Publication Status",
-      tags: STATUSES.map((v) => ({
-        id: `${TAG_PREFIX.publication}${v.toLowerCase()}`,
-        label: capitalize(v),
-        adultContent: false,
-      })),
-    },
+    title: "Publication Status",
+    type: FilterType.MULTISELECT,
+    options: STATUSES.map((v) => ({ id: v, label: capitalize(v) })),
   },
   {
     id: TAG_PREFIX.scanlation,
-    canExclude: false,
-    property: {
-      id: TAG_PREFIX.scanlation,
-      label: "Scan Status",
-      tags: STATUSES.map((v) => ({
-        id: `${TAG_PREFIX.scanlation}${v.toLowerCase()}`,
-        label: capitalize(v),
-        adultContent: false,
-      })),
-    },
+    title: "Scan Status",
+    options: STATUSES.map((v) => ({ id: v, label: capitalize(v) })),
+    type: FilterType.MULTISELECT,
   },
   {
-    id: "translation",
-    canExclude: false,
-    property: {
-      id: "translation",
-      label: "Translation",
-      tags: [
-        {
-          id: `tls|o_translation`,
-          label: "Official Translation Only",
-          adultContent: false,
-        },
-      ],
-    },
+    id: TAG_PREFIX.translation,
+    title: "Translation Status",
+    label: "Official Translation Only",
+    type: FilterType.TOGGLE,
   },
 ];
