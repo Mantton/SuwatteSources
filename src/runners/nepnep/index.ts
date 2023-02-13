@@ -28,7 +28,7 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "m.nepnep",
     website: "https://mangasee123.com",
-    version: 1.12,
+    version: 1.2,
     name: "NepNep",
     supportedLanguages: ["EN_US"],
     nsfw: false,

@@ -21,7 +21,7 @@ export class Target extends Source {
     id: "dev_comic_castle",
     name: "Comic Castle",
     nsfw: false,
-    version: 1.1,
+    version: 1.2,
     website: "https://comicastle.org",
     supportedLanguages: ["en_US"],
     thumbnail: "comic_castle.png",

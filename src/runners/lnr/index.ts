@@ -29,7 +29,7 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "mttn.org.lnr",
     name: "Light Novel Reader",
-    version: 1.1,
+    version: 1.2,
     supportedLanguages: ["EN_US"],
     website: "https://lightnovelreader.me",
     nsfw: false,

@@ -52,7 +52,7 @@ export class Target extends Source {
   info: SourceInfo = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.3,
+    version: 1.4,
     website: "https://mangadex.org",
     supportedLanguages: languages.map((v) =>
       v.languageCode.includes("-")

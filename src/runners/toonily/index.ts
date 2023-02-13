@@ -9,7 +9,7 @@ export class Target extends MadaraTemplate {
     id: "com.toonily",
     name: "Toonily",
     thumbnail: "toonily.png",
-    version: 1.1,
+    version: 1.2,
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
     nsfw: true,

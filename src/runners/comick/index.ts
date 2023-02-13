@@ -35,7 +35,7 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "app.comick",
     name: "ComicK",
-    version: 0.1,
+    version: 0.2,
     website: "https://comick.app/home",
     supportedLanguages: [],
     nsfw: false,

@@ -19,7 +19,7 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "to.bato",
     name: "Bato",
-    version: 0.11,
+    version: 0.2,
     website: "https://bato.to",
     supportedLanguages: [],
     nsfw: false,
