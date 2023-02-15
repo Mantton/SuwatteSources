@@ -68,7 +68,7 @@ export const DEFAULT_CONTEXT: Context = {
   baseUrl: "",
   contentPath: "manga",
   searchPath: "page",
-  searchSelector: "div.c-tabs-item__content",
+  searchSelector: ".c-tabs-item__content",
   imageSelector: "div.page-break > img",
   chapterUseAJAX: false,
   useLoadMoreSearch: true,

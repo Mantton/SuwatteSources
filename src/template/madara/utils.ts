@@ -148,17 +148,17 @@ export const parseStatus = (str: string): Status => {
   return Status.UNKNOWN;
 };
 
-export const parseDate = (str: string) => {
+export const parseDate = (str: string, format?: string) => {
   if (["just", "now", "up"].some((v) => str.trim().toLowerCase().includes(v)))
     return new Date();
   if (str.trim().toLowerCase() === "yesterday")
     return moment().subtract(1, "day").toDate();
-  return parseRelativeDate(str)?.toDate() ?? moment(str).toDate();
+  return parseRelativeDate(str)?.toDate() ?? moment(str, format).toDate();
 };
 export const parseRelativeDate = (str: string) => {
   const numStr = str.match(/(\d+)/)?.[1];
   if (!numStr || Number.isNaN(parseInt(numStr))) {
-    throw new Error(`Date Parse Failure: ${str}`);
+    return null;
   }
   const number = parseInt(numStr);
 
@@ -177,4 +177,6 @@ export const parseRelativeDate = (str: string) => {
     return now.subtract(number, "months");
   if (YEAR_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
     return now.subtract(number, "years");
+
+  return null;
 };

@@ -7,6 +7,7 @@ import {
   ExploreTag,
   Filter,
   FilterType,
+  NetworkRequest,
   PagedResult,
   Property,
   SearchRequest,
@@ -40,19 +41,37 @@ export class Controller {
   }
   // Get Content
   async getContent(id: string): Promise<Content> {
-    const response = await this.client.get(
-      `${this.context.baseUrl}/${this.context.contentPath}/${id}/`
-    );
+    const url = `${this.context.baseUrl}/${this.context.contentPath}/${id}/`;
+    const response = await this.client.get(url);
 
-    return this.parser.content(this.context, response.data, id);
+    return {
+      ...this.parser.content(this.context, response.data, id),
+      webUrl: url,
+    };
   }
 
   // Get Chapters
   async getChapters(id: string): Promise<Chapter[]> {
-    const response = await this.client.get(
-      `${this.context.baseUrl}/${this.context.contentPath}/${id}/`
-    );
-    return this.parser.chapters(this.context, response.data, id);
+    const url = `${this.context.baseUrl}/${this.context.contentPath}/${id}/`;
+    const response = await this.client.get(url);
+
+    const $ = load(response.data);
+    const wrapper = $("div[id^=manga-chapters-holder]");
+    const elements = $(this.context.chapterSelector).toArray();
+
+    if (elements.length == 0 && wrapper.length != 0) {
+      const manga_id = $(wrapper).attr("data-id");
+      const { data } = await this.client.post(url + "ajax/chapters", {
+        headers: {
+          Referer: `${this.context.baseUrl}/`,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      return this.parser.chapters(this.context, data, id);
+    } else {
+      return this.parser.chapters(this.context, response.data, id);
+    }
   }
 
   // Get Chapter Data

@@ -197,7 +197,7 @@ export class Parser {
       status,
       adultContent,
       properties,
-      chapters,
+      ...(chapters.length > 0 && { chapters }),
       recommendedReadingMode: ReadingMode.VERTICAL,
       additionalTitles:
         additionalTitles.length != 0 ? additionalTitles : undefined,
@@ -206,9 +206,9 @@ export class Parser {
 
   chapters(ctx: Context, html: string, contentId: string): Chapter[] {
     const $ = load(html);
-    let index = 0;
     const chapters: Chapter[] = [];
-    for (const node of $(ctx.chapterSelector).toArray()) {
+    const nodes = $(ctx.chapterSelector).toArray();
+    for (const [index, node] of nodes.entries()) {
       const elem = $(node);
 
       const id = $("a", elem)
@@ -237,8 +237,6 @@ export class Parser {
         title,
         language: "en_us",
       });
-
-      index++;
     }
 
     return chapters;
@@ -284,8 +282,7 @@ export class Parser {
 
   searchResponse(ctx: Context, html: string, page: number): PagedResult {
     const $ = load(html);
-    const nodes = $(".page-item-detail").toArray();
-
+    const nodes = $(ctx.searchSelector).toArray();
     const highlights: Highlight[] = nodes.map((node) => {
       const title = $("a", node).attr("title");
       const contentId = $("a", node)

@@ -32,6 +32,7 @@ export type Context = {
   // Helpers
   forceAdult: boolean;
   adultTags: string[];
+  dateFormat?: string;
 };
 
 export type AnchorTag = {

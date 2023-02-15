@@ -26,6 +26,7 @@ export class Target extends MadaraTemplate {
       chapterUseAJAX: true,
       searchSelector: "div.page-item-detail.manga",
       useLoadMoreSearch: true,
+      dateFormat: "MMM d, yyyy",
     });
   }
 
