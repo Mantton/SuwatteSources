@@ -2,18 +2,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
-const daisuke_1 = require("@suwatte/daisuke");
-const cheerio_1 = require("cheerio");
 const madara_1 = require("../../template/madara");
 const constants_1 = require("../../template/madara/constants");
-const utils_1 = require("../../template/madara/utils");
 class Target extends madara_1.MadaraTemplate {
     info = {
-        id: "com.toonily",
-        name: "Toonily",
-        thumbnail: "toonily.png",
-        version: 1.2,
-        website: "https://toonily.com",
+        id: "com.hiperdex",
+        name: "Hiperdex",
+        thumbnail: "hiperdex.png",
+        version: 0.1,
+        website: "https://1sthiperdex.com",
         supportedLanguages: ["EN_US"],
         nsfw: true,
         minSupportedAppVersion: "4.6.0",
@@ -21,69 +18,18 @@ class Target extends madara_1.MadaraTemplate {
     constructor() {
         super({
             ...constants_1.DEFAULT_CONTEXT,
-            baseUrl: "https://toonily.com",
-            contentPath: "webtoon",
-            tagSelector: ".wp-manga-tags-list > a",
+            baseUrl: "https://1sthiperdex.com",
+            contentPath: "manga",
             filterNonMangaItems: false,
             chapterUseAJAX: true,
-            searchSelector: "div.page-item-detail.manga",
-            useLoadMoreSearch: true,
-            dateFormat: "MMM d, yyyy",
+            useLoadMoreSearch: false,
+            dateFormat: "MMMM d, yyyy",
         });
-    }
-    async onSourceLoaded() {
-        this.controller.client.requestInterceptHandler = async (req) => {
-            return {
-                ...req,
-                headers: {
-                    ...(req.headers ?? {}),
-                    referer: this.context.baseUrl + "/",
-                },
-                cookies: [
-                    {
-                        name: "wpmanga-adault",
-                        domain: ".toonily.com",
-                        value: "1",
-                    },
-                    {
-                        name: "toonily-mature",
-                        domain: ".toonily.com",
-                        value: "1",
-                    },
-                ],
-            };
-        };
-    }
-    async getAuthenticationMethod() {
-        return daisuke_1.AuthMethod.WEB;
-    }
-    async willRequestWebViewAuth() {
-        return {
-            url: this.info.website,
-        };
-    }
-    async didReceiveWebAuthCookie(name) {
-        return name.includes("wordpress_logged_in");
-    }
-    async getAuthenticatedUser() {
-        const response = await this.controller.client.get("https://toonily.com/user-settings/?tab=account-settings");
-        const $ = (0, cheerio_1.load)(response.data);
-        const username = $("#form-account-settings > div > div:nth-child(2) > div:nth-child(2) > div > span").text();
-        const avatar = (0, utils_1.imageFromElement)($(".c-user-avatar > img"));
-        if (!username) {
-            return null;
-        }
-        return {
-            id: username,
-            username,
-            avatar,
-            info: [],
-        };
     }
 }
 exports.Target = Target;
 
-},{"../../template/madara":4,"../../template/madara/constants":2,"../../template/madara/utils":6,"@suwatte/daisuke":9,"cheerio":"cheerio"}],2:[function(require,module,exports){
+},{"../../template/madara":4,"../../template/madara/constants":2}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.YEAR_DATE_LIST = exports.MONTH_DATE_LIST = exports.WEEK_DATE_LIST = exports.SECONDS_DATE_LIST = exports.MINUTE_DATE_LIST = exports.HOUR_DATE_LIST = exports.DAY_DATE_LIST = exports.CANCELLED_STATUS_LIST = exports.HIATUS_STATUS_LIST = exports.ONGOING_STATUS_LIST = exports.COMPLETED_STATUS_LIST = exports.TAG_PREFIX = exports.DEFAULT_CONTEXT = exports.EXPLORE_SECTIONS = exports.AJAX_DIRECTORY = void 0;
