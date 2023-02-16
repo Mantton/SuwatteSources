@@ -120,6 +120,7 @@ export class Parser {
       properties,
       adultContent,
       chapters,
+      webUrl: `https://bato.to/series/${contentId}`,
     };
   }
 
