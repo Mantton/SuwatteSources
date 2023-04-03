@@ -5,7 +5,6 @@ import {
   PagedResult,
   Property,
   SearchRequest,
-  Tag,
 } from "@suwatte/daisuke";
 import {
   ADULT_TAGS,
@@ -22,10 +21,10 @@ export class Controller {
   private BASE = "https://bato.to";
   private client = new NetworkClient();
   private parser = new Parser();
-  private store = new ValueStore();
+  private store = new ObjectStore();
 
   async getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    let params: Record<string, any> = {};
+    const params: Record<string, any> = {};
 
     // Keyword
     if (query.query) {
@@ -57,9 +56,11 @@ export class Controller {
             filter.excluded ?? []
           );
           if (!params.lang) {
-            const values = await this.store.get("content_search_langs");
+            const values = ((await this.store.get("content_search_langs")) as
+              | string[]
+              | null) ?? ["en"];
             if (values) {
-              const langs = values.split(", ");
+              const langs = values;
               params.lang = this.prepareFilterString(langs, []);
             }
           }

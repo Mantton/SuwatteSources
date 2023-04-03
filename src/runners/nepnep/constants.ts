@@ -36,7 +36,7 @@ export const VERTICAL_TYPES = ["OEL", "Manhwa", "Manhua"];
 export const BASE_EXPLORE_COLLECTIONS: CollectionExcerpt[] = [
   {
     id: "trending",
-    title: "Trending Titles 🚀 ",
+    title: "Trending Titles ",
     subtitle: "Hottest updates being read right now!",
     style: CollectionStyle.INFO,
   },
@@ -48,7 +48,7 @@ export const BASE_EXPLORE_COLLECTIONS: CollectionExcerpt[] = [
   },
   {
     id: "hot_monthly",
-    title: "Top Titles This Month 🔥 ",
+    title: "Top Titles This Month ",
     subtitle: "Certified Bangers",
     style: CollectionStyle.NORMAL,
   },
@@ -142,3 +142,5 @@ export const DEFAULT_FILTERS: Filter[] = [
     type: FilterType.TOGGLE,
   },
 ];
+
+export const IMAGE_HOST = "https://cover.mangabeast01.com/cover";

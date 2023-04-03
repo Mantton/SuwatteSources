@@ -51,7 +51,7 @@ export class Parser {
     const workStatus = textFromInfo("Original work");
 
     const uploadStatus = textFromInfo("Upload status");
-    let title = decode($("h3", infoElement).text().trim());
+    const title = decode($("h3", infoElement).text().trim());
     const author = textFromInfo("Authors:");
     const artist = textFromInfo("Artists:");
     const summary = (
@@ -168,7 +168,7 @@ export class Parser {
         title = chapterText[0];
       }
 
-      let providers: Provider[] = [];
+      const providers: Provider[] = [];
       if (group) {
         const name = group.text().trim();
         const link = group.attr("href");
@@ -207,7 +207,7 @@ export class Parser {
 
   parseDate(str: string) {
     const value = Number(str.split(" ")[0]);
-    let current = moment();
+    const current = moment();
 
     if (!value) return current.toDate();
 

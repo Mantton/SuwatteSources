@@ -3,9 +3,9 @@ import {
   ChapterData,
   Content,
   Filter,
+  MultiSelectPreference,
   PagedResult,
   PreferenceGroup,
-  PreferenceType,
   Property,
   SearchRequest,
   SearchSort,
@@ -19,12 +19,12 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "to.bato",
     name: "Bato",
-    version: 0.2,
+    version: 0.3,
     website: "https://bato.to",
     supportedLanguages: [],
     nsfw: false,
     thumbnail: "bato.png",
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
   };
 
   private controller = new Controller();
@@ -53,17 +53,29 @@ export class Target extends Source {
   }
 
   async getUserPreferences(): Promise<PreferenceGroup[]> {
+    const store = new ObjectStore();
+
     return [
       {
         id: "language",
         children: [
-          {
+          new MultiSelectPreference({
             label: "Languages",
-            key: "content_search_langs",
-            defaultValue: "lang:en",
-            type: PreferenceType.multiSelect,
+            key: "n_content_search_langs",
             options: LANG_TAGS.map((v) => ({ label: v.label, value: v.id })),
-          },
+            value: {
+              get: async () => {
+                return (
+                  ((await store.get("n_content_search_langs")) as
+                    | string[]
+                    | null) ?? ["en"]
+                );
+              },
+              set: async (v) => {
+                return await store.set("n_content_search_langs", v);
+              },
+            },
+          }),
         ],
       },
     ];

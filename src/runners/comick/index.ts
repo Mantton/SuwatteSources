@@ -9,10 +9,10 @@ import {
   NetworkRequest,
   PagedResult,
   PreferenceGroup,
-  PreferenceType,
   Property,
   SearchRequest,
   SearchSort,
+  SelectPreference,
   Source,
   SourceInfo,
 } from "@suwatte/daisuke";
@@ -35,16 +35,16 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "app.comick",
     name: "ComicK",
-    version: 0.2,
+    version: 0.3,
     website: "https://comick.app/home",
     supportedLanguages: [],
     nsfw: false,
     thumbnail: "comick.png",
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
   };
 
   private client = new NetworkClient();
-  private store = new ValueStore();
+  private store = new ObjectStore();
   private API_URL = "https://api.comick.fun";
 
   async getContent(contentId: string): Promise<Content> {
@@ -59,7 +59,7 @@ export class Target extends Source {
     if (!limit || !hid) throw new Error("Could Not Get Chapter Count");
 
     const url = `${this.API_URL}/comic/${hid}/chapters`;
-    const lang = await this.store.get("content_lang");
+    const lang = (await this.store.get("n_content_lang")) as string | null;
     const { data: response } = await this.client.get(url, {
       params: {
         ...(lang && lang !== "all" && { lang }),
@@ -105,19 +105,30 @@ export class Target extends Source {
     return getProperties();
   }
 
-  async getUserPreferences(): Promise<PreferenceGroup[]> {
+  async getSourcePreferences(): Promise<PreferenceGroup[]> {
     return [
       {
         id: "lang",
         header: "Language",
         children: [
-          {
-            key: "content_lang",
+          new SelectPreference({
+            key: "n_content_lang",
+
             label: "Language",
-            type: PreferenceType.select,
-            defaultValue: "en",
+
             options: LANGUAGE_OPTIONS,
-          },
+            value: {
+              get: async () => {
+                return (
+                  ((await this.store.get("n_content_lang")) as string | null) ??
+                  "all"
+                );
+              },
+              set: async (v) => {
+                return await this.store.set("n_content_lang", v);
+              },
+            },
+          }),
         ],
         footer: "Languages in which chapters will be available",
       },
@@ -284,9 +295,3 @@ export class Target extends Source {
     return data;
   }
 }
-
-// Homepage
-// Chapter Info is in :
-// https://api.comick.app/chapter?page=1&order=hot&limit=60 -> Hot Updates
-// https://api.comick.app/chapter?page=1&order=new&limit=30 -> New Updates
-// Core data  is in : __NEXT_DATA__;

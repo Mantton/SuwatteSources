@@ -33,7 +33,6 @@ export class Controller {
   }
   private async fetchDirectory() {
     const html = await this.getDirectoryString();
-    this.parser.thumbnail(html);
     const regex = PATHS.directory;
     const dirStr = html.match(regex)?.[1];
 
@@ -41,18 +40,12 @@ export class Controller {
     this.directory = JSON.parse(dirStr);
   }
 
-  private async setThumbnail() {
-    const html = await this.getDirectoryString();
-    this.parser.thumbnail(html);
-  }
-
   async fetchHomePage() {
     const host = await this.store.host();
     const response = await this.client.get(host);
     this.homepage = response.data;
-    if (!this.parser.hasThumbnail()) {
-      await this.setThumbnail();
-    }
+    const temp = this.homepage.match(/ng-src="(.*\.jpg)"/)?.[1];
+    if (temp) this.parser.THUMBNAIL_TEMPLATE = temp;
   }
 
   // Explore
@@ -77,6 +70,9 @@ export class Controller {
     if (this.directory.length == 0) {
       await this.fetchDirectory();
     }
+
+    const temp = this.directoryHTML.match(/ng-src="(.*\.jpg)"/)?.[1];
+    if (temp) this.parser.THUMBNAIL_TEMPLATE = temp;
 
     const key = SORT_KEYS[request.sort ?? ""] ?? "v";
 
@@ -105,7 +101,7 @@ export class Controller {
     };
   }
 
-  matchesRequest(entry: DirectoryEntry, request: ParsedRequest): Boolean {
+  matchesRequest(entry: DirectoryEntry, request: ParsedRequest): boolean {
     let match = true;
     // Author
     if (request.authors && request.authors.length > 0) {
@@ -218,10 +214,6 @@ export class Controller {
     const host = await this.store.host();
     const response = await this.client.get(`${host}/manga/${id}`);
     const html = response.data;
-
-    if (!this.parser.hasThumbnail()) {
-      await this.setThumbnail();
-    }
     return this.parser.content(html, id, host);
   }
 

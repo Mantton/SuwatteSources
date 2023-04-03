@@ -29,7 +29,6 @@ import {
   ExploreCollection,
   User,
   NonInteractiveProperty,
-  ActionGroup,
   DownSyncedContent,
   UpSyncedContent,
   FilterType,
@@ -52,7 +51,7 @@ export class Target extends Source {
   info: SourceInfo = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.4,
+    version: 1.5,
     website: "https://mangadex.org",
     supportedLanguages: languages.map((v) =>
       v.languageCode.includes("-")
@@ -61,7 +60,10 @@ export class Target extends Source {
     ),
     nsfw: false,
     thumbnail: "mangadex.png",
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
+    config: {
+      authenticationMethod: AuthMethod.USERNAME_PW,
+    },
   };
   private API_URL = "https://api.mangadex.org";
   private COVER_URL = "https://uploads.mangadex.org/covers";
@@ -69,9 +71,6 @@ export class Target extends Source {
   constructor() {
     super();
     this.NETWORK_CLIENT = new NetworkClient();
-    this.NETWORK_CLIENT.requestInterceptHandler = async (req) => {
-      return await this.requestHandler(req);
-    };
   }
   private ADULT_TAG_IDS = [
     "b29d6a3d-1569-4e7a-8caf-7557bc92cd5d",
@@ -85,8 +84,8 @@ export class Target extends Source {
   private CONTENT_RATINGS = ["safe", "suggestive", "erotica", "pornographic"];
   private LANGUAGES = ["en", "ko", "ja", "zh", "zh-hk"];
   private PUBLICATION_STATUS = ["ongoing", "completed", "hiatus", "cancelled"];
-  private VALUE_STORE = new ValueStore();
-  private KEYCHAIN = new KeyChainStore();
+  private VALUE_STORE = new ObjectStore();
+  private KEYCHAIN = new SecureStore();
   private STORE = new MDStore(this.VALUE_STORE);
   private PROPERTIES: Property[] = [];
 
@@ -134,7 +133,7 @@ export class Target extends Source {
     const properties: Property[] = [];
 
     // Genres
-    var genreTags: Tag[] = [];
+    const genreTags: Tag[] = [];
     for (const tag of attributes.tags) {
       const adult = this.ADULT_TAG_IDS.includes(tag.id);
       const t: Tag = {
@@ -317,7 +316,6 @@ export class Target extends Source {
   }
   async getChapters(contentId: string): Promise<Chapter[]> {
     const translatedLanguage = await this.STORE.getLanguages();
-
     const chapters: Chapter[] = [];
     let offset = 0;
     const limit = 500;
@@ -445,7 +443,7 @@ export class Target extends Source {
   // * Explore
   async createExploreCollections(): Promise<CollectionExcerpt[]> {
     const shuffle = <T>(array: T[]) => {
-      var currentIndex = array.length,
+      let currentIndex = array.length,
         temporaryValue,
         randomIndex;
 
@@ -619,7 +617,10 @@ export class Target extends Source {
     return this.parsePagedResponse(response, 1, true, false);
   }
   async getExplorePageTags(): Promise<ExploreTag[]> {
-    return explore_tags.map((v) => ({ ...v, filterId: "general" }));
+    return explore_tags.map((v) => ({
+      ...v,
+      request: { filters: [{ id: "", included: [v.id] }] },
+    }));
   }
 
   // * Search
@@ -698,53 +699,16 @@ export class Target extends Source {
         body: {
           status: "reading",
         },
+        transformRequest: requestHandler,
       });
     }
   }
 
   // Preferences
-  async getUserPreferences(): Promise<PreferenceGroup[]> {
-    return getPreferenceList();
+  async getSourcePreferences(): Promise<PreferenceGroup[]> {
+    return getPreferenceList(this.STORE, this);
   }
 
-  async getSourceActions(): Promise<ActionGroup[]> {
-    return [
-      {
-        id: "auth",
-        header: "Auth",
-        children: [
-          {
-            isDestructive: true,
-            systemImage: "trash",
-            title: "Force Sign Out",
-            key: "force_sign_out",
-          },
-        ],
-      },
-      {
-        id: "base",
-        header: "Mimas",
-        children: [
-          {
-            isDestructive: true,
-            systemImage: "trash",
-            title: "Clear Recommendations",
-            key: "mimas_clear",
-          },
-        ],
-      },
-    ];
-  }
-
-  async didTriggerAction(key: string): Promise<void> {
-    switch (key) {
-      case "mimas_clear":
-        await this.STORE.clearMimasTargets();
-        break;
-      case "force_sign_out":
-        await this.clearTokens();
-    }
-  }
   // Auth
   async handleBasicAuth(username: string, password: string) {
     const response = await this.NETWORK_CLIENT.post(
@@ -754,6 +718,7 @@ export class Target extends Source {
           username,
           password,
         },
+        transformRequest: requestHandler,
       }
     );
 
@@ -772,7 +737,9 @@ export class Target extends Source {
       return null;
     }
 
-    const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/user/me`);
+    const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/user/me`, {
+      transformRequest: requestHandler,
+    });
     const data = JSON.parse(response.data);
     const mdUser = data.data;
 
@@ -788,7 +755,9 @@ export class Target extends Source {
 
   async handleUserSignOut() {
     try {
-      await this.NETWORK_CLIENT.get(`${this.API_URL}/auth/logout`);
+      await this.NETWORK_CLIENT.get(`${this.API_URL}/auth/logout`, {
+        transformRequest: requestHandler,
+      });
     } catch (err) {
       console.log(err);
     }
@@ -801,7 +770,6 @@ export class Target extends Source {
     library: UpSyncedContent[]
   ): Promise<DownSyncedContent[]> {
     const fetchedLib = await this.fetchUserLibrary();
-
     // Titles in local but not cloud
     const toUpSync = library.filter(
       (v) => !fetchedLib.find((a) => a.id === v.id)
@@ -820,22 +788,20 @@ export class Target extends Source {
     });
     // Handle UpSync
     await this.handleUpSync(toUpSync);
+
     return toDownSync;
   }
 
   async handleUpSync(entries: UpSyncedContent[]) {
     for (const entry of entries) {
-      await this.NETWORK_CLIENT.post(
-        `${this.API_URL}/manga/${entry.id}/status`,
-        {
-          body: {
-            status:
-              Object.keys(this.READING_STATUS).find(
-                (key) => this.READING_STATUS[key] === entry.flag
-              ) ?? ReadingFlag.PLANNED,
-          },
-        }
-      );
+      const url = `${this.API_URL}/manga/${entry.id}/status`;
+      const status = this.getStatusFlagForReadingFlag(entry.flag);
+      await this.NETWORK_CLIENT.post(url, {
+        body: {
+          status,
+        },
+        transformRequest: requestHandler,
+      });
     }
   }
   async fetchUserLibrary() {
@@ -846,6 +812,7 @@ export class Target extends Source {
     const limit = 100;
     let offset = 0;
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const response = await this.NETWORK_CLIENT.get(
         `${this.API_URL}/user/follows/manga`,
@@ -855,6 +822,7 @@ export class Target extends Source {
             offset,
             includes: ["cover_art"],
           },
+          transformRequest: requestHandler,
         }
       );
       const highlights = (
@@ -886,7 +854,10 @@ export class Target extends Source {
   async getReadChapterMarkers(contentId: string): Promise<string[]> {
     const response = await this.NETWORK_CLIENT.get(
       `${this.API_URL}/manga/read`,
-      { params: { ids: [contentId], grouped: true } }
+      {
+        params: { ids: [contentId], grouped: true },
+        transformRequest: requestHandler,
+      }
     );
 
     const data = JSON.parse(response.data);
@@ -903,6 +874,14 @@ export class Target extends Source {
     re_reading: ReadingFlag.REREADING,
     on_hold: ReadingFlag.PAUSED,
   };
+
+  getStatusFlagForReadingFlag(flag: ReadingFlag) {
+    return (
+      Object.keys(this.READING_STATUS).find(
+        (key) => this.READING_STATUS[key] === flag
+      ) ?? "reading"
+    );
+  }
   // Authenticated User
   getMDReadingStatus(str: string): ReadingFlag {
     switch (str) {
@@ -926,7 +905,10 @@ export class Target extends Source {
   async getMDUserStatuses() {
     try {
       const response = await this.NETWORK_CLIENT.get(
-        `${this.API_URL}/manga/status`
+        `${this.API_URL}/manga/status`,
+        {
+          transformRequest: requestHandler,
+        }
       );
       return JSON.parse(response.data).statuses as Record<string, string>;
     } catch (err: any) {
@@ -1042,9 +1024,9 @@ export class Target extends Source {
 
   async parsePagedResponse(
     response: NetworkResponse,
-    page: number = 1,
-    fetchCovers: boolean = false,
-    fetchStatistics: boolean = false
+    page = 1,
+    fetchCovers = false,
+    fetchStatistics = false
   ): Promise<PagedResult> {
     const json = JSON.parse(response.data);
 
@@ -1085,7 +1067,7 @@ export class Target extends Source {
       }
       return highlight;
     });
-    let results = await Promise.all(highlights);
+    const results = await Promise.all(highlights);
     return {
       page,
       results,
@@ -1107,7 +1089,7 @@ export class Target extends Source {
     const stats = json.statistics;
 
     const getValue = (key: string) => {
-      let obj = stats[key];
+      const obj = stats[key];
       return {
         follows: obj.follows,
         rating: obj.rating.average,
@@ -1132,13 +1114,13 @@ export class Target extends Source {
         : response.data;
 
     for (const id of ids) {
-      let files = (json.data as any[]).filter((data) =>
+      const files = (json.data as any[]).filter((data) =>
         Object.values(data.relationships.flatMap((x: any) => x.id)).includes(id)
       );
 
       const suffix = await this.STORE.getCoverQuality();
 
-      let covers = files.map(
+      const covers = files.map(
         (val) => `${this.COVER_URL}/${id}/${val.attributes.fileName}${suffix}`
       );
       results[id] = covers;
@@ -1287,95 +1269,32 @@ export class Target extends Source {
 
   // Network Functions
   // Ref: https://stackoverflow.com/a/69058154
-  isTokenExpired = (token: string) =>
-    Date.now() >=
-    JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).exp *
-      1000;
+
   async clearTokens() {
     await this.KEYCHAIN.remove("session");
     await this.KEYCHAIN.remove("refresh");
-  }
-  async refreshTokens() {
-    const token = await this.KEYCHAIN.get("refresh");
-
-    if (!token) {
-      await this.clearTokens();
-      return;
-    }
-    if (this.isTokenExpired(token)) {
-      await this.clearTokens();
-      return;
-    }
-    // Refresh
-    try {
-      const refreshResponse = await this.NETWORK_CLIENT.post(
-        `${this.API_URL}/auth/refresh`,
-        {
-          body: {
-            token,
-          },
-        }
-      );
-      const data = JSON.parse(refreshResponse.data);
-
-      await this.KEYCHAIN.set("session", data.token.session);
-      await this.KEYCHAIN.set("refresh", data.token.refresh);
-    } catch {
-      await this.clearTokens();
-    }
-
-    console.log("Refreshed Token");
-  }
-
-  async getAuthenticationMethod(): Promise<AuthMethod> {
-    return AuthMethod.USERNAME_PW;
   }
 
   async isSignedIn() {
     const session = await this.KEYCHAIN.get("session");
     const refresh = await this.KEYCHAIN.get("refresh");
 
-    if (!session || !refresh) return false; // Either Refresh or Access is missing, not signed in
+    if (
+      !session ||
+      !refresh ||
+      typeof session !== "string" ||
+      typeof refresh !== "string"
+    )
+      return false; // Either Refresh or Access is missing, not signed in
 
-    if (this.isTokenExpired(refresh)) {
+    if (isTokenExpired(refresh)) {
       // Refresh is expired, not signed in
       this.clearTokens(); // clear tokens
       return false;
     }
     return true;
   }
-  async requestHandler(request: NetworkRequest) {
-    let token: string | null = null;
-    try {
-      token = await this.KEYCHAIN.get("session");
-    } catch (error) {
-      console.log("Nested Object Reference Error");
-      return request;
-    }
 
-    if (
-      !token ||
-      !["auth/log", "user", "read", "/status"].some((v) =>
-        request.url.includes(v)
-      )
-    ) {
-      return request;
-    }
-    if (this.isTokenExpired(token)) {
-      await this.refreshTokens();
-      token = await this.KEYCHAIN.get("session");
-      if (!token) {
-        return request;
-      }
-    }
-    request.headers = {
-      ...request.headers,
-      authorization: `Bearer ${token.trim()}`,
-      referer: "https://mangadex.org",
-    };
-
-    return request;
-  }
   async getMimasRecommendations(
     id: string
   ): Promise<{ recs: MimasRecommendation[]; target: MimasRecommendation }> {
@@ -1401,6 +1320,75 @@ export class Target extends Source {
         chapterIdsUnread,
         chapterIdsRead,
       },
+      transformRequest: requestHandler,
     });
   }
 }
+
+const requestHandler = async (request: NetworkRequest) => {
+  let token: string | null = null;
+  const chain = new SecureStore();
+  try {
+    token = await chain.string("session");
+  } catch (error) {
+    console.log("Nested Object Reference Error");
+    return request;
+  }
+  if (!token) return request;
+  if (isTokenExpired(token)) {
+    await refreshTokens();
+    token = await chain.string("session");
+    if (!token) {
+      return request;
+    }
+  }
+  request.headers = {
+    ...request.headers,
+    authorization: `Bearer ${token.trim()}`,
+    referer: "https://mangadex.org",
+  };
+
+  return request;
+};
+
+const refreshTokens = async () => {
+  const KEYCHAIN = new SecureStore();
+  const token = await KEYCHAIN.string("refresh");
+  const removeTokens = async () => {
+    await KEYCHAIN.remove("refresh");
+    await KEYCHAIN.remove("session");
+  };
+
+  if (!token) {
+    await removeTokens();
+    return;
+  }
+  if (isTokenExpired(token)) {
+    await removeTokens();
+    return;
+  }
+  // Refresh
+  try {
+    const NETWORK_CLIENT = new NetworkClient();
+    const refreshResponse = await NETWORK_CLIENT.post(
+      `https://api.mangadex.org/auth/refresh`,
+      {
+        body: {
+          token,
+        },
+      }
+    );
+    const data = JSON.parse(refreshResponse.data);
+
+    await KEYCHAIN.set("session", data.token.session);
+    await KEYCHAIN.set("refresh", data.token.refresh);
+  } catch {
+    await removeTokens();
+  }
+
+  console.log("Refreshed Token");
+};
+
+const isTokenExpired = (token: string) =>
+  Date.now() >=
+  JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).exp * 1000;

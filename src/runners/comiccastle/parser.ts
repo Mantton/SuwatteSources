@@ -1,6 +1,5 @@
 import {
   Chapter,
-  ChapterPage,
   CollectionStyle,
   Content,
   Highlight,
@@ -11,7 +10,7 @@ import {
 import { AnyNode, Cheerio, load } from "cheerio";
 
 export class Parser {
-  homepage: string = "";
+  homepage = "";
 
   parseHomePageSection(key: string, data?: string): Highlight[] {
     const highlights: Highlight[] = [];
@@ -208,15 +207,13 @@ export class Parser {
   }
 
   private parseStatus(str: string): Status {
-    let status = Status.UNKNOWN;
-
     switch (str.toLowerCase()) {
       case "completed":
         return Status.COMPLETED;
       case "ongoing":
         return Status.ONGOING;
     }
-    return status;
+    return Status.UNKNOWN;
   }
 
   // Chapters

@@ -19,12 +19,12 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "com.manganato",
     name: "MangaNato",
-    version: 0.1,
+    version: 0.2,
     website: "https://manganto.com",
     thumbnail: "manganato.png",
     nsfw: false,
     supportedLanguages: ["en_US"],
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
   };
 
   private controller = new Controller();

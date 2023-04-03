@@ -21,11 +21,11 @@ export class Target extends Source {
     id: "dev_comic_castle",
     name: "Comic Castle",
     nsfw: false,
-    version: 1.2,
+    version: 1.3,
     website: "https://comicastle.org",
     supportedLanguages: ["en_US"],
     thumbnail: "comic_castle.png",
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
   };
 
   private client = new NetworkClient();
@@ -59,7 +59,7 @@ export class Target extends Source {
   async getSearchResults(query: SearchRequest): Promise<PagedResult> {
     const { page, query: text, filters } = query;
     let path = "/library/search/result";
-    let config: any = {
+    const config: any = {
       method: "POST",
       body: {
         search: "",

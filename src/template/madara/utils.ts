@@ -1,8 +1,7 @@
 import { NetworkRequest, SearchRequest, Status } from "@suwatte/daisuke";
 import { AnyNode, Cheerio, CheerioAPI } from "cheerio";
-import moment, { Moment } from "moment";
+import moment from "moment";
 import {
-  AJAX_DIRECTORY,
   CANCELLED_STATUS_LIST,
   COMPLETED_STATUS_LIST,
   DAY_DATE_LIST,
@@ -20,7 +19,7 @@ import { AnchorTag, Context } from "./types";
 export const AJAXDirectoryRequest = (
   ctx: Context,
   request: SearchRequest,
-  searching: boolean = false
+  searching = false
 ): NetworkRequest => {
   const body = generateAJAXRequest(ctx, request);
   if (!searching) {
@@ -129,7 +128,7 @@ export const imageFromElement = (element: Cheerio<AnyNode>): string => {
 };
 export const notUpdating = (tag: AnchorTag): boolean => {
   const regex = /Updating|Atualizando/;
-  return !!!tag.title.trim().match(regex);
+  return !tag.title.trim().match(regex);
 };
 
 export const generateAnchorTag = ($: CheerioAPI, node: AnyNode): AnchorTag => {
@@ -162,7 +161,7 @@ export const parseRelativeDate = (str: string) => {
   }
   const number = parseInt(numStr);
 
-  let now = moment();
+  const now = moment();
   if (DAY_DATE_LIST.some((v) => str.toLowerCase().includes(v)))
     return now.subtract(number, "days");
   if (HOUR_DATE_LIST.some((v) => str.toLowerCase().includes(v)))

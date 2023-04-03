@@ -65,7 +65,7 @@ export const parseHomePageSection = (
   const $ = load(data);
   switch (key) {
     case "new":
-    case "popular":
+    case "popular": {
       const index = key == "new" ? "4" : "5";
       const selector = `body > section:nth-child(${index}) .card-v`;
       const elements = $(selector).toArray();
@@ -89,7 +89,9 @@ export const parseHomePageSection = (
       }
       //
       break;
-    case "latest":
+    }
+
+    case "latest": {
       const latestSelector = $(
         "body > section:nth-child(6) .card-box"
       ).toArray();
@@ -113,6 +115,7 @@ export const parseHomePageSection = (
         highlights.push(highlight);
       }
       break;
+    }
   }
   return highlights;
 };
@@ -193,7 +196,7 @@ export const parseChapters = (data: string, contentId: string): Chapter[] => {
   const $ = load(data);
   const chapters: Chapter[] = [];
   let index = 0;
-  for (let e of $(".novels-detail-chapters li a")) {
+  for (const e of $(".novels-detail-chapters li a")) {
     const chapter = $(e);
     const chapterText = chapter.text();
     const chapterId = chapter.attr("href")?.split("/").pop();

@@ -7,12 +7,10 @@ import {
   ExploreTag,
   Filter,
   FilterType,
-  NetworkRequest,
   PagedResult,
   Property,
   SearchRequest,
   SearchSort,
-  Tag,
 } from "@suwatte/daisuke";
 import { load } from "cheerio";
 import { sampleSize } from "lodash";
@@ -60,7 +58,6 @@ export class Controller {
     const elements = $(this.context.chapterSelector).toArray();
 
     if (elements.length == 0 && wrapper.length != 0) {
-      const manga_id = $(wrapper).attr("data-id");
       const { data } = await this.client.post(url + "ajax/chapters", {
         headers: {
           Referer: `${this.context.baseUrl}/`,
@@ -106,7 +103,12 @@ export class Controller {
 
   async getExploreTags(): Promise<ExploreTag[]> {
     const tags = (await this.getTags()).tags;
-    return sampleSize(tags, 7).map((v) => ({ ...v, filterId: "genres" }));
+    return sampleSize(tags, 7).map((v) => ({
+      ...v,
+      request: {
+        filters: [{ id: "genres", included: [v.id] }],
+      },
+    }));
   }
 
   async getFilters(): Promise<Filter[]> {
@@ -152,6 +154,7 @@ export class Controller {
     const params: Record<string, any> = {
       s: request.query,
       post_type: "wp-manga",
+      m_orderby: request.sort ?? "views",
     };
     for (const filter of request.filters ?? []) {
       switch (filter.id) {

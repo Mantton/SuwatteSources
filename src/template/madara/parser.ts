@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Chapter,
   ChapterData,
@@ -7,13 +8,12 @@ import {
   PagedResult,
   Property,
   ReadingMode,
-  Status,
   Tag,
 } from "@suwatte/daisuke";
 import { load } from "cheerio";
 import { trim } from "lodash";
 import { TAG_PREFIX } from "./constants";
-import { AnchorTag, Context } from "./types";
+import { Context } from "./types";
 import {
   generateAnchorTag,
   imageFromElement,
@@ -58,7 +58,7 @@ export class Parser {
      * Removes the Text from child elements so we get only the text from the H1 Tag
      * Reference: https://stackoverflow.com/a/8851526
      */
-    let title = $(ctx.titleSelector)
+    const title = $(ctx.titleSelector)
       .first()
       ?.clone()
       .children()
@@ -101,7 +101,7 @@ export class Parser {
 
     // Summary
     let summary = "";
-    let summaryNode = $(ctx.summarySelector);
+    const summaryNode = $(ctx.summarySelector);
     if ($(summaryNode, "p").text().trim()) {
       summary = $(summaryNode, "p")
         .toArray()
@@ -221,7 +221,7 @@ export class Parser {
       const title = $("a", elem).first().text().trim();
 
       const numStr = id
-        .match(/\D*(\d*\-?\d*)\D*$/)
+        .match(/\D*(\d*-?\d*)\D*$/)
         ?.pop()
         ?.replace(/-/g, ".");
       const number = Number(numStr);
@@ -302,7 +302,7 @@ export class Parser {
     return {
       results: highlights,
       page,
-      isLastPage: highlights.length <= 18,
+      isLastPage: highlights.length <= (ctx.paginationLimit ?? 30),
     };
   }
 }

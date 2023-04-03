@@ -12,7 +12,6 @@ import {
   SearchRequest,
   Source,
   SourceInfo,
-  Tag,
 } from "@suwatte/daisuke";
 import { sampleSize } from "lodash";
 import {
@@ -29,12 +28,12 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "mttn.org.lnr",
     name: "Light Novel Reader",
-    version: 1.2,
+    version: 1.3,
     supportedLanguages: ["EN_US"],
     website: "https://lightnovelreader.me",
     nsfw: false,
     thumbnail: "lnr.png",
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
   };
   CLIENT = new NetworkClient();
   BASE_URL = "https://lightnovelreader.me";
@@ -123,9 +122,7 @@ export class Target extends Source {
 
   async willResolveExploreCollections(): Promise<void> {
     // Parse Homepage
-    try {
-      await this.getHomePage();
-    } catch {}
+    return await this.getHomePage();
   }
   async resolveExploreCollection(
     excerpt: CollectionExcerpt
@@ -157,7 +154,9 @@ export class Target extends Source {
     const props = parseTags(response.data);
     return sampleSize(props[0].tags, 7).map((v) => ({
       ...v,
-      filterId: "genre",
+      request: {
+        filters: [{ id: "genre", included: [v.id] }],
+      },
     }));
   }
 

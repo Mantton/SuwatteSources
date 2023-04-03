@@ -9,11 +9,14 @@ export class Target extends MadaraTemplate {
     id: "com.toonily",
     name: "Toonily",
     thumbnail: "toonily.png",
-    version: 1.2,
+    version: 1.3,
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
     nsfw: true,
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
+    config: {
+      authenticationMethod: AuthMethod.WEB,
+    },
   };
 
   constructor() {
@@ -25,13 +28,14 @@ export class Target extends MadaraTemplate {
       filterNonMangaItems: false,
       chapterUseAJAX: true,
       searchSelector: "div.page-item-detail.manga",
-      useLoadMoreSearch: true,
+      useLoadMoreSearch: false,
       dateFormat: "MMM d, yyyy",
+      paginationLimit: 18,
     });
   }
 
   async onSourceLoaded(): Promise<void> {
-    this.controller.client.requestInterceptHandler = async (req) => {
+    this.controller.client.transformRequest = async (req) => {
       return {
         ...req,
         headers: {
@@ -54,16 +58,17 @@ export class Target extends MadaraTemplate {
     };
   }
 
-  async getAuthenticationMethod(): Promise<AuthMethod> {
-    return AuthMethod.WEB;
-  }
   async willRequestWebViewAuth(): Promise<NetworkRequest> {
     return {
       url: this.info.website,
     };
   }
-  async didReceiveWebAuthCookie(name: string): Promise<boolean> {
-    return name.includes("wordpress_logged_in");
+
+  async didReceiveAuthenticationCookieFromWebView(cookie: {
+    name: string;
+    value: string;
+  }): Promise<boolean> {
+    return cookie.name.includes("wordpress_logged_in");
   }
 
   async getAuthenticatedUser(): Promise<User | null> {

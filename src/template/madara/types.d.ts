@@ -33,6 +33,8 @@ export type Context = {
   forceAdult: boolean;
   adultTags: string[];
   dateFormat?: string;
+
+  paginationLimit?: number;
 };
 
 export type AnchorTag = {

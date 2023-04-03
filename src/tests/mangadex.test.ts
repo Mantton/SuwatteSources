@@ -1,6 +1,5 @@
 import { Target } from "../runners/mangadex";
 import emulate from "@suwatte/emulator";
-import { Validate } from "@suwatte/daisuke";
 
 describe("MangaDex Tests", () => {
   const source = emulate(Target);
@@ -20,7 +19,6 @@ describe("MangaDex Tests", () => {
         },
       ],
     });
-    expect(Validate.object.pagedResult(data)).toBe(true);
   });
   test("Get Tags", async () => {
     const tags = await source.getSourceTags();

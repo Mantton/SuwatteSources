@@ -85,10 +85,11 @@ export const parseSearchRequest = (request: SearchRequest) => {
         if (filter.excluded)
           params["g_e"] = filter.excluded.map((v) => `_${v}`).join("");
         break;
-      case "status":
+      case "status": {
         const key = filter.included?.[0];
         if (key == "all") break;
         params.sts = key;
+      }
     }
   }
 

@@ -64,10 +64,7 @@ export const parseSearchRequest = (request: SearchRequest) => {
   };
 };
 
-export const MangaToHighlight = (
-  manga: MangaExcerpt,
-  fetchGenres = false
-): Highlight => {
+export const MangaToHighlight = (manga: MangaExcerpt): Highlight => {
   return {
     contentId: manga.slug,
     title: manga.title,
@@ -84,7 +81,6 @@ type Base = { name: string; slug: string };
 export const MangaToContent = (data: any, contentId: string): Content => {
   const { comic, artists, authors, genres: ckGenres, matureContent } = data;
   const {
-    country,
     title,
     links,
     hentai,
@@ -95,7 +91,6 @@ export const MangaToContent = (data: any, contentId: string): Content => {
     desc: summary,
     year,
     bayesian_rating,
-    content_rating,
     md_titles,
     mu_comics,
     status: ckStatus,
@@ -218,7 +213,6 @@ export const CKChapterToChapter = (
     title,
     chap,
     vol,
-    slug,
     lang,
     created_at,
     hid: chapterId,

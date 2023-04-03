@@ -34,20 +34,7 @@ import {
 import { parseChapterString } from "./utils";
 
 export class Parser {
-  private THUMBNAIL_URL = "";
-
-  thumbnail(html: string) {
-    const $ = load(html);
-    const selector = ".SearchResult > .SearchResultCover img";
-
-    const url = $(selector).first().attr("ng-src");
-    if (!url) throw new Error("Failed to parse thumbnail URL");
-    this.THUMBNAIL_URL = url;
-  }
-
-  hasThumbnail() {
-    return !!this.THUMBNAIL_URL;
-  }
+  THUMBNAIL_TEMPLATE = "";
 
   homepageSection(entries: HomePageEntry[]) {
     const highlights: Highlight[] = [];
@@ -99,7 +86,7 @@ export class Parser {
     return [...filters, ...DEFAULT_FILTERS];
   }
   coverFor(id: string): string {
-    return this.THUMBNAIL_URL.replace("{{Result.i}}", id);
+    return this.THUMBNAIL_TEMPLATE.replace("{{Result.i}}", id);
   }
   toHighlight(entry: DirectoryEntry): Highlight {
     return {
@@ -293,7 +280,8 @@ export class Parser {
       includedCollections.push(collection);
     }
 
-    const cover = this.coverFor(id);
+    const cover =
+      $('meta[property="og:image"]').attr("content") ?? this.coverFor(id);
     const chapters = this.chapters(html, id);
     return {
       contentId: id,
@@ -347,7 +335,7 @@ export class Parser {
       chapter.Directory && chapter.Directory.length > 0
         ? `${chapter.Directory}/`
         : "";
-    let c = parseChapterString(chapter.Chapter).number.toString().split(".");
+    const c = parseChapterString(chapter.Chapter).number.toString().split(".");
     let chapterPath = c[0];
     chapterPath = chapterPath.padStart(4, "0");
     const decimal = c[1];

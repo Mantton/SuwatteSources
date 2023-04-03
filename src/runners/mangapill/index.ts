@@ -22,12 +22,12 @@ export class Target extends Source {
   info: SourceInfo = {
     id: "com.mangapill",
     name: "MangaPill",
-    version: 0.1,
+    version: 0.2,
     supportedLanguages: ["en_US"],
     website: "https://mangapill.com",
     nsfw: false,
     thumbnail: "mangapill.png",
-    minSupportedAppVersion: "4.6.0",
+    minSupportedAppVersion: "5.0",
   };
 
   private client = new NetworkClient();
@@ -64,12 +64,15 @@ export class Target extends Source {
     query.filters?.forEach((filter) => {
       switch (filter.id) {
         case "genre":
-          if (!filter.included) break;
-          const queryString = filter.included
-            .map((v) => `genre=${v}`)
-            .join("&");
-          url += "?";
-          url += queryString;
+          {
+            if (!filter.included) break;
+            const queryString = filter.included
+              .map((v) => `genre=${v}`)
+              .join("&");
+            url += "?";
+            url += queryString;
+          }
+
           break;
         case "type":
           if (!filter.included?.[0] || filter.included?.[0] === "all") break;
