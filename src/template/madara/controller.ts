@@ -152,9 +152,12 @@ export class Controller {
   async searchWithQueryParams(request: SearchRequest): Promise<PagedResult> {
     const base = `${this.context.baseUrl}/page/${request.page ?? 1}/`;
     const params: Record<string, any> = {
-      s: request.query,
       post_type: "wp-manga",
+      s: "",
       m_orderby: request.sort ?? "views",
+      ...(request.query && {
+        s: request.query,
+      }),
     };
     for (const filter of request.filters ?? []) {
       switch (filter.id) {
@@ -172,7 +175,7 @@ export class Controller {
     const response = await this.client.get(base, {
       params,
     });
-
+    console.log(base, params);
     const data = this.parser.searchResponse(
       this.context,
       response.data,

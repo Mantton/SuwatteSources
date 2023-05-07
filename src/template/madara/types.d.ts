@@ -1,3 +1,5 @@
+import { ReadingMode } from "@suwatte/daisuke";
+
 export type Context = {
   baseUrl: string;
 
@@ -35,6 +37,7 @@ export type Context = {
   dateFormat?: string;
 
   paginationLimit?: number;
+  defaultReadingMode?: ReadingMode;
 };
 
 export type AnchorTag = {

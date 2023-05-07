@@ -1,6 +1,7 @@
+import { Status } from "@suwatte/daisuke";
 import { Target } from "../runners/mangapill";
 import emulate from "@suwatte/emulator";
-import { Status, Validate } from "@suwatte/daisuke";
+import { Validate } from "@suwatte/validate";
 
 describe("MangaPill Tests", () => {
   const source = emulate(Target);

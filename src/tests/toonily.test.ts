@@ -1,6 +1,6 @@
 import { Target } from "../runners/toonily";
 import emulate from "@suwatte/emulator";
-import { ZChapterData, ZContent } from "@suwatte/daisuke";
+import { ZChapterData, ZContent } from "@suwatte/validate";
 
 describe("Toonily Tests", () => {
   const source = emulate(Target);

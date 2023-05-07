@@ -1,6 +1,6 @@
 import { Target } from "../runners/comick";
 import emulate from "@suwatte/emulator";
-import { Validate } from "@suwatte/daisuke";
+import { Validate } from "@suwatte/validate";
 
 const ids = [
   "solo-leveling",

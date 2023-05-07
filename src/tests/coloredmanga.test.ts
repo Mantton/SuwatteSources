@@ -1,8 +1,8 @@
-import { Target } from "../runners/hiperdex";
+import { Target } from "../runners/coloredmanga";
 import emulate from "@suwatte/emulator";
-import { ZChapterData, ZContent } from "@suwatte/daisuke";
+import { ZChapterData, ZContent } from "@suwatte/validate";
 
-describe("Hiperdex Tests", () => {
+describe("ColoredManga Tests", () => {
   const source = emulate(Target);
 
   test("Explore Page", async () => {
@@ -10,14 +10,15 @@ describe("Hiperdex Tests", () => {
     const collection = collections[0];
     const data = await source.resolveExploreCollection(collection);
 
-    expect(data.highlights.length).toBeGreaterThan(1);
     expect(collection.title).toEqual(data.title);
   });
 
   test("Get Content", async () => {
-    const id = "unlock-her-heart";
+    const id = "vagabond-vizbig";
     const data = await source.getContent(id);
-    expect(data.title).toBe("Unlock Her Heart");
+    expect(data.title).toBe(
+      "Vagabond – {VIZBIG Scans} {HQ} Monochrome — {Official TL} (EN)"
+    );
     const parse = () => {
       ZContent.parse(data);
     };
@@ -25,8 +26,9 @@ describe("Hiperdex Tests", () => {
   });
 
   test("Get Chapters Data", async () => {
-    const id = "unlock-her-heart";
+    const id = "vagabond-vizbig";
     const chapters = await source.getChapters(id);
+
     expect(chapters.length).toBeGreaterThan(1);
     const chapter = chapters[0];
     const data = await source.getChapterData(
@@ -46,10 +48,7 @@ describe("Hiperdex Tests", () => {
   });
 
   test("Handle Search", async () => {
-    const pagedResult = await source.getSearchResults({ query: "noona" });
+    const pagedResult = await source.getSearchResults({});
     expect(pagedResult.results.length).toBeGreaterThan(2);
-    expect(
-      pagedResult.results.filter((v) => v.title == "My Landlady Noona").length
-    ).toBe(1);
   });
 });

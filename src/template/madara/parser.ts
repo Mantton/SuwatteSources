@@ -198,7 +198,9 @@ export class Parser {
       adultContent,
       properties,
       ...(chapters.length > 0 && { chapters }),
-      recommendedReadingMode: ReadingMode.VERTICAL,
+      recommendedReadingMode: ctx.defaultReadingMode
+        ? ctx.defaultReadingMode
+        : ReadingMode.VERTICAL,
       additionalTitles:
         additionalTitles.length != 0 ? additionalTitles : undefined,
     };
@@ -226,14 +228,13 @@ export class Parser {
         ?.replace(/-/g, ".");
       const number = Number(numStr);
       const dateStr = $(ctx.chapterDateSelector, elem).first().text().trim();
-      const date = parseDate(dateStr);
 
       chapters.push({
         index,
         contentId,
         chapterId: id,
         number,
-        date,
+        date: ctx.dateFormat ? parseDate(dateStr) : new Date(),
         title,
         language: "en_us",
       });
@@ -284,13 +285,15 @@ export class Parser {
     const $ = load(html);
     const nodes = $(ctx.searchSelector).toArray();
     const highlights: Highlight[] = nodes.map((node) => {
-      const title = $("a", node).attr("title");
+      const title =
+        $("a", node).attr("title") ?? $(".post-title", node).text().trim();
       const contentId = $("a", node)
         .attr("href")
         ?.replace(`${ctx.baseUrl}/${ctx.contentPath}/`, "")
         .replace(/\/$/, "");
 
       if (!title || !contentId) throw "Failed to Parse Search Result";
+
       const cover = imageFromElement($("img", node));
 
       return {
