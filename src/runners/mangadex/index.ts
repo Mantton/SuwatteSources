@@ -33,6 +33,7 @@ import {
   UpSyncedContent,
   FilterType,
   ExploreTag,
+  URLContentIdentifier,
 } from "@suwatte/daisuke";
 import explore_tags from "./explore.json";
 import { decode, encode } from "he";
@@ -1276,16 +1277,10 @@ export class Target extends Source {
   }
 
   async isSignedIn() {
-    const session = await this.KEYCHAIN.get("session");
-    const refresh = await this.KEYCHAIN.get("refresh");
+    const session = await this.KEYCHAIN.string("session");
+    const refresh = await this.KEYCHAIN.string("refresh");
 
-    if (
-      !session ||
-      !refresh ||
-      typeof session !== "string" ||
-      typeof refresh !== "string"
-    )
-      return false; // Either Refresh or Access is missing, not signed in
+    if (!session || !refresh) return false; // Either Refresh or Access is missing, not signed in
 
     if (isTokenExpired(refresh)) {
       // Refresh is expired, not signed in
@@ -1315,13 +1310,55 @@ export class Target extends Source {
     chapterIdsRead: string[],
     chapterIdsUnread: string[] = []
   ) {
-    await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
-      body: {
-        chapterIdsUnread,
-        chapterIdsRead,
-      },
-      transformRequest: requestHandler,
-    });
+    try {
+      await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
+        body: {
+          chapterIdsUnread,
+          chapterIdsRead,
+        },
+        transformRequest: requestHandler,
+      });
+    } catch {
+      console.error("failed to sync to mangadex");
+    }
+  }
+
+  async handleIdentifierForUrl(
+    url: string
+  ): Promise<URLContentIdentifier | null> {
+    const titleRegex =
+      /^https:\/\/mangadex.org\/title\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
+    const contentId = url.match(titleRegex)?.[1];
+
+    if (contentId)
+      return {
+        contentId,
+      };
+
+    const chapterRegex =
+      /^https:\/\/mangadex.org\/chapter\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
+    const chapterId = url.match(chapterRegex)?.[1];
+
+    if (chapterId) {
+      const id = await this.getMangaFromChapterId(chapterId);
+      return {
+        contentId: id,
+        chapterId,
+      };
+    }
+
+    return null;
+  }
+
+  async getMangaFromChapterId(id: string) {
+    const url = `${this.API_URL}/chapter/${id}?includes[]=manga`;
+    const { data: res } = await this.NETWORK_CLIENT.get(url);
+    const { data } = JSON.parse(res);
+    const contentId = data.relationships.find(
+      (v: any) => v.type === "manga"
+    )?.id;
+
+    return contentId;
   }
 }
 
