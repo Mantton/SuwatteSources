@@ -24,7 +24,10 @@ export class MDStore {
   }
   async getContentRatings(): Promise<string[]> {
     const DEFAULT = ["safe", "suggestive", "erotica"];
-    const ratings = await this.store.stringArray(PREF_KEYS.exploreCR);
+    //TODO: Uncomment out the below line when V6.0 is released.
+    const ratings = (await this.store.get(PREF_KEYS.exploreCR)) as
+      | string[]
+      | null;
 
     if (!ratings) return DEFAULT;
     return ratings;
@@ -61,7 +64,9 @@ export class MDStore {
 
   async getLanguages(): Promise<string[]> {
     const DEFAULT = ["en"];
-    const value = await this.store.stringArray(PREF_KEYS.lang);
+    //TODO: Uncomment out the below line when V6.0 is released.
+    // const value = await this.store.stringArray(PREF_KEYS.lang);
+    const value = (await this.store.get(PREF_KEYS.lang)) as string[] | null;
     if (!value) return DEFAULT;
     return value;
   }
@@ -80,7 +85,11 @@ export class MDStore {
     return this.store.set(PREF_KEYS.mimasEnabled, v);
   }
   async getMimasTargets(): Promise<string[]> {
-    const value = await this.store.stringArray(PREF_KEYS.mimasTargets);
+    //TODO: Uncomment out the below line when V6.0 is released.
+
+    const value = (await this.store.get(PREF_KEYS.mimasTargets)) as
+      | string[]
+      | null;
     if (!value) return [];
     return value;
   }
