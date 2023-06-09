@@ -64,7 +64,7 @@ class Target extends daisuke_1.Source {
     info = {
         name: "MangaDex",
         id: "org.mangadex",
-        version: 1.5,
+        version: 1.6,
         website: "https://mangadex.org",
         supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
             ? v.languageCode
@@ -1086,12 +1086,9 @@ class Target extends daisuke_1.Source {
         await this.KEYCHAIN.remove("refresh");
     }
     async isSignedIn() {
-        const session = await this.KEYCHAIN.get("session");
-        const refresh = await this.KEYCHAIN.get("refresh");
-        if (!session ||
-            !refresh ||
-            typeof session !== "string" ||
-            typeof refresh !== "string")
+        const session = await this.KEYCHAIN.string("session");
+        const refresh = await this.KEYCHAIN.string("refresh");
+        if (!session || !refresh)
             return false; // Either Refresh or Access is missing, not signed in
         if (isTokenExpired(refresh)) {
             // Refresh is expired, not signed in
@@ -1110,13 +1107,43 @@ class Target extends daisuke_1.Source {
         };
     }
     async syncToMD(id, chapterIdsRead, chapterIdsUnread = []) {
-        await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
-            body: {
-                chapterIdsUnread,
-                chapterIdsRead,
-            },
-            transformRequest: requestHandler,
-        });
+        try {
+            await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
+                body: {
+                    chapterIdsUnread,
+                    chapterIdsRead,
+                },
+                transformRequest: requestHandler,
+            });
+        }
+        catch {
+            console.error("failed to sync to mangadex");
+        }
+    }
+    async handleIdentifierForUrl(url) {
+        const titleRegex = /^https:\/\/mangadex.org\/title\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
+        const contentId = url.match(titleRegex)?.[1];
+        if (contentId)
+            return {
+                contentId,
+            };
+        const chapterRegex = /^https:\/\/mangadex.org\/chapter\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
+        const chapterId = url.match(chapterRegex)?.[1];
+        if (chapterId) {
+            const id = await this.getMangaFromChapterId(chapterId);
+            return {
+                contentId: id,
+                chapterId,
+            };
+        }
+        return null;
+    }
+    async getMangaFromChapterId(id) {
+        const url = `${this.API_URL}/chapter/${id}?includes[]=manga`;
+        const { data: res } = await this.NETWORK_CLIENT.get(url);
+        const { data } = JSON.parse(res);
+        const contentId = data.relationships.find((v) => v.type === "manga")?.id;
+        return contentId;
     }
 }
 exports.Target = Target;
@@ -1383,7 +1410,8 @@ class MDStore {
     }
     async getContentRatings() {
         const DEFAULT = ["safe", "suggestive", "erotica"];
-        const ratings = await this.store.stringArray(exports.PREF_KEYS.exploreCR);
+        //TODO: Uncomment out the below line when V6.0 is released.
+        const ratings = (await this.store.get(exports.PREF_KEYS.exploreCR));
         if (!ratings)
             return DEFAULT;
         return ratings;
@@ -1415,7 +1443,9 @@ class MDStore {
     }
     async getLanguages() {
         const DEFAULT = ["en"];
-        const value = await this.store.stringArray(exports.PREF_KEYS.lang);
+        //TODO: Uncomment out the below line when V6.0 is released.
+        // const value = await this.store.stringArray(PREF_KEYS.lang);
+        const value = (await this.store.get(exports.PREF_KEYS.lang));
         if (!value)
             return DEFAULT;
         return value;
@@ -1432,7 +1462,8 @@ class MDStore {
         return this.store.set(exports.PREF_KEYS.mimasEnabled, v);
     }
     async getMimasTargets() {
-        const value = await this.store.stringArray(exports.PREF_KEYS.mimasTargets);
+        //TODO: Uncomment out the below line when V6.0 is released.
+        const value = (await this.store.get(exports.PREF_KEYS.mimasTargets));
         if (!value)
             return [];
         return value;
