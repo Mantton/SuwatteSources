@@ -1,10 +1,10 @@
+import { DirectoryRequest, PageSection, PagedResult } from "@suwatte/daisuke";
 import {
-  CollectionExcerpt,
-  ExploreCollection,
-  PagedResult,
-  SearchRequest,
-} from "@suwatte/daisuke";
-import { HIGHLIGHT_LIMIT, PATHS, SORT_KEYS } from "./constants";
+  HIGHLIGHT_LIMIT,
+  HOME_PAGE_SECTIONS,
+  PATHS,
+  SORT_KEYS,
+} from "./constants";
 import { Parser } from "./parser";
 import { Store } from "./store";
 import { DirectoryEntry, ParsedRequest } from "./types";
@@ -14,19 +14,15 @@ export class Controller {
   private client = new NetworkClient();
   private parser = new Parser();
   private store = new Store();
-
   private directory: DirectoryEntry[] = [];
   private directoryHTML = "";
-  private homepage = "";
   // Directory
-
   private async getDirectoryString() {
     if (this.directoryHTML) {
       return this.directoryHTML;
     }
     const url = await this.store.host();
     const response = await this.client.get(`${url}/search`);
-
     const html = response.data;
     this.directoryHTML = html;
     return this.directoryHTML;
@@ -35,28 +31,30 @@ export class Controller {
     const html = await this.getDirectoryString();
     const regex = PATHS.directory;
     const dirStr = html.match(regex)?.[1];
-
     if (!dirStr) throw new Error("Failed to parse NepNep Directory");
     this.directory = JSON.parse(dirStr);
   }
 
-  async fetchHomePage() {
+  async buildHomePageSections() {
     const host = await this.store.host();
-    const response = await this.client.get(host);
-    this.homepage = response.data;
-    const temp = this.homepage.match(/ng-src="(.*\.jpg)"/)?.[1];
+    const { data: response } = await this.client.get(host);
+
+    const temp = response.match(/ng-src="(.*\.jpg)"/)?.[1];
     if (temp) this.parser.THUMBNAIL_TEMPLATE = temp;
-  }
 
-  // Explore
-  async resolveExcerpt(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
-    const regex = PATHS[excerpt.id];
-    const str = this.homepage.match(regex)?.[1];
+    const out: PageSection[] = [];
+    for (const section of HOME_PAGE_SECTIONS) {
+      const regex = PATHS[section.id];
+      const str = response.match(regex)?.[1];
 
-    if (!str) throw new Error("Failed to Match HomePage Section");
-    const highlights = this.parser.homepageSection(JSON.parse(str));
-
-    return { ...excerpt, highlights };
+      if (!str) {
+        console.error(`[${section.id}] Failed to match section`);
+        continue;
+      }
+      const items = this.parser.homepageSection(JSON.parse(str));
+      out.push({ ...section, items });
+    }
+    return out;
   }
 
   // Search
@@ -64,43 +62,34 @@ export class Controller {
     const html = await this.getDirectoryString();
     return this.parser.filters(html);
   }
-
-  async getSearchResults(request: SearchRequest): Promise<PagedResult> {
+  async getSearchResults(request: DirectoryRequest): Promise<PagedResult> {
     // Populate if empty
     if (this.directory.length == 0) {
       await this.fetchDirectory();
     }
-
     const temp = this.directoryHTML.match(/ng-src="(.*\.jpg)"/)?.[1];
     if (temp) this.parser.THUMBNAIL_TEMPLATE = temp;
-
-    const key = SORT_KEYS[request.sort ?? ""] ?? "v";
-
+    const key = SORT_KEYS[request.sort?.id ?? ""] ?? "v";
     const parsed = this.parser.search(request);
-
     const matches = this.directory.filter((v) =>
       this.matchesRequest(v, parsed)
     );
     const page = request.page ?? 1;
     const min = HIGHLIGHT_LIMIT * (page - 1);
     const max = HIGHLIGHT_LIMIT * page;
-
     if (key !== "s") {
       matches.sort(dynamicSort(key));
     }
-
     const results = matches
       .slice(min, max)
       .map((v) => this.parser.toHighlight(v));
 
     return {
-      page,
       results,
-      isLastPage: results.length <= HIGHLIGHT_LIMIT,
+      isLastPage: results.length < HIGHLIGHT_LIMIT,
       totalResultCount: matches.length,
     };
   }
-
   matchesRequest(entry: DirectoryEntry, request: ParsedRequest): boolean {
     let match = true;
     // Author
@@ -125,7 +114,6 @@ export class Controller {
         return false;
       }
     }
-
     // Release Year
     if (request.released) {
       match = entry.y == request.released;
@@ -134,7 +122,6 @@ export class Controller {
         return false;
       }
     }
-
     // Official Translation
     if (request.originalTranslation) {
       match = entry.o === "yes";
@@ -143,7 +130,6 @@ export class Controller {
         return false;
       }
     }
-
     // Included Types
     if (request.includeTypes && request.includeTypes.length > 0) {
       match = request.includeTypes.includes(entry.t.toLowerCase());
@@ -160,7 +146,6 @@ export class Controller {
         return false;
       }
     }
-
     // Scan Status
     if (request.s_status && request.s_status.length > 0) {
       match = request.s_status.includes(entry.ss.toLowerCase());
@@ -169,7 +154,6 @@ export class Controller {
         return false;
       }
     }
-
     // Publication Status
     if (request.p_status && request.p_status.length > 0) {
       match = request.p_status.includes(entry.ps.toLowerCase());
@@ -178,7 +162,6 @@ export class Controller {
         return false;
       }
     }
-
     /**
      * checks if the entry's genre list contains provided genre
      * @param v Genre Name
@@ -188,7 +171,6 @@ export class Controller {
         .map((v) => v.toLowerCase().trim())
         .includes(v.toLowerCase().trim());
     };
-
     // Included Tags
     if (request.includedTags && request.includedTags.length > 0) {
       match = request.includedTags.every(hasTag);
@@ -197,7 +179,6 @@ export class Controller {
         return false;
       }
     }
-
     // Excluded Tags
     if (request.excludedTags && request.excludedTags.length > 0) {
       match = !request.excludedTags.some(hasTag);
@@ -205,32 +186,27 @@ export class Controller {
         return false;
       }
     }
-
     return true;
   }
-
-  // Content
+  //   // Content
   async getContent(id: string) {
     const host = await this.store.host();
     const response = await this.client.get(`${host}/manga/${id}`);
     const html = response.data;
     return this.parser.content(html, id, host);
   }
-
   // Chapters
   async getChapters(id: string) {
     const host = await this.store.host();
     const response = await this.client.get(`${host}/manga/${id}`);
     const html = response.data;
-    return this.parser.chapters(html, id);
+    return this.parser.chapters(html);
   }
-
   async getChapterData(contentId: string, chapterId: string) {
     const host = await this.store.host();
     const suffix = prepareURLSuffix(chapterId);
     const url = `${host}/read-online/${contentId}${suffix}`;
-
     const response = await this.client.get(url);
-    return this.parser.chapterData(response.data, chapterId, contentId);
+    return this.parser.chapterData(response.data);
   }
 }

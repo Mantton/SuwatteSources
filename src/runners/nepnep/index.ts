@@ -1,43 +1,43 @@
+"stt_env wk";
+
 import {
+  CatalogRating,
   Chapter,
   ChapterData,
-  CollectionExcerpt,
   Content,
-  ExploreCollection,
-  ExploreTag,
-  Filter,
+  ContentSource,
+  DirectoryConfig,
+  DirectoryRequest,
+  Form,
+  PageLink,
+  PageLinkResolver,
+  PageSection,
   PagedResult,
-  PreferenceGroup,
   Property,
-  SearchRequest,
-  SearchSort,
-  SelectPreference,
-  Source,
-  SourceInfo,
+  ResolvedPageSection,
+  RunnerInfo,
+  RunnerPreferenceProvider,
+  UIPicker,
 } from "@suwatte/daisuke";
-import { sampleSize } from "lodash";
-import {
-  ADULT_TAGS,
-  BASE_EXPLORE_COLLECTIONS,
-  NEPNEP_DOMAINS,
-  SEARCH_SORTERS,
-} from "./constants";
+import { ADULT_TAGS, NEPNEP_DOMAINS, SEARCH_SORTERS } from "./constants";
 import { Controller } from "./controller";
 
-export class Target extends Source {
-  info: SourceInfo = {
+export class Target
+  implements ContentSource, PageLinkResolver, RunnerPreferenceProvider
+{
+  info: RunnerInfo = {
     id: "m.nepnep",
     website: "https://mangasee123.com",
-    version: 1.3,
+    version: 1.5,
     name: "NepNep",
     supportedLanguages: ["EN_US"],
-    nsfw: false,
-    authors: ["Mantton"],
     thumbnail: "nepnep.png",
-    minSupportedAppVersion: "5.0",
+    minSupportedAppVersion: "6.0",
+    rating: CatalogRating.MIXED,
   };
   private controller = new Controller();
 
+  // Core
   async getContent(contentId: string): Promise<Content> {
     return this.controller.getContent(contentId);
   }
@@ -51,88 +51,78 @@ export class Target extends Source {
     return this.controller.getChapterData(contentId, chapterId);
   }
 
-  async getSourceTags(): Promise<Property[]> {
+  async getTags?(): Promise<Property[]> {
     const filters = await this.controller.getFilters();
     return filters
-      .map((v) => ({
-        id: v.id,
-        label: v.title,
-        tags: (v.options ?? []).map((v) => ({
-          ...v,
-          adultContent: ADULT_TAGS.includes(v.id),
+      .map(({ id, title, options }) => ({
+        id,
+        title,
+        tags: (options ?? []).map((v) => ({
+          id: v.id,
+          title: v.title,
+          nsfw: ADULT_TAGS.includes(v.id),
         })),
       }))
       .filter((v) => v.tags.length != 0);
   }
 
-  async createExploreCollections(): Promise<CollectionExcerpt[]> {
-    // Refresh
-    return BASE_EXPLORE_COLLECTIONS;
+  // Directory
+  getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    return this.controller.getSearchResults(request);
   }
 
-  willResolveExploreCollections(): Promise<void> {
-    return this.controller.fetchHomePage();
-  }
-
-  async resolveExploreCollection(
-    excerpt: CollectionExcerpt
-  ): Promise<ExploreCollection> {
-    return await this.controller.resolveExcerpt(excerpt);
-  }
-
-  async getExplorePageTags(): Promise<ExploreTag[]> {
-    const tags = (await this.getSourceTags())[0].tags.filter(
-      (v) => !v.adultContent
-    );
-    const selected = sampleSize(tags, 7);
-
-    return selected.map((v) => ({
-      ...v,
-      request: { filters: [{ id: "genres", included: [v.id] }] },
-    }));
-  }
-  // Searching
-  async getSearchSorters(): Promise<SearchSort[]> {
-    return SEARCH_SORTERS;
-  }
-
-  async getSearchFilters(): Promise<Filter[]> {
-    return this.controller.getFilters();
-  }
-
-  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    return this.controller.getSearchResults(query);
-  }
-
-  // Preference
-  async getSourcePreferences(): Promise<PreferenceGroup[]> {
-    const store = new ObjectStore();
-    return [
-      {
-        id: "general",
-        header: "General",
-        children: [
-          new SelectPreference({
-            key: "host",
-            label: "NepNep Site",
-            options: NEPNEP_DOMAINS.map((v) => ({
-              label: v.name,
-              value: v.id,
-            })),
-            value: {
-              get: async () => {
-                const stored = await store.string("n_host");
-                const def = NEPNEP_DOMAINS[0].id;
-                if (!stored) return def;
-                return NEPNEP_DOMAINS.find((v) => v.id == stored)?.id ?? def;
-              },
-              set: async (value) => {
-                return store.set("n_host", value);
-              },
-            },
-          }),
-        ],
+  async getDirectoryConfig(): Promise<DirectoryConfig> {
+    return {
+      sort: {
+        options: SEARCH_SORTERS,
+        canChangeOrder: true,
+        default: {
+          id: "views_all",
+          ascending: false,
+        },
       },
-    ];
+      filters: await this.controller.getFilters(),
+    };
+  }
+
+  // Page Links
+
+  async getSectionsForPage(link: PageLink): Promise<PageSection[]> {
+    const key = link.id;
+    if (key !== "home") throw new Error("invalid page.");
+    return this.controller.buildHomePageSections();
+  }
+
+  resolvePageSection(
+    _link: PageLink,
+    _sectionKey: string
+  ): Promise<ResolvedPageSection> {
+    throw new Error("already resolved");
+  }
+
+  // Preferences
+  async getPreferenceMenu(): Promise<Form> {
+    return {
+      sections: [
+        {
+          header: "General",
+          children: [
+            UIPicker({
+              id: "host",
+              title: "Website",
+              options: NEPNEP_DOMAINS.map(({ name: title, id }) => ({
+                title,
+                id,
+              })),
+              value:
+                (await ObjectStore.string("n_host")) ?? NEPNEP_DOMAINS[0].id,
+              async didChange(value) {
+                return ObjectStore.set("n_host", value);
+              },
+            }),
+          ],
+        },
+      ],
+    };
   }
 }

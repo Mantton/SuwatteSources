@@ -1,3 +1,5 @@
+import { Option } from "@suwatte/daisuke";
+
 type Language = {
   label: string;
   languageCode: string;
@@ -266,7 +268,7 @@ export const languageLabel = (lang: string) => {
 
 export const languageCode = (lang: string) => {
   const t = languages.find((v) => v.languageCode == lang);
-  if (!t) return undefined;
+  if (!t) return "";
 
   return t.languageCode.includes("-")
     ? t.languageCode
@@ -279,3 +281,18 @@ export type MimasRecommendation = {
   title: string;
   coverImage: string;
 };
+
+export const CoverQualityOptions: Option[] = [
+  {
+    title: "Original",
+    id: "original",
+  },
+  {
+    title: "Medium",
+    id: "medium",
+  },
+  {
+    title: "Low",
+    id: "low",
+  },
+];

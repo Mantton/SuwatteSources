@@ -1,37 +1,37 @@
 import {
   Chapter,
   ChapterData,
-  CollectionExcerpt,
   Content,
-  ExploreCollection,
-  ExploreTag,
-  Filter,
+  ContentSource,
+  DirectoryConfig,
+  DirectoryRequest,
+  ImageRequestHandler,
   NetworkRequest,
   PagedResult,
   Property,
-  SearchRequest,
-  SearchSort,
-  Source,
+  RunnerInfo,
+  SourceConfig,
 } from "@suwatte/daisuke";
-import { EXPLORE_SECTIONS as EXPLORE_COLLECTIONS } from "./constants";
 import { Controller } from "./controller";
 import { Context } from "./types";
 
-export abstract class MadaraTemplate extends Source {
+export abstract class MadaraTemplate
+  implements ContentSource, ImageRequestHandler
+{
   context: Context;
   protected controller: Controller;
+  info!: RunnerInfo;
+  config?: SourceConfig | undefined;
 
   constructor(ctx: Context) {
-    super();
     this.context = ctx;
     this.controller = new Controller(ctx);
   }
-  async willRequestImage(request: NetworkRequest): Promise<NetworkRequest> {
-    request.headers = {
-      ...request.headers,
-      Referer: this.context.baseUrl + "/",
+  async willRequestImage(url: string): Promise<NetworkRequest> {
+    return {
+      url,
+      headers: { Referer: this.context.baseUrl + "/" },
     };
-    return request;
   }
   //
   async getContent(contentId: string): Promise<Content> {
@@ -47,41 +47,20 @@ export abstract class MadaraTemplate extends Source {
   getChapterData(contentId: string, chapterId: string): Promise<ChapterData> {
     return this.controller.getChapterData(contentId, chapterId);
   }
+  //
 
   //
-  getSearchFilters(): Promise<Filter[]> {
-    return this.controller.getFilters();
-  }
-
-  //
-  async getSearchSorters(): Promise<SearchSort[]> {
-    return this.controller.getSorters();
-  }
-  //
-  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    return this.controller.handleSearch(query);
-  }
-
-  //
-  async getSourceTags(): Promise<Property[]> {
+  async getTags(): Promise<Property[]> {
     const main = await this.controller.getTags();
     return [main];
   }
 
-  //
-  getExplorePageTags(): Promise<ExploreTag[]> {
-    return this.controller.getExploreTags();
+  getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    return this.controller.handleSearch(request);
   }
-
-  //
-  async createExploreCollections(): Promise<CollectionExcerpt[]> {
-    return EXPLORE_COLLECTIONS;
-  }
-
-  //
-  async resolveExploreCollection(
-    excerpt: CollectionExcerpt
-  ): Promise<ExploreCollection> {
-    return this.controller.getCollection(excerpt);
+  async getDirectoryConfig(
+    _configID?: string | undefined
+  ): Promise<DirectoryConfig> {
+    return {};
   }
 }

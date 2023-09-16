@@ -1,35 +1,34 @@
 import {
+  Highlight,
+  Content,
+  Property,
+  ReadingMode,
+  HighlightCollection,
   Chapter,
   ChapterData,
   ChapterPage,
-  CollectionStyle,
-  Content,
-  Filter,
   FilterType,
-  Highlight,
-  HighlightCollection,
-  Property,
-  ReadingMode,
-  SearchRequest,
-  Status,
+  DirectoryFilter,
+  DirectoryRequest,
 } from "@suwatte/daisuke";
 import { load } from "cheerio";
 import { capitalize, toLower } from "lodash";
 import moment from "moment";
 import {
-  ADULT_TAGS,
-  DEFAULT_FILTERS,
   HIGHLIGHT_LIMIT,
-  PATHS,
-  STATUS_KEYS,
   TAG_PREFIX,
+  ADULT_TAGS,
   VERTICAL_TYPES,
+  STATUS_KEYS,
+  PATHS,
+  DEFAULT_FILTERS,
 } from "./constants";
 import {
-  ChapterDetail,
-  DirectoryEntry,
   HomePageEntry,
+  DirectoryEntry,
+  ChapterDetail,
   ParsedRequest,
+  FilterProps,
 } from "./types";
 import { parseChapterString } from "./utils";
 
@@ -40,17 +39,16 @@ export class Parser {
     const highlights: Highlight[] = [];
     for (const entry of entries.slice(0, HIGHLIGHT_LIMIT)) {
       highlights.push({
-        contentId: entry.IndexName,
+        id: entry.IndexName,
         title: entry.SeriesName,
         cover: this.coverFor(entry.IndexName),
-        // tags: entry.Genres,
       });
     }
     return highlights;
   }
 
-  filters(html: string): Filter[] {
-    const filters: Filter[] = [];
+  filters(html: string): DirectoryFilter[] {
+    const filters: DirectoryFilter[] = [];
     const genreStr = html.match(PATHS.genre_tag)?.[1].replace(/'/g, '"').trim();
     const typesStr = html
       .match(PATHS.format_tag)?.[1]
@@ -68,7 +66,7 @@ export class Parser {
       type: FilterType.EXCLUDABLE_MULTISELECT,
       options: genres.map((v) => ({
         id: v.toLowerCase(),
-        label: v,
+        title: v,
       })),
     });
 
@@ -79,7 +77,7 @@ export class Parser {
       type: FilterType.EXCLUDABLE_MULTISELECT,
       options: types.map((v) => ({
         id: v.toLowerCase(),
-        label: v,
+        title: v,
       })),
     });
 
@@ -90,68 +88,60 @@ export class Parser {
   }
   toHighlight(entry: DirectoryEntry): Highlight {
     return {
-      contentId: entry.i,
+      id: entry.i,
       title: entry.s,
       cover: this.coverFor(entry.i),
     };
   }
 
-  search(request: SearchRequest): ParsedRequest {
-    const { filters } = request;
-    const grouped = filters?.find((v) => v.id == "grouped");
-    const groupedTypes = grouped?.included
-      ?.filter((v) => v.startsWith(TAG_PREFIX.type))
-      .map((v) => v.split(":")?.[1])
-      .filter((v) => v);
-    const groupedYear = grouped?.included
-      ?.filter((v) => v.startsWith(TAG_PREFIX.year))
-      .map((v) => v.split(":")?.[1])
-      .filter((v) => v)?.[0];
-    const orig = grouped?.included?.includes(TAG_PREFIX.translation);
-    return {
-      query: request.query?.toLowerCase(),
+  search(request: DirectoryRequest<FilterProps>): ParsedRequest {
+    const { filters, tag, query } = request;
 
-      // Tags
-      includedTags: filters
-        ?.find((v) => v.id == TAG_PREFIX.genres)
-        ?.included?.map(toLower),
-      excludedTags: filters
-        ?.find((v) => v.id == TAG_PREFIX.genres)
-        ?.excluded?.map(toLower),
+    if (query) {
+      return {
+        query,
+      };
+    }
 
-      // Author
-      authors: filters
-        ?.find((v) => v.id == TAG_PREFIX.author)
-        ?.included?.map(toLower),
-      // Status
-      p_status: filters
-        ?.find((v) => v.id == TAG_PREFIX.publication)
-        ?.included?.map(toLower),
-      s_status: filters
-        ?.find((v) => v.id == TAG_PREFIX.scanlation)
-        ?.included?.map(toLower),
+    if (filters) {
+      return {
+        includedTags: filters.genres?.included.map(toLower),
+        excludedTags: filters.genres?.excluded.map(toLower),
+        p_status: filters.p_status,
+        s_status: filters.s_status,
+        includeTypes: filters.type?.included.map(toLower),
+        excludeTypes: filters.type?.excluded.map(toLower),
+      };
+    }
 
-      // Types
-      includeTypes:
-        filters?.find((v) => v.id == TAG_PREFIX.type)?.included?.map(toLower) ??
-        groupedTypes,
-      excludeTypes: filters
-        ?.find((v) => v.id == TAG_PREFIX.type)
-        ?.excluded?.map(toLower),
+    if (tag) {
+      switch (tag.propertyId) {
+        case "p_status":
+        case "s_status": {
+          return { [tag.propertyId]: [tag.tagId] };
+        }
+        case "type": {
+          return { includeTypes: [tag.tagId] };
+        }
+        case "genres": {
+          return { includedTags: [tag.tagId] };
+        }
 
-      // Original Translation
-      originalTranslation:
-        filters?.find((v) => v.id == TAG_PREFIX.translation)?.bool ??
-        orig ??
-        false,
-      // Release Year
-      released:
-        filters?.find((v) => v.id == TAG_PREFIX.year)?.included?.[0] ??
-        groupedYear,
-    };
+        case "released": {
+          return { released: tag.tagId };
+        }
+        case "author": {
+          return { authors: [tag.tagId] };
+        }
+        case "translation":
+          return { originalTranslation: true };
+      }
+    }
+
+    return {};
   }
 
-  // Content
+  //   // Content
   content(html: string, id: string, host: string): Content {
     const $ = load(html);
 
@@ -186,20 +176,20 @@ export class Parser {
       .filter((v) => !!v);
     properties.push({
       id: TAG_PREFIX.genres,
-      label: "Genres",
+      title: "Genres",
       tags: genres.map((v) => ({
         id: v.toLowerCase(),
-        label: v,
-        adultContent: ADULT_TAGS.includes(v.toLowerCase()),
+        title: v,
+        nsfw: ADULT_TAGS.includes(v.toLowerCase()),
       })),
     });
 
-    const adultContent = properties[0].tags.some((v) => v.adultContent);
+    const nsfw = properties[0].tags.some((v) => v.nsfw);
 
     // Grouped Types, Released, Official Translation
     const groupedProperty: Property = {
       id: "grouped",
-      label: "Additional Tags",
+      title: "Additional Tags",
       tags: [],
     };
 
@@ -219,26 +209,26 @@ export class Parser {
     // Type
     groupedProperty.tags.push({
       id: `${TAG_PREFIX.type}:${type.toLowerCase()}`,
-      label: type,
+      title: type,
     });
 
     // Released
 
     groupedProperty.tags.push({
       id: `${TAG_PREFIX.year}:${released}`,
-      label: `Released in ${released}`,
+      title: `Released in ${released}`,
     });
 
     // Reading Mode
-    let recommendedReadingMode = ReadingMode.PAGED_MANGA;
+    let recommendedPanelMode = ReadingMode.PAGED_MANGA;
     if (VERTICAL_TYPES.includes(type)) {
-      recommendedReadingMode = ReadingMode.VERTICAL;
+      recommendedPanelMode = ReadingMode.WEBTOON;
     }
 
     if (officialTranslation) {
       groupedProperty.tags.push({
-        id: TAG_PREFIX.lang,
-        label: "Official Translation",
+        id: TAG_PREFIX.translation,
+        title: "Official Translation",
       });
     }
     properties.push(groupedProperty);
@@ -246,10 +236,10 @@ export class Parser {
     /// Authors
     properties.push({
       id: TAG_PREFIX.author,
-      label: "Author(s)",
+      title: "Author(s)",
       tags: creators.map((v) => ({
         id: v.trim().toLowerCase(),
-        label: v.split(" ").map(capitalize).join(" ").trim(),
+        title: v.split(" ").map(capitalize).join(" ").trim(),
       })),
     });
 
@@ -262,10 +252,10 @@ export class Parser {
       .trim()
       .toLowerCase();
 
-    const status = STATUS_KEYS[statusString] ?? Status.UNKNOWN;
+    const status = STATUS_KEYS[statusString];
 
     // Related
-    const includedCollections: HighlightCollection[] = [];
+    const collections: HighlightCollection[] = [];
     const relatedString = html.match(PATHS.related)?.[1];
 
     if (relatedString) {
@@ -274,23 +264,21 @@ export class Parser {
       const collection: HighlightCollection = {
         id: "related",
         title: "Related Titles",
-        style: CollectionStyle.NORMAL,
-        highlights,
+        highlights: highlights,
       };
-      includedCollections.push(collection);
+      collections.push(collection);
     }
 
     const cover =
       $('meta[property="og:image"]').attr("content") ?? this.coverFor(id);
-    const chapters = this.chapters(html, id);
+    const chapters = this.chapters(html);
     return {
-      contentId: id,
       additionalTitles,
       summary,
       cover,
-      includedCollections,
-      adultContent,
-      recommendedReadingMode,
+      collections,
+      isNSFW: nsfw,
+      recommendedPanelMode,
       title,
       status,
       properties,
@@ -300,7 +288,7 @@ export class Parser {
     };
   }
 
-  chapters(html: string, contentId: string): Chapter[] {
+  chapters(html: string): Chapter[] {
     const str = html.match(PATHS.chapters)?.[1];
     if (!str) throw new Error("Failed to Parse Chapters");
 
@@ -312,7 +300,6 @@ export class Parser {
       const numbers = parseChapterString(chapterId);
       chapters.push({
         chapterId,
-        contentId,
         ...numbers,
         index,
         date: moment(object.Date).subtract(1, "hour").toDate(),
@@ -323,7 +310,7 @@ export class Parser {
     return chapters;
   }
 
-  chapterData(html: string, chapterId: string, contentId: string): ChapterData {
+  chapterData(html: string): ChapterData {
     const host = html.match(PATHS.chapter_data_domain)?.[1].replaceAll(`"`, "");
     const path = html.match(PATHS.chapter_data_path)?.[1].replaceAll(`"`, "");
     const chapterStr = html.match(PATHS.chapter_data_chapter)?.[1];
@@ -352,8 +339,6 @@ export class Parser {
       url: `${base}-${(n + 1).toString().padStart(3, "0")}.png`,
     }));
     return {
-      chapterId,
-      contentId,
       pages,
     };
   }

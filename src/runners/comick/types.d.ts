@@ -21,3 +21,27 @@ export type MangaExcerpt = {
   mu_comics: { year: number };
   cover_url: string;
 };
+
+export type HPTimeGroup = {
+  "7": MangaExcerpt[];
+  "30": MangaExcerpt[];
+  "90": MangaExcerpt[];
+};
+export type HomePageProps = {
+  rank: MangaExcerpt[];
+  recentRank: MangaExcerpt[];
+  trending: HPTimeGroup;
+  follows: {
+    identities: {
+      traits: {
+        username: string;
+      };
+    };
+    md_comics: MangaExcerpt;
+  }[];
+  news: MangaExcerpt[];
+  extendedNews: MangaExcerpt[];
+  completions: MangaExcerpt[];
+  topFollowNewComics: HPTimeGroup;
+  topFollowComics: HPTimeGroup;
+};

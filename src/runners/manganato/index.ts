@@ -1,30 +1,40 @@
 import {
+  CatalogRating,
   Chapter,
   ChapterData,
-  CollectionExcerpt,
   Content,
-  ExploreCollection,
-  Filter,
+  ContentSource,
+  DirectoryConfig,
+  DirectoryRequest,
+  Generate,
+  ImageRequestHandler,
   NetworkRequest,
+  PageLink,
+  PageLinkResolver,
+  PageSection,
   PagedResult,
-  Property,
-  SearchRequest,
-  Source,
-  SourceInfo,
+  ResolvedPageSection,
+  RunnerInfo,
 } from "@suwatte/daisuke";
-import { EXPLORE_COLLECTIONS, FILTERS, PROPERTIES } from "./constants";
+import {
+  FILTERS,
+  HOMEPAGE_SECTIONS,
+  SORT_OPTONS as SORT_OPTIONS,
+} from "./constants";
 import { Controller } from "./controller";
 
-export class Target extends Source {
-  info: SourceInfo = {
+export class Target
+  implements ContentSource, ImageRequestHandler, PageLinkResolver
+{
+  info: RunnerInfo = {
     id: "com.manganato",
     name: "MangaNato",
-    version: 0.2,
+    version: 0.3,
     website: "https://manganto.com",
     thumbnail: "manganato.png",
-    nsfw: false,
     supportedLanguages: ["en_US"],
-    minSupportedAppVersion: "5.0",
+    minSupportedAppVersion: "6.0",
+    rating: CatalogRating.SAFE,
   };
 
   private controller = new Controller();
@@ -39,50 +49,56 @@ export class Target extends Source {
     return this.controller.getChapterData(contentId, chapterId);
   }
 
-  async getSourceTags(): Promise<Property[]> {
-    return PROPERTIES;
+  async willRequestImage(url: string): Promise<NetworkRequest> {
+    return {
+      url,
+      headers: {
+        referer: "https://manganato.com",
+      },
+    };
   }
 
-  // Searching
-  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    const results = await this.controller.getSearchResults(query);
+  // Directory
+  async getDirectoryConfig(
+    _key?: string | undefined
+  ): Promise<DirectoryConfig> {
+    return Generate<DirectoryConfig>({
+      filters: FILTERS,
+      sort: {
+        options: SORT_OPTIONS,
+        default: {
+          id: "topview",
+          ascending: false,
+        },
+        canChangeOrder: false,
+      },
+    });
+  }
+
+  async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    const results = await this.controller.getDirectoryResults(request);
     return {
-      page: query.page ?? 1,
       results,
       isLastPage: results.length > 24,
     };
   }
-  async getSearchFilters(): Promise<Filter[]> {
-    return FILTERS;
+
+  async getSectionsForPage({ id }: PageLink): Promise<PageSection[]> {
+    if (id !== "home") throw new Error(`Cannot handle page, ${id}`);
+    return HOMEPAGE_SECTIONS;
   }
 
-  // Explore
-  async createExploreCollections(): Promise<CollectionExcerpt[]> {
-    return EXPLORE_COLLECTIONS;
+  async willResolveSectionsForPage(_link: PageLink): Promise<any> {
+    await this.controller.getHomePage();
+    return;
   }
-
-  willResolveExploreCollections(): Promise<void> {
-    return this.controller.getHomePage();
-  }
-  async resolveExploreCollection(
-    excerpt: CollectionExcerpt
-  ): Promise<ExploreCollection> {
-    const highlights = await this.controller.resolveExploreCollection(
-      excerpt.id
-    );
+  async resolvePageSection(
+    _link: PageLink,
+    sectionID: string,
+    _pageContext?: any
+  ): Promise<ResolvedPageSection> {
     return {
-      ...excerpt,
-      highlights,
+      items: await this.controller.resolveHomePageSection(sectionID),
     };
-  }
-
-  async willRequestImage(request: NetworkRequest): Promise<NetworkRequest> {
-    request.headers = {
-      ...(request.headers ?? {}),
-      ...{
-        referer: "https://manganato.com",
-      },
-    };
-    return request;
   }
 }

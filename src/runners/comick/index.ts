@@ -1,28 +1,32 @@
 import {
   Chapter,
   ChapterData,
-  CollectionExcerpt,
   Content,
-  ExploreCollection,
-  Filter,
+  ContentSource,
+  DirectoryConfig,
+  DirectoryFilter,
+  DirectoryRequest,
   FilterType,
+  Form,
+  ImageRequestHandler,
   NetworkRequest,
+  PageLink,
+  PageLinkResolver,
+  PageSection,
   PagedResult,
-  PreferenceGroup,
   Property,
-  SearchRequest,
-  SearchSort,
-  SelectPreference,
-  Source,
-  SourceInfo,
+  ResolvedPageSection,
+  RunnerInfo,
+  RunnerPreferenceProvider,
+  UIMultiPicker,
 } from "@suwatte/daisuke";
 import {
-  EXPLORE_COLLECTIONS,
+  EXPLORE_COLLECTIONS as HOMEPAGE_COLLECTIONS,
   getProperties,
   LANGUAGE_OPTIONS,
   SORT_OPTIONS,
 } from "./constants";
-import { MangaExcerpt } from "./types";
+import { HomePageProps, MangaExcerpt } from "./types";
 import {
   CKChapterToChapter,
   MangaToContent,
@@ -31,20 +35,25 @@ import {
   parseSearchRequest,
 } from "./utilts";
 
-export class Target extends Source {
-  info: SourceInfo = {
+export class Target
+  implements
+    ContentSource,
+    ImageRequestHandler,
+    RunnerPreferenceProvider,
+    PageLinkResolver
+{
+  info: RunnerInfo = {
     id: "app.comick",
     name: "ComicK",
     version: 0.3,
     website: "https://comick.app/home",
     supportedLanguages: [],
-    nsfw: false,
     thumbnail: "comick.png",
     minSupportedAppVersion: "5.0",
   };
 
   private client = new NetworkClient();
-  private store = new ObjectStore();
+  private store = ObjectStore;
   private API_URL = "https://api.comick.fun";
 
   async getContent(contentId: string): Promise<Content> {
@@ -76,7 +85,7 @@ export class Target extends Source {
     return chapters;
   }
   async getChapterData(
-    contentId: string,
+    _contentId: string,
     chapterId: string
   ): Promise<ChapterData> {
     const url = `${this.API_URL}/chapter/${chapterId}?tachiyomi=true`;
@@ -85,67 +94,68 @@ export class Target extends Source {
 
     const pages = images.map((v) => ({ url: v.url }));
     return {
-      contentId,
-      chapterId,
       pages,
     };
   }
-  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    const { queryString, core: params } = parseSearchRequest(query);
+
+  async getTags?(): Promise<Property[]> {
+    return getProperties();
+  }
+  async getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    const { queryString, core: params } = parseSearchRequest(request);
     const url = `${this.API_URL}/v1.0/search?${queryString.replace("&", "")}`;
     const response = await this.client.get(url, { params });
     const data: MangaExcerpt[] = JSON.parse(response.data);
     return {
-      page: query.page ?? 1,
       results: data.map((v) => MangaToHighlight(v)),
       isLastPage: data.length < 30,
     };
   }
-  async getSourceTags(): Promise<Property[]> {
-    return getProperties();
-  }
-
-  async getSourcePreferences(): Promise<PreferenceGroup[]> {
-    return [
-      {
-        id: "lang",
-        header: "Language",
-        children: [
-          new SelectPreference({
-            key: "n_content_lang",
-
-            label: "Language",
-
-            options: LANGUAGE_OPTIONS,
-            value: {
-              get: async () => {
-                return (
-                  ((await this.store.get("n_content_lang")) as string | null) ??
-                  "all"
-                );
-              },
-              set: async (v) => {
-                return await this.store.set("n_content_lang", v);
-              },
-            },
-          }),
-        ],
-        footer: "Languages in which chapters will be available",
+  async getDirectoryConfig(
+    _configID?: string | undefined
+  ): Promise<DirectoryConfig> {
+    return {
+      filters: await this.getSearchFilters(),
+      sort: {
+        options: SORT_OPTIONS,
+        canChangeOrder: false,
+        default: {
+          id: "user_follow_count",
+          ascending: false,
+        },
       },
-    ];
+    };
   }
 
-  async getSearchSorters(): Promise<SearchSort[]> {
-    return SORT_OPTIONS;
+  async getPreferenceMenu(): Promise<Form> {
+    return {
+      sections: [
+        {
+          header: "Languages",
+          footer: "Languages in which chapters will be available",
+          children: [
+            UIMultiPicker({
+              id: "lang",
+              title: "Content Languages",
+              options: LANGUAGE_OPTIONS,
+              value: (await this.store.stringArray("langs")) ?? ["all"],
+              async didChange(value) {
+                return ObjectStore.set("lang", value);
+              },
+            }),
+          ],
+        },
+      ],
+    };
   }
 
-  async getSearchFilters(): Promise<Filter[]> {
+  async getSearchFilters(): Promise<DirectoryFilter[]> {
     const properties = getProperties();
     return [
       {
         id: "content_type",
         title: "Content Type",
-        type: FilterType.SELECT,
+        type: FilterType.MULTISELECT,
         options: properties[0].tags,
       },
       {
@@ -162,8 +172,7 @@ export class Target extends Source {
       },
       {
         id: "completed",
-        title: "Content Status",
-        label: "Completed",
+        title: "Is Completed",
         type: FilterType.TOGGLE,
       },
     ];
@@ -178,104 +187,92 @@ export class Target extends Source {
     return JSON.parse(response.data);
   }
 
-  async willRequestImage(request: NetworkRequest): Promise<NetworkRequest> {
-    request.headers = {
-      ...request.headers,
-      referer: "https://comic.app/",
+  async willRequestImage(url: string): Promise<NetworkRequest> {
+    return {
+      url,
+      headers: {
+        referer: "https://comic.app/",
+      },
     };
-
-    return request;
   }
+  // Home Page
+  async getSectionsForPage(link: PageLink): Promise<PageSection[]> {
+    if (link.id !== "home") throw new Error("Page not found");
+    return HOMEPAGE_COLLECTIONS;
+  }
+  private homepage: HomePageProps | undefined;
 
-  // Explore Page
-  private homepage: any;
-  async willResolveExploreCollections(): Promise<void> {
+  async willResolveSectionsForPage(_link: PageLink): Promise<any> {
     const { data } = await this.client.get("https://comick.app/home");
     const str = data
       .split(`<script id="__NEXT_DATA__" type="application/json">`)
       .pop()
       ?.split("</script>")?.[0];
-
     if (!str) throw new Error("Could not find Homepage JSON");
-    this.homepage = JSON.parse(str).props.pageProps;
+    this.homepage = JSON.parse(str).props.pageProps.data;
   }
 
-  async createExploreCollections(): Promise<CollectionExcerpt[]> {
-    return EXPLORE_COLLECTIONS;
-  }
+  async resolvePageSection(
+    _link: PageLink,
+    sectionID: string,
+    _pageContext?: any
+  ): Promise<ResolvedPageSection> {
+    if (!this.homepage) throw new Error("Homepage has not been retrieved");
 
-  async resolveExploreCollection(
-    excerpt: CollectionExcerpt
-  ): Promise<ExploreCollection> {
-    let highlights: any;
-    switch (excerpt.id) {
+    switch (sectionID) {
       case "hot_updates":
-        return {
-          ...excerpt,
-          highlights: await this.getUpdateHighlights(true),
-        };
+        return { items: await this.getUpdateHighlights(true) };
       case "recently_added":
-        highlights = this.homepage.news.map((v: any) => MDComicToHighlight(v));
-        return { ...excerpt, highlights };
+        return { items: this.homepage.news.map(MDComicToHighlight) };
       case "most_viewed_7":
-        highlights = this.homepage.trending["7"].map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return { items: this.homepage.trending["7"].map(MDComicToHighlight) };
       case "most_viewed_30":
-        highlights = this.homepage.trending["30"].map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return { items: this.homepage.trending["30"].map(MDComicToHighlight) };
       case "popular_new_7":
-        highlights = this.homepage.topFollowNewComics["7"].map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.topFollowNewComics["7"].map(MDComicToHighlight),
+        };
       case "popular_new_30":
-        highlights = this.homepage.topFollowNewComics["30"].map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.topFollowNewComics["30"].map(MDComicToHighlight),
+        };
       case "completed":
-        highlights = this.homepage.completions.map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.completions.map(MDComicToHighlight),
+        };
 
       case "recently_followed":
-        highlights = this.homepage.follows.map((v: any) =>
-          MDComicToHighlight(v.md_comics)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.follows.map((v: any) =>
+            MDComicToHighlight(v.md_comics)
+          ),
+        };
 
       case "popular_ongoing":
-        highlights = this.homepage.rank.map((v: any) => MDComicToHighlight(v));
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.rank.map(MDComicToHighlight),
+        };
 
       case "upcoming":
-        highlights = this.homepage.recentRank.map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.recentRank.map(MDComicToHighlight),
+        };
 
       case "top_followed_7":
-        highlights = this.homepage.topFollowComics["7"].map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.topFollowComics["7"].map(MDComicToHighlight),
+        };
       case "top_followed_30":
-        highlights = this.homepage.topFollowComics["30"].map((v: any) =>
-          MDComicToHighlight(v)
-        );
-        return { ...excerpt, highlights };
+        return {
+          items: this.homepage.topFollowComics["30"].map(MDComicToHighlight),
+        };
       case "latest":
         return {
-          ...excerpt,
-          highlights: await this.getUpdateHighlights(false),
+          items: await this.getUpdateHighlights(false),
         };
     }
-    throw "Not Ready";
+
+    throw new Error("Unknown Section ID");
   }
 
   async getUpdateHighlights(hot: boolean) {

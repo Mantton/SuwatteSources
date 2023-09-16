@@ -42,7 +42,7 @@ export class Parser {
       const imageURL = imageFromElement(imageElement);
 
       highlights.push({
-        contentId: id,
+        id,
         title,
         cover: imageURL,
       });
@@ -77,8 +77,8 @@ export class Parser {
       .map(
         (tag): Tag => ({
           id: `${TAG_PREFIX.author}|tag.title.toLowerCase()`,
-          label: tag.title,
-          adultContent: false,
+          title: tag.title,
+          nsfw: false,
         })
       );
     // Artists
@@ -89,14 +89,14 @@ export class Parser {
       .map(
         (tag): Tag => ({
           id: `${TAG_PREFIX.artist}|tag.title.toLowerCase()`,
-          label: tag.title,
-          adultContent: false,
+          title: tag.title,
+          nsfw: false,
         })
       );
 
     // Creators
     const creators = Array.from(
-      new Set(authors.concat(artists).map((v) => v.label))
+      new Set(authors.concat(artists).map((v) => v.title))
     );
 
     // Summary
@@ -134,8 +134,8 @@ export class Parser {
               .link!.split("/")
               .filter((v) => v)
               .pop() ?? "",
-          label: v.title,
-          adultContent: ctx.adultTags.includes(v.title.toLowerCase()),
+          title: v.title,
+          nsfw: ctx.adultTags.includes(v.title.toLowerCase()),
         })
       )
       .filter((v) => v.id);
@@ -151,8 +151,8 @@ export class Parser {
               .filter((v) => v)
               .pop() ?? ""
           }`,
-          label: v.title,
-          adultContent: ctx.adultTags.includes(v.title.toLowerCase()),
+          title: v.title,
+          nsfw: ctx.adultTags.includes(v.title.toLowerCase()),
         })
       )
       .filter((v) => v.id.replace(TAG_PREFIX.hashtag, ""));
@@ -164,43 +164,42 @@ export class Parser {
       .split(";")
       .map(trim);
 
-    const adultContent = genres.some((v) => v.adultContent);
+    const isNSFW = genres.some((v) => v.nsfw);
 
     const properties: Property[] = [
       {
         id: "main",
-        label: "Genres",
+        title: "Genres",
         tags: genres,
       },
       {
         id: "supporting",
-        label: "Tags",
+        title: "Tags",
         tags: hashtags,
       },
       {
         id: "creators",
-        label: "Credits",
+        title: "Credits",
         tags: [
-          ...authors.map((v): Tag => ({ ...v, label: `Story By ${v.label}` })),
-          ...artists.map((v): Tag => ({ ...v, label: `Art By ${v.label}` })),
+          ...authors.map((v): Tag => ({ ...v, title: `Story By ${v.title}` })),
+          ...artists.map((v): Tag => ({ ...v, title: `Art By ${v.title}` })),
         ],
       },
     ];
 
     const chapters = this.chapters(ctx, html, contentId);
     return {
-      contentId,
       title,
       cover,
       summary: summary ? summary : undefined,
       creators,
       status,
-      adultContent,
+      isNSFW,
       properties,
       ...(chapters.length > 0 && { chapters }),
-      recommendedReadingMode: ctx.defaultReadingMode
+      recommendedPanelMode: ctx.defaultReadingMode
         ? ctx.defaultReadingMode
-        : ReadingMode.VERTICAL,
+        : ReadingMode.WEBTOON,
       additionalTitles:
         additionalTitles.length != 0 ? additionalTitles : undefined,
     };
@@ -231,7 +230,6 @@ export class Parser {
 
       chapters.push({
         index,
-        contentId,
         chapterId: id,
         number,
         date: ctx.dateFormat ? parseDate(dateStr) : new Date(),
@@ -243,12 +241,7 @@ export class Parser {
     return chapters;
   }
 
-  chapterData(
-    ctx: Context,
-    contentId: string,
-    chapterId: string,
-    html: string
-  ): ChapterData {
+  chapterData(ctx: Context, html: string): ChapterData {
     const $ = load(html);
     const nodes = $(ctx.imageSelector).toArray();
 
@@ -257,8 +250,6 @@ export class Parser {
       .map((url): ChapterPage => ({ url }));
 
     return {
-      contentId,
-      chapterId,
       pages,
     };
   }
@@ -271,40 +262,39 @@ export class Parser {
 
     const tags = nodes
       .map((node): Tag => {
-        const label = $("label", node).text().trim();
+        const title = $("label", node).text().trim();
         const id = $("input[type=checkbox]", node).attr("value")?.trim() ?? "";
-        const adultContent = ctx.adultTags.includes(label.toLowerCase());
-        return { label, id, adultContent };
+        const nsfw = ctx.adultTags.includes(title.toLowerCase());
+        return { title, id, nsfw };
       })
       .filter((v) => v.id);
 
     return tags;
   }
 
-  searchResponse(ctx: Context, html: string, page: number): PagedResult {
+  searchResponse(ctx: Context, html: string): PagedResult {
     const $ = load(html);
     const nodes = $(ctx.searchSelector).toArray();
     const highlights: Highlight[] = nodes.map((node) => {
       const title =
         $("a", node).attr("title") ?? $(".post-title", node).text().trim();
-      const contentId = $("a", node)
+      const id = $("a", node)
         .attr("href")
         ?.replace(`${ctx.baseUrl}/${ctx.contentPath}/`, "")
         .replace(/\/$/, "");
 
-      if (!title || !contentId) throw "Failed to Parse Search Result";
+      if (!title || !id) throw "Failed to Parse Search Result";
 
       const cover = imageFromElement($("img", node));
 
       return {
         title,
-        contentId,
+        id,
         cover,
       };
     });
     return {
       results: highlights,
-      page,
       isLastPage: highlights.length <= (ctx.paginationLimit ?? 30),
     };
   }

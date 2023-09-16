@@ -1,3 +1,5 @@
+import { ExcludableMultiSelectProp } from "@suwatte/daisuke";
+
 export type DirectoryEntry = {
   /**
    * id
@@ -53,16 +55,16 @@ export type HomePageEntry = {
 };
 
 export type ParsedRequest = {
-  query: string | undefined;
-  includedTags: string[] | undefined;
-  excludedTags: string[] | undefined;
-  authors: string[] | undefined;
-  p_status: string[] | undefined;
-  s_status: string[] | undefined;
-  includeTypes: string[] | undefined;
-  excludeTypes: string[] | undefined;
-  originalTranslation: boolean;
-  released: string | undefined;
+  query?: string;
+  includedTags?: string[];
+  excludedTags?: string[];
+  authors?: string[];
+  p_status?: string[];
+  s_status?: string[];
+  includeTypes?: string[];
+  excludeTypes?: string[];
+  originalTranslation?: boolean;
+  released?: string;
 };
 
 export type ChapterDetail = {
@@ -71,4 +73,12 @@ export type ChapterDetail = {
   Date: string;
   Directory?: string;
   Page?: string;
+};
+
+export type FilterProps = {
+  p_status?: string[]; // multiselect
+  s_status?: string[]; // multiselect
+  type?: ExcludableMultiSelectProp;
+  genres?: ExcludableMultiSelectProp;
+  translation?: boolean; // Toggle
 };

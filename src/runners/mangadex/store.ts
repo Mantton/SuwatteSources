@@ -1,19 +1,17 @@
 import { getURLSuffixFor } from "./utils";
 export const PREF_KEYS = {
-  lang: "dfasdfas",
-  dataSaver: "ew23fs",
-  coverQuality: "43twedfsa",
-  exploreCR: "43qgrdsehwe",
-  showSeasonal: "463easrda",
-  mimasEnabled: "43qwaeds",
-  mimasLimit: "43y4wesr",
-  mimasTargets: "4324qewd",
+  lang: "_lang",
+  dataSaver: "_data_saver",
+  coverQuality: "_cover_quality",
+  exploreCR: "_explore_content_rating",
+  showSeasonal: "_show_seasonal",
+  mimasEnabled: "_mimas_enabled",
+  mimasLimit: "_mimas_limit",
+  mimasTargets: "_mimas_targets",
 };
 export class MDStore {
-  store: ObjectStore;
-  constructor(store: ObjectStore) {
-    this.store = store;
-  }
+  private store = ObjectStore;
+
   async getSeasonal() {
     const value = await this.store.boolean(PREF_KEYS.showSeasonal);
     if (!value) return true;
@@ -24,10 +22,7 @@ export class MDStore {
   }
   async getContentRatings(): Promise<string[]> {
     const DEFAULT = ["safe", "suggestive", "erotica"];
-    //TODO: Uncomment out the below line when V6.0 is released.
-    const ratings = (await this.store.get(PREF_KEYS.exploreCR)) as
-      | string[]
-      | null;
+    const ratings = await this.store.stringArray(PREF_KEYS.exploreCR);
 
     if (!ratings) return DEFAULT;
     return ratings;
@@ -64,9 +59,7 @@ export class MDStore {
 
   async getLanguages(): Promise<string[]> {
     const DEFAULT = ["en"];
-    //TODO: Uncomment out the below line when V6.0 is released.
-    // const value = await this.store.stringArray(PREF_KEYS.lang);
-    const value = (await this.store.get(PREF_KEYS.lang)) as string[] | null;
+    const value = await this.store.stringArray(PREF_KEYS.lang);
     if (!value) return DEFAULT;
     return value;
   }
@@ -85,11 +78,7 @@ export class MDStore {
     return this.store.set(PREF_KEYS.mimasEnabled, v);
   }
   async getMimasTargets(): Promise<string[]> {
-    //TODO: Uncomment out the below line when V6.0 is released.
-
-    const value = (await this.store.get(PREF_KEYS.mimasTargets)) as
-      | string[]
-      | null;
+    const value = await this.store.stringArray(PREF_KEYS.mimasTargets);
     if (!value) return [];
     return value;
   }

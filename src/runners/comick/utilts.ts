@@ -1,16 +1,18 @@
 import {
   Chapter,
   Content,
+  DirectoryRequest,
   Highlight,
-  NonInteractiveProperty,
   Property,
+  PublicationStatus,
   ReadingMode,
-  SearchRequest,
-  Status,
 } from "@suwatte/daisuke";
 import { MangaExcerpt } from "./types";
+import { PopulatedFilter } from "../../template/madara/types";
 
-export const parseSearchRequest = (request: SearchRequest) => {
+export const parseSearchRequest = (
+  request: DirectoryRequest<PopulatedFilter>
+) => {
   const limit = 30;
   const sort = request.sort ?? "view";
   const page = request.page ?? 1;
@@ -19,34 +21,41 @@ export const parseSearchRequest = (request: SearchRequest) => {
   const tachiyomi = "true";
   let queryString = "";
 
-  for (const filter of request.filters ?? []) {
-    switch (filter.id) {
-      case "content_type":
-        if (filter.included)
-          queryString +=
-            "&" + filter.included.map((v) => `country=${v}`).join("&");
+  const { content_type, demographic, genres, completed } =
+    request.filters ?? {};
+
+  if (completed) queryString += `&completed=true`;
+  if (content_type)
+    queryString += "&" + content_type.map((v) => `country=${v}`).join("&");
+  if (demographic)
+    queryString += "&" + demographic.map((v) => `demographic=${v}`).join("&");
+
+  if (genres) {
+    const { included, excluded } = genres;
+    if (included)
+      queryString += "&" + included.map((v) => `genres=${v}`).join("&");
+    if (excluded)
+      queryString += "&" + excluded.map((v) => `excluded=${v}`).join("&");
+  }
+
+  if (request.tag) {
+    switch (request.tag.propertyId) {
+      case "genres":
+        queryString +=
+          "&" + [request.tag.tagId].map((v) => `genres=${v}`).join("&");
+        break;
+      case "tags":
+        queryString +=
+          "&" + [request.tag.tagId].map((v) => `tags=${v}`).join("&");
+        break;
+      case "type":
+        queryString +=
+          "&" + [request.tag.tagId].map((v) => `country=${v}`).join("&");
         break;
       case "demographic":
-        if (filter.included)
-          queryString +=
-            "&" + filter.included.map((v) => `demographic=${v}`).join("&");
+        queryString +=
+          "&" + [request.tag.tagId].map((v) => `demographic=${v}`).join("&");
         break;
-      case "genres":
-        if (filter.included)
-          queryString +=
-            "&" + filter.included.map((v) => `genres=${v}`).join("&");
-
-        if (filter.excluded)
-          "&" + filter.excluded.map((v) => `excluded=${v}`).join("&");
-        break;
-      case "completed":
-        if (filter.bool) queryString += `&completed=true`;
-        break;
-
-      case "tags":
-        if (filter.included)
-          queryString +=
-            "&" + filter.included.map((v) => `tags=${v}`).join("&");
     }
   }
 
@@ -66,14 +75,14 @@ export const parseSearchRequest = (request: SearchRequest) => {
 
 export const MangaToHighlight = (manga: MangaExcerpt): Highlight => {
   return {
-    contentId: manga.slug,
+    id: manga.slug,
     title: manga.title,
     cover: manga.cover_url,
-    stats: {
-      follows: manga.user_follow_count,
-      rating: manga.rating ? Number(manga.rating) : undefined,
-      views: manga.view_count,
-    },
+    // stats: {
+    //   follows: manga.user_follow_count,
+    //   rating: manga.rating ? Number(manga.rating) : undefined,
+    //   views: manga.view_count,
+    // },
   };
 };
 
@@ -118,10 +127,10 @@ export const MangaToContent = (data: any, contentId: string): Content => {
   // Base Genres
   properties.push({
     id: "genres",
-    label: "Genres",
+    title: "Genres",
     tags: ckGenres.map((v: Base) => ({
       id: v.slug,
-      label: v.name,
+      title: v.name,
       adultContent: false,
     })),
   });
@@ -130,10 +139,10 @@ export const MangaToContent = (data: any, contentId: string): Content => {
   if (muGenres) {
     properties.push({
       id: "tags",
-      label: "Tags",
+      title: "Tags",
       tags: muGenres.map((v: any) => ({
         id: v.slug,
-        label: v.title,
+        title: v.title,
         adultContent: false,
       })),
     });
@@ -146,7 +155,7 @@ export const MangaToContent = (data: any, contentId: string): Content => {
   const mapped = ckGenres.map((v: Base) => v.slug);
 
   if (mapped.includes(longStripId)) {
-    recommendedReadingMode = ReadingMode.VERTICAL;
+    recommendedReadingMode = ReadingMode.WEBTOON;
   } else if (mapped.includes(fullColorId)) {
     recommendedReadingMode = ReadingMode.PAGED_COMIC;
   }
@@ -166,43 +175,35 @@ export const MangaToContent = (data: any, contentId: string): Content => {
 
   if (translation_completed) genTags.push("Translation Completed");
   if (comment_count) genTags.push(`${comment_count} Onsite Comments`);
-  const nonInteractive: NonInteractiveProperty = {
-    id: "general",
-    label: "Additional Info",
-    tags: genTags,
-  };
 
   const trackerInfo = Array.isArray(links) ? undefined : links;
 
   return {
-    contentId,
     title,
-    adultContent,
+    isNSFW: adultContent,
     cover,
     additionalTitles,
     creators,
-    recommendedReadingMode,
+    recommendedPanelMode: recommendedReadingMode,
     webUrl,
     status,
     summary,
     properties,
     trackerInfo,
-    nonInteractiveProperties: [nonInteractive],
+    info: genTags,
   };
 };
 
 const convertStatus = (val: number) => {
   switch (val) {
     case 1:
-      return Status.ONGOING;
+      return PublicationStatus.ONGOING;
     case 2:
-      return Status.COMPLETED;
+      return PublicationStatus.COMPLETED;
     case 3:
-      return Status.CANCELLED;
+      return PublicationStatus.CANCELLED;
     case 4:
-      return Status.HIATUS;
-    default:
-      return Status.UNKNOWN;
+      return PublicationStatus.HIATUS;
   }
 };
 
@@ -238,7 +239,7 @@ export const CKChapterToChapter = (
 
 export const MDComicToHighlight = (data: any): Highlight => {
   return {
-    contentId: data.slug,
+    id: data.slug,
     title: data.title,
     cover: `https://meo.comick.pictures/${data.md_covers?.[0].b2key ?? ""}`,
   };

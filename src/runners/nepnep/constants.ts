@@ -1,10 +1,10 @@
 import {
-  CollectionExcerpt,
-  CollectionStyle,
-  Filter,
+  DirectoryFilter,
   FilterType,
-  SearchSort,
-  Status,
+  Option,
+  PageSection,
+  PublicationStatus,
+  SectionStyle,
 } from "@suwatte/daisuke";
 import { capitalize } from "lodash";
 
@@ -23,46 +23,46 @@ export const NEPNEP_DOMAINS = [
 
 const STATUSES = ["ongoing", "complete", "hiatus", "discontinued", "cancelled"];
 
-export const STATUS_KEYS: Record<string, Status> = {
-  ongoing: Status.ONGOING,
-  complete: Status.COMPLETED,
-  hiatus: Status.HIATUS,
-  cancelled: Status.CANCELLED,
-  discontinued: Status.CANCELLED,
+export const STATUS_KEYS: Record<string, PublicationStatus> = {
+  ongoing: PublicationStatus.ONGOING,
+  complete: PublicationStatus.COMPLETED,
+  hiatus: PublicationStatus.HIATUS,
+  cancelled: PublicationStatus.CANCELLED,
+  discontinued: PublicationStatus.CANCELLED,
 };
 export const ADULT_TAGS = ["mature", "adult", "hentai", "smut"];
 export const VERTICAL_TYPES = ["OEL", "Manhwa", "Manhua"];
 
-export const BASE_EXPLORE_COLLECTIONS: CollectionExcerpt[] = [
+export const HOME_PAGE_SECTIONS: PageSection[] = [
   {
     id: "trending",
     title: "Trending Titles ",
     subtitle: "Hottest updates being read right now!",
-    style: CollectionStyle.INFO,
+    style: SectionStyle.INFO,
   },
   {
     id: "admin_recommendations",
     title: "Admin Recommendations",
     subtitle: "Titles worth your time",
-    style: CollectionStyle.GALLERY,
+    style: SectionStyle.GALLERY,
   },
   {
     id: "hot_monthly",
     title: "Top Titles This Month ",
     subtitle: "Certified Bangers",
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: "new",
     title: "New Titles",
     subtitle: "Just added to the site.",
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: "latest",
     title: "Latest Updates ",
     subtitle: "Top of the morning.",
-    style: CollectionStyle.UPDATE_LIST,
+    style: SectionStyle.PADDED_LIST,
   },
 ];
 
@@ -97,48 +97,46 @@ export const TAG_PREFIX = {
   scanlation: "s_status",
   type: "type",
   year: "released",
-  lang: "o_translation",
   author: "author",
   translation: "translation",
   genres: "genres",
 };
 
-export const SEARCH_SORTERS: SearchSort[] = [
+export const SEARCH_SORTERS: Option[] = [
   {
     id: "views_all",
-    label: "Most Popular (All Time)",
+    title: "Most Popular (All Time)",
   },
   {
     id: "views_monthly",
-    label: "Most Popular (Monthly)",
+    title: "Most Popular (Monthly)",
   },
   {
     id: "recent",
-    label: "Recently Released Chapter",
+    title: "Recently Released Chapter",
   },
   {
     id: "alphabetically",
-    label: "Alphabetically",
+    title: "Alphabetically",
   },
 ];
 
-export const DEFAULT_FILTERS: Filter[] = [
+export const DEFAULT_FILTERS: DirectoryFilter[] = [
   {
     id: TAG_PREFIX.publication,
     title: "Publication Status",
     type: FilterType.MULTISELECT,
-    options: STATUSES.map((v) => ({ id: v, label: capitalize(v) })),
+    options: STATUSES.map((id) => ({ id, title: capitalize(id) })),
   },
   {
     id: TAG_PREFIX.scanlation,
     title: "Scan Status",
-    options: STATUSES.map((v) => ({ id: v, label: capitalize(v) })),
+    options: STATUSES.map((id) => ({ id, title: capitalize(id) })),
     type: FilterType.MULTISELECT,
   },
   {
     id: TAG_PREFIX.translation,
-    title: "Translation Status",
-    label: "Official Translation Only",
+    title: "Official Translation Only",
     type: FilterType.TOGGLE,
   },
 ];
