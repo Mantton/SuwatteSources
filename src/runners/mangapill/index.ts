@@ -2,13 +2,15 @@ import {
   Chapter,
   ChapterData,
   Content,
-  Filter,
+  ContentSource,
+  DirectoryConfig,
+  DirectoryRequest,
   FilterType,
+  ImageRequestHandler,
+  NetworkRequest,
   PagedResult,
   Property,
-  SearchRequest,
-  Source,
-  SourceInfo,
+  RunnerInfo,
 } from "@suwatte/daisuke";
 import { GENRES, STATUS, TYPES } from "./constants";
 import {
@@ -18,16 +20,15 @@ import {
   parseSearchResults,
 } from "./parser";
 
-export class Target extends Source {
-  info: SourceInfo = {
+export class Target implements ContentSource, ImageRequestHandler {
+  info: RunnerInfo = {
     id: "com.mangapill",
     name: "MangaPill",
     version: 0.2,
     supportedLanguages: ["en_US"],
     website: "https://mangapill.com",
-    nsfw: false,
     thumbnail: "mangapill.png",
-    minSupportedAppVersion: "5.0",
+    minSupportedAppVersion: "6.0",
   };
 
   private client = new NetworkClient();
@@ -43,16 +44,28 @@ export class Target extends Source {
       `https://mangapill.com/manga/${contentId}`
     );
 
-    return parseChapters(data, contentId);
+    return parseChapters(data);
   }
   async getChapterData(
-    contentId: string,
+    _contentId: string,
     chapterId: string
   ): Promise<ChapterData> {
     const { data } = await this.client.get(`https://mangapill.com${chapterId}`);
-    return parseChapterData(data, chapterId, contentId);
+    return parseChapterData(data);
   }
-  async getSearchResults(query: SearchRequest): Promise<PagedResult> {
+
+  async getTags?(): Promise<Property[]> {
+    return [
+      {
+        id: "genre",
+        title: "Genres",
+        tags: GENRES.map((v) => ({ id: v.replaceAll(" ", "+"), title: v })),
+      },
+    ];
+  }
+  async getDirectory(
+    query: DirectoryRequest<PopulatedFilters>
+  ): Promise<PagedResult> {
     let url = "https://mangapill.com/search";
     const params: Record<string, any> = {
       page: query.page ?? 1,
@@ -61,29 +74,24 @@ export class Target extends Source {
       status: "",
     };
 
-    query.filters?.forEach((filter) => {
-      switch (filter.id) {
-        case "genre":
-          {
-            if (!filter.included) break;
-            const queryString = filter.included
-              .map((v) => `genre=${v}`)
-              .join("&");
-            url += "?";
-            url += queryString;
-          }
-
-          break;
-        case "type":
-          if (!filter.included?.[0] || filter.included?.[0] === "all") break;
-          params.type = filter.included[0];
-          break;
-        case "status":
-          if (!filter.included?.[0] || filter.included?.[0] === "all") break;
-          params.status = filter.included[0];
-          break;
+    const filters = query.filters;
+    if (filters) {
+      if (filters.genre) {
+        const queryString = filters.genre.map((v) => `genre=${v}`).join("&");
+        url += "?";
+        url += queryString;
       }
-    });
+
+      if (filters.type) {
+        if (filters.type !== "all") params.type = filters.type;
+      }
+
+      if (filters.status) {
+        if (filters.status !== "all") params.status = filters.status;
+      }
+    } else if (query.tag?.tagId) {
+      url += `?genre=${query.tag.tagId.replaceAll(" ", "+")}`;
+    }
 
     if (!url.includes("?") && !params.type && !params.status) {
       const queryString = GENRES.map(
@@ -96,41 +104,53 @@ export class Target extends Source {
     const { data } = await this.client.get(url, { params });
     const results = parseSearchResults(data);
     return {
-      page: query.page ?? 1,
       results,
       isLastPage: results.length < 50,
     };
   }
-  async getSourceTags(): Promise<Property[]> {
-    return [
-      {
-        id: "genre",
-        label: "Genres",
-        tags: GENRES.map((v) => ({ id: v.replaceAll(" ", "+"), label: v })),
-      },
-    ];
+
+  async getDirectoryConfig(
+    _configID?: string | undefined
+  ): Promise<DirectoryConfig> {
+    return {
+      filters: [
+        {
+          id: "genre",
+          title: "Genres",
+          options: GENRES.map((v) => ({
+            id: v.replaceAll(" ", "+"),
+            title: v,
+          })),
+          type: FilterType.MULTISELECT,
+        },
+        {
+          id: "type",
+          title: "Type",
+          options: TYPES,
+          type: FilterType.SELECT,
+        },
+        {
+          id: "status",
+          title: "Status",
+          options: STATUS,
+          type: FilterType.SELECT,
+        },
+      ],
+    };
   }
 
-  async getSearchFilters(): Promise<Filter[]> {
-    return [
-      {
-        id: "genre",
-        title: "Genres",
-        options: GENRES.map((v) => ({ id: v.replaceAll(" ", "+"), label: v })),
-        type: FilterType.MULTISELECT,
+  async willRequestImage(url: string): Promise<NetworkRequest> {
+    return {
+      url,
+      headers: {
+        Referer: "https://www.mangapill.com/",
       },
-      {
-        id: "type",
-        title: "Type",
-        options: TYPES,
-        type: FilterType.SELECT,
-      },
-      {
-        id: "status",
-        title: "Status",
-        options: STATUS,
-        type: FilterType.SELECT,
-      },
-    ];
+    };
   }
 }
+
+type PopulatedFilters = {
+  genre?: string[];
+  type?: string;
+  status?: string;
+};

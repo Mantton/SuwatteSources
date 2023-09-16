@@ -5,13 +5,13 @@ import {
   Highlight,
   Property,
   ReadingMode,
-  SearchRequest,
-  Status,
+  DirectoryRequest,
+  PublicationStatus,
   Tag,
 } from "@suwatte/daisuke";
 import { CheerioAPI, Element, load } from "cheerio";
 import moment from "moment";
-import { ADULT_IDS } from "./constants";
+import { ADULT_IDS, FilterResult } from "./constants";
 
 // HomePage
 export const parseHomePageTopSection = ($: CheerioAPI): Highlight[] => {
@@ -26,7 +26,7 @@ export const parseHomePageTopSection = ($: CheerioAPI): Highlight[] => {
 
     if (!contentId || !cover || !title) continue;
 
-    highlights.push({ contentId, title, cover });
+    highlights.push({ id: contentId, title, cover });
   }
 
   return highlights;
@@ -42,7 +42,7 @@ export const parseHomePageNewSection = ($: CheerioAPI): Highlight[] => {
 
     if (!contentId || !cover || !title) continue;
 
-    highlights.push({ contentId, title, cover });
+    highlights.push({ id: contentId, title, cover });
   }
 
   return highlights;
@@ -60,37 +60,34 @@ export const parseHomePageLatestSection = ($: CheerioAPI): Highlight[] => {
 
     if (!contentId || !cover || !title) continue;
 
-    highlights.push({ contentId, title, cover });
+    highlights.push({ id: contentId, title, cover });
   }
 
   return highlights;
 };
 
 // Search
-export const parseSearchRequest = (request: SearchRequest) => {
+export const parseSearchRequest = (request: DirectoryRequest<FilterResult>) => {
   const params: Record<string, any> = {
     page: request.page ?? 1,
-    orby: request.sort ?? "topview",
+    orby: request.sort?.id ?? "topview",
     s: "all",
   };
 
   if (request.query) params.keyw = request.query;
   if (!request.filters) return params;
 
-  for (const filter of request.filters) {
-    switch (filter.id) {
-      case "genre":
-        if (filter.included)
-          params["g_i"] = filter.included.map((v) => `_${v}`).join("");
-        if (filter.excluded)
-          params["g_e"] = filter.excluded.map((v) => `_${v}`).join("");
-        break;
-      case "status": {
-        const key = filter.included?.[0];
-        if (key == "all") break;
-        params.sts = key;
-      }
-    }
+  if (request.filters.genre) {
+    const filter = request.filters.genre;
+    if (filter.included)
+      params["g_i"] = filter.included.map((v) => `_${v}`).join("");
+    if (filter.excluded)
+      params["g_e"] = filter.excluded.map((v) => `_${v}`).join("");
+  }
+
+  if (request.filters.status) {
+    const key = request.filters.status;
+    if (key !== "all") params.sts = key;
   }
 
   return params;
@@ -102,7 +99,7 @@ export const parseSearchResponse = (html: string) => {
 
   const highlights = elements
     .map((v) => mangaFromElement($, v))
-    .filter((v) => v.title && v.contentId && v.cover) as Highlight[];
+    .filter((v) => v.title && v.id && v.cover) as Highlight[];
 
   return highlights;
 };
@@ -114,7 +111,7 @@ const mangaFromElement = (
 ) => {
   const anchor = $(urlSelector, element);
   return {
-    contentId: anchor.attr("href")?.split("/").pop(),
+    id: anchor.attr("href")?.split("/").pop(),
     title: anchor.text().trim(),
     cover: $("img", element).attr("src"),
   };
@@ -156,53 +153,50 @@ export const parseContent = (html: string, contentId: string): Content => {
   const genres = $("td:contains(Genre) + td a", doc)
     .toArray()
     .map((elem) => ({
-      label: $(elem).text(),
+      title: $(elem).text(),
       id: $(elem).attr("href")?.split("-").pop(),
     }));
   const properties: Property[] = [
     {
       id: "genre",
-      label: "Genres",
+      title: "Genres",
       tags: genres
         .filter((v) => v.id)
         .map((v) => ({
           ...v,
-          adultContent: ADULT_IDS.includes(v.id ?? ""),
+          nsfw: ADULT_IDS.includes(v.id ?? ""),
         })) as Tag[],
     },
   ];
-  const adultContent = properties[0].tags.some((v) => v.adultContent);
-  const recommendedReadingMode = properties[0].tags.some((v) => v.id === "40")
-    ? ReadingMode.VERTICAL
+  const nsfw = properties[0].tags.some((v) => v.nsfw);
+  const recommendedPanelMode = properties[0].tags.some((v) => v.id === "40")
+    ? ReadingMode.WEBTOON
     : ReadingMode.PAGED_MANGA;
   return {
-    contentId,
     summary,
     title,
     additionalTitles,
     cover,
     status,
-    adultContent,
-    recommendedReadingMode,
+    isNSFW: nsfw,
+    recommendedPanelMode,
     webUrl: `https://chapmanganato.com/${contentId}`,
-    chapters: parseChapters(html, contentId),
+    chapters: parseChapters(html),
   };
 };
 
 const parseStatus = (text?: string) => {
-  if (!text) return Status.UNKNOWN;
+  if (!text) return;
   switch (text) {
     case "Ongoing":
-      return Status.ONGOING;
+      return PublicationStatus.ONGOING;
     case "Completed":
-      return Status.COMPLETED;
+      return PublicationStatus.COMPLETED;
   }
-
-  return Status.UNKNOWN;
 };
 
 // Parse Chapters
-export const parseChapters = (html: string, contentId: string): Chapter[] => {
+export const parseChapters = (html: string): Chapter[] => {
   const $ = load(html);
 
   const chapters: Chapter[] = [];
@@ -230,7 +224,6 @@ export const parseChapters = (html: string, contentId: string): Chapter[] => {
       number,
       date,
       index,
-      contentId,
       language: "en_US",
     });
   }

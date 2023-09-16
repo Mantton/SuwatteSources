@@ -1,4 +1,8 @@
-import { ReadingMode } from "@suwatte/daisuke";
+import {
+  ExcludableMultiSelectProp,
+  NetworkRequestTransformer,
+  ReadingMode,
+} from "@suwatte/daisuke";
 
 export type Context = {
   baseUrl: string;
@@ -38,9 +42,18 @@ export type Context = {
 
   paginationLimit?: number;
   defaultReadingMode?: ReadingMode;
+
+  requestInterceptors?: NetworkRequestTransformer[];
 };
 
 export type AnchorTag = {
   link?: string;
   title: string;
+};
+
+export type PopulatedFilter = {
+  content_type?: string[];
+  demographic?: string[];
+  genres?: ExcludableMultiSelectProp;
+  completed?: boolean;
 };

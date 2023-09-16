@@ -1,4 +1,8 @@
-import { NetworkRequest, SearchRequest, Status } from "@suwatte/daisuke";
+import {
+  DirectoryRequest,
+  NetworkRequest,
+  PublicationStatus,
+} from "@suwatte/daisuke";
 import { AnyNode, Cheerio, CheerioAPI } from "cheerio";
 import moment from "moment";
 import {
@@ -18,7 +22,7 @@ import { AnchorTag, Context } from "./types";
 
 export const AJAXDirectoryRequest = (
   ctx: Context,
-  request: SearchRequest,
+  request: DirectoryRequest,
   searching = false
 ): NetworkRequest => {
   const body = generateAJAXRequest(ctx, request);
@@ -37,7 +41,7 @@ export const AJAXDirectoryRequest = (
 };
 const generateAJAXRequest = (
   ctx: Context,
-  request: SearchRequest
+  request: DirectoryRequest
 ): Record<string, string> => {
   const body: Record<string, string> = {
     action: "madara_load_more",
@@ -58,7 +62,7 @@ const generateAJAXRequest = (
   }
 
   if (request.sort) {
-    switch (request.sort) {
+    switch (request.sort.id) {
       case "latest":
         body["vars[orderby]"] = "meta_value_num";
         body["vars[order]"] = "DESC";
@@ -138,13 +142,11 @@ export const generateAnchorTag = ($: CheerioAPI, node: AnyNode): AnchorTag => {
   return { link, title };
 };
 
-export const parseStatus = (str: string): Status => {
-  if (COMPLETED_STATUS_LIST.includes(str)) return Status.COMPLETED;
-  if (ONGOING_STATUS_LIST.includes(str)) return Status.ONGOING;
-  if (HIATUS_STATUS_LIST.includes(str)) return Status.HIATUS;
-  if (CANCELLED_STATUS_LIST.includes(str)) return Status.CANCELLED;
-
-  return Status.UNKNOWN;
+export const parseStatus = (str: string) => {
+  if (COMPLETED_STATUS_LIST.includes(str)) return PublicationStatus.COMPLETED;
+  if (ONGOING_STATUS_LIST.includes(str)) return PublicationStatus.ONGOING;
+  if (HIATUS_STATUS_LIST.includes(str)) return PublicationStatus.HIATUS;
+  if (CANCELLED_STATUS_LIST.includes(str)) return PublicationStatus.CANCELLED;
 };
 
 export const parseDate = (str: string, format?: string) => {

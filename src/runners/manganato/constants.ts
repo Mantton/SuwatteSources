@@ -1,87 +1,90 @@
 import {
-  CollectionExcerpt,
-  CollectionStyle,
+  DirectoryFilter,
+  ExcludableMultiSelectProp,
   FilterType,
+  Option,
+  PageSection,
   Property,
+  SectionStyle,
 } from "@suwatte/daisuke";
 
 export const ADULT_IDS = ["3", "9", "36"];
-export const GENRE_OPTIONS = [
-  { id: "all", label: "ALL" },
-  { id: "2", label: "Action" },
-  { id: "3", label: "Adult" },
-  { id: "4", label: "Adventure" },
-  { id: "6", label: "Comedy" },
-  { id: "7", label: "Cooking" },
-  { id: "9", label: "Doujinshi" },
-  { id: "10", label: "Drama" },
-  { id: "11", label: "Ecchi" },
-  { id: "12", label: "Fantasy" },
-  { id: "13", label: "Gender bender" },
-  { id: "14", label: "Harem" },
-  { id: "15", label: "Historical" },
-  { id: "16", label: "Horror" },
-  { id: "45", label: "Isekai" },
-  { id: "17", label: "Josei" },
-  { id: "44", label: "Manhua" },
-  { id: "43", label: "Manhwa" },
-  { id: "19", label: "Martial arts" },
-  { id: "20", label: "Mature" },
-  { id: "21", label: "Mecha" },
-  { id: "22", label: "Medical" },
-  { id: "24", label: "Mystery" },
-  { id: "25", label: "One shot" },
-  { id: "26", label: "Psychological" },
-  { id: "27", label: "Romance" },
-  { id: "28", label: "School life" },
-  { id: "29", label: "Sci fi" },
-  { id: "30", label: "Seinen" },
-  { id: "31", label: "Shoujo" },
-  { id: "32", label: "Shoujo ai" },
-  { id: "33", label: "Shounen" },
-  { id: "34", label: "Shounen ai" },
-  { id: "35", label: "Slice of life" },
-  { id: "36", label: "Smut" },
-  { id: "37", label: "Sports" },
-  { id: "38", label: "Supernatural" },
-  { id: "39", label: "Tragedy" },
-  { id: "40", label: "Webtoons" },
-  { id: "41", label: "Yaoi" },
-  { id: "42", label: "Yuri" },
+export const GENRE_OPTIONS: Option[] = [
+  { id: "all", title: "ALL" },
+  { id: "2", title: "Action" },
+  { id: "3", title: "Adult" },
+  { id: "4", title: "Adventure" },
+  { id: "6", title: "Comedy" },
+  { id: "7", title: "Cooking" },
+  { id: "9", title: "Doujinshi" },
+  { id: "10", title: "Drama" },
+  { id: "11", title: "Ecchi" },
+  { id: "12", title: "Fantasy" },
+  { id: "13", title: "Gender bender" },
+  { id: "14", title: "Harem" },
+  { id: "15", title: "Historical" },
+  { id: "16", title: "Horror" },
+  { id: "45", title: "Isekai" },
+  { id: "17", title: "Josei" },
+  { id: "44", title: "Manhua" },
+  { id: "43", title: "Manhwa" },
+  { id: "19", title: "Martial arts" },
+  { id: "20", title: "Mature" },
+  { id: "21", title: "Mecha" },
+  { id: "22", title: "Medical" },
+  { id: "24", title: "Mystery" },
+  { id: "25", title: "One shot" },
+  { id: "26", title: "Psychological" },
+  { id: "27", title: "Romance" },
+  { id: "28", title: "School life" },
+  { id: "29", title: "Sci fi" },
+  { id: "30", title: "Seinen" },
+  { id: "31", title: "Shoujo" },
+  { id: "32", title: "Shoujo ai" },
+  { id: "33", title: "Shounen" },
+  { id: "34", title: "Shounen ai" },
+  { id: "35", title: "Slice of life" },
+  { id: "36", title: "Smut" },
+  { id: "37", title: "Sports" },
+  { id: "38", title: "Supernatural" },
+  { id: "39", title: "Tragedy" },
+  { id: "40", title: "Webtoons" },
+  { id: "41", title: "Yaoi" },
+  { id: "42", title: "Yuri" },
 ];
 
-export const SORT_OPTONS = [
-  { id: "latest", label: "Latest" },
-  { id: "newest", label: "Newest" },
-  { id: "topview", label: "Top Read" },
+export const SORT_OPTONS: Option[] = [
+  { id: "latest", title: "Latest" },
+  { id: "newest", title: "Newest" },
+  { id: "topview", title: "Top Read" },
 ];
 
-export const STATUS_OPTIONS = [
-  { id: "all", label: "All" },
-  { id: "completed", label: "Completed" },
-  { id: "ongoing", label: "Ongoing" },
-  { id: "drop", label: "Dropped" },
+export const STATUS_OPTIONS: Option[] = [
+  { id: "all", title: "All" },
+  { id: "completed", title: "Completed" },
+  { id: "ongoing", title: "Ongoing" },
+  { id: "drop", title: "Dropped" },
 ];
 
-export const EXPLORE_COLLECTIONS: CollectionExcerpt[] = [
+export const HOMEPAGE_SECTIONS: PageSection[] = [
   {
     id: "top",
     title: "Top This Week",
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: "new",
     title: "New Titles",
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: "latest",
     title: "Latest Updates",
-    style: CollectionStyle.UPDATE_LIST,
+    style: SectionStyle.PADDED_LIST,
   },
 ];
 
-export const FILTERS = [
+export const FILTERS: DirectoryFilter[] = [
   {
     id: "genre",
     title: "Genres",
@@ -96,13 +99,19 @@ export const FILTERS = [
   },
 ];
 
+export type FilterResult = {
+  genre?: ExcludableMultiSelectProp;
+  status?: string;
+};
+
 export const PROPERTIES: Property[] = [
   {
     id: "genre",
-    label: "Genres",
+    title: "Genres",
     tags: GENRE_OPTIONS.map((v) => ({
       ...v,
-      ...(ADULT_IDS.includes(v.id) && { adultContent: true }),
+      id: v.id,
+      ...(ADULT_IDS.includes(v.id) && { nsfw: true }),
     })),
   },
 ];

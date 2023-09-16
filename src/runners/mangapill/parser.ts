@@ -3,8 +3,8 @@ import {
   ChapterData,
   Content,
   Highlight,
+  PublicationStatus,
   ReadingMode,
-  Status,
 } from "@suwatte/daisuke";
 import { load } from "cheerio";
 
@@ -23,8 +23,7 @@ export const parseSearchResults = (html: string) => {
       .at(-2);
 
     if (!cover || !title || !contentId) return;
-
-    results.push({ cover, title, contentId });
+    results.push({ cover, title, id: contentId });
   });
 
   return results;
@@ -54,44 +53,43 @@ export const parseContent = (html: string, contentId: string): Content => {
     .text()
     .toLowerCase();
   const recommendedReadingMode =
-    type == "manhwa" ? ReadingMode.VERTICAL : ReadingMode.PAGED_MANGA;
+    type == "manhwa" ? ReadingMode.WEBTOON : ReadingMode.PAGED_MANGA;
 
   if (!title || !cover)
     throw new Error("Invalid Parse, Missing Either the Title or the Thumbnail");
   return {
-    contentId,
     title,
     cover,
     summary,
     webUrl,
-    adultContent,
-    recommendedReadingMode,
+    isNSFW: adultContent,
+    recommendedPanelMode: recommendedReadingMode,
     status,
     properties: [
       {
         id: "genre",
-        label: "Genres",
-        tags: genres.map((v) => ({ id: v, label: v })),
+        title: "Genres",
+        tags: genres.map((v) => ({ id: v, title: v })),
       },
     ],
-    chapters: parseChapters(html, contentId),
+    chapters: parseChapters(html),
   };
 };
 
 export const parseStatus = (str: string) => {
   switch (str) {
     case "publishing":
-      return Status.ONGOING;
+      return PublicationStatus.ONGOING;
     case "finished":
-      return Status.COMPLETED;
+      return PublicationStatus.COMPLETED;
     case "on hiatus":
-      return Status.HIATUS;
+      return PublicationStatus.HIATUS;
     case "discontinued":
-      return Status.CANCELLED;
+      return PublicationStatus.CANCELLED;
   }
 };
 
-export const parseChapters = (html: string, contentId: string): Chapter[] => {
+export const parseChapters = (html: string): Chapter[] => {
   const $ = load(html);
   const elements = $("#chapters > div > a").toArray();
 
@@ -106,7 +104,6 @@ export const parseChapters = (html: string, contentId: string): Chapter[] => {
     if (!chapterId || !numStr || Number.isNaN(numStr)) continue;
     const number = Number(numStr);
     chapters.push({
-      contentId,
       chapterId,
       index,
       date,
@@ -118,11 +115,7 @@ export const parseChapters = (html: string, contentId: string): Chapter[] => {
   return chapters;
 };
 
-export const parseChapterData = (
-  html: string,
-  chapterId: string,
-  contentId: string
-): ChapterData => {
+export const parseChapterData = (html: string): ChapterData => {
   const $ = load(html);
   const pages = $("picture img")
     .toArray()
@@ -130,5 +123,5 @@ export const parseChapterData = (
       return { url: $(elem).attr("data-src") ?? "" };
     });
 
-  return { chapterId, contentId, pages };
+  return { pages };
 };

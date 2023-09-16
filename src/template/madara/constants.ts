@@ -1,4 +1,4 @@
-import { CollectionExcerpt, CollectionStyle } from "@suwatte/daisuke";
+import { PageSection, SectionStyle } from "@suwatte/daisuke";
 import { Context } from "./types";
 
 export enum AJAX_DIRECTORY {
@@ -13,54 +13,54 @@ export enum AJAX_DIRECTORY {
   NEW = "new",
 }
 
-export const EXPLORE_SECTIONS: CollectionExcerpt[] = [
+export const EXPLORE_SECTIONS: PageSection[] = [
   {
     id: AJAX_DIRECTORY.POPULAR_AT,
     title: "Popular Titles",
     subtitle: `The "Must Reads"`,
-    style: CollectionStyle.INFO,
+    style: SectionStyle.INFO,
   },
   {
     id: AJAX_DIRECTORY.TRENDING_DAILY,
     title: "Trending Daily",
     subtitle: `What we're "reading"`,
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: AJAX_DIRECTORY.NEW,
     title: "Recently Added Series",
     subtitle: `Fresh from the bakery, discover new stories`,
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: AJAX_DIRECTORY.TRENDING_WEEKLY,
     title: "Trending Weekly",
     subtitle: `Top Reads from this past week.`,
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: AJAX_DIRECTORY.TOP_RATED,
     title: "Top Rated Titles",
     subtitle: `Guaranteed Bangers 🔥`,
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: AJAX_DIRECTORY.TRENDING_MONTHLY,
     title: "Trending Monthly",
     subtitle: `Top Reads from this past month.`,
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
 
   {
     id: AJAX_DIRECTORY.COMPLETED,
     title: "Completed Titles",
     subtitle: `Perfect for binging.`,
-    style: CollectionStyle.NORMAL,
+    style: SectionStyle.DEFAULT,
   },
   {
     id: AJAX_DIRECTORY.LATEST,
     title: "Latest Updates",
-    style: CollectionStyle.UPDATE_LIST,
+    style: SectionStyle.PADDED_LIST,
   },
 ];
 

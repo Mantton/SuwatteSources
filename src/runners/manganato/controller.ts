@@ -1,4 +1,4 @@
-import { Content, SearchRequest } from "@suwatte/daisuke";
+import { Content, DirectoryRequest } from "@suwatte/daisuke";
 import { CheerioAPI, load } from "cheerio";
 import {
   parseChapterData,
@@ -20,7 +20,7 @@ export class Controller {
     this.homepage = load(data);
   }
 
-  async resolveExploreCollection(id: string) {
+  async resolveHomePageSection(id: string) {
     if (!this.homepage) throw new Error("Homepage Not Initialized");
     switch (id) {
       case "top":
@@ -33,8 +33,9 @@ export class Controller {
     throw "Invalid Collection ID";
   }
 
-  async getSearchResults(request: SearchRequest) {
+  async getDirectoryResults(request: DirectoryRequest) {
     const params = parseSearchRequest(request);
+    console.log(params);
 
     const { data } = await this.client.get(
       "https://manganato.com/advanced_search",
@@ -58,7 +59,7 @@ export class Controller {
       `https://chapmanganato.com/${contentId}`
     );
 
-    const chapters = parseChapters(data, contentId);
+    const chapters = parseChapters(data);
     return chapters;
   }
 

@@ -1,41 +1,52 @@
-import {
-  Chapter,
-  ChapterData,
-  CollectionExcerpt,
-  Content,
-  ExploreCollection,
-  ExploreTag,
-  Filter,
-  FilterType,
-  PagedResult,
-  Property,
-  SearchRequest,
-  SearchSort,
-} from "@suwatte/daisuke";
 import { load } from "cheerio";
-import { sampleSize } from "lodash";
 import { AJAX_DIRECTORY } from "./constants";
 import { Parser } from "./parser";
 import { Context } from "./types";
 import { AJAXDirectoryRequest } from "./utils";
+import {
+  Content,
+  Chapter,
+  ChapterData,
+  Property,
+  FilterType,
+  PagedResult,
+  DirectoryFilter,
+  DirectoryRequest,
+  Option,
+  ResolvedPageSection,
+  NetworkClientBuilder,
+} from "@suwatte/daisuke";
 
 export class Controller {
   context: Context;
-  client = new NetworkClient();
+  client: NetworkClient;
   parser = new Parser();
   constructor(ctx: Context) {
     this.context = ctx;
+
+    let builder = new NetworkClientBuilder();
+
+    if (this.context.requestInterceptors) {
+      for (const interceptor of this.context.requestInterceptors) {
+        builder = builder.addRequestInterceptor(interceptor);
+      }
+    }
+    this.client = builder.build();
   }
 
   // Resolve Explore Collection
-  async getCollection(excerpt: CollectionExcerpt): Promise<ExploreCollection> {
+  async getCollection(id: string): Promise<ResolvedPageSection> {
     const request = AJAXDirectoryRequest(this.context, {
-      sort: excerpt.id,
+      sort: {
+        id,
+        ascending: false,
+      },
+      page: 1,
     });
     const response = await this.client.request(request);
     const highlights = this.parser.AJAXResponse(this.context, response.data);
 
-    return { ...excerpt, highlights };
+    return { items: highlights };
   }
   // Get Content
   async getContent(id: string): Promise<Content> {
@@ -80,12 +91,7 @@ export class Controller {
       `${this.context.baseUrl}/${this.context.contentPath}/${contentId}/${chapterId}`
     );
 
-    return this.parser.chapterData(
-      this.context,
-      contentId,
-      chapterId,
-      response.data
-    );
+    return this.parser.chapterData(this.context, response.data);
   }
 
   async getTags(): Promise<Property> {
@@ -96,45 +102,35 @@ export class Controller {
     const tags = this.parser.genres(this.context, response.data);
     return {
       id: "genres",
-      label: "Genres",
+      title: "Genres",
       tags,
     };
   }
 
-  async getExploreTags(): Promise<ExploreTag[]> {
-    const tags = (await this.getTags()).tags;
-    return sampleSize(tags, 7).map((v) => ({
-      ...v,
-      request: {
-        filters: [{ id: "genres", included: [v.id] }],
-      },
-    }));
-  }
-
-  async getFilters(): Promise<Filter[]> {
-    const main: Filter = {
+  async getFilters(): Promise<DirectoryFilter[]> {
+    const main: DirectoryFilter = {
       id: "genres",
       title: "Genres",
       type: FilterType.MULTISELECT,
       options: (await this.getTags()).tags,
     };
 
-    const adult: Filter = {
+    const adult: DirectoryFilter = {
       id: "adult",
       title: "Adult Content",
       type: FilterType.SELECT,
       options: [
         {
           id: "all",
-          label: "Show All",
+          title: "Show All",
         },
         {
           id: "hidden",
-          label: "Hide Adult Titles",
+          title: "Hide Adult Titles",
         },
         {
           id: "only",
-          label: "Show Only Adult Content",
+          title: "Show Only Adult Content",
         },
       ],
     };
@@ -142,14 +138,14 @@ export class Controller {
   }
 
   // Search
-  async handleSearch(request: SearchRequest): Promise<PagedResult> {
+  async handleSearch(request: DirectoryRequest): Promise<PagedResult> {
     const loadMore = this.context.useLoadMoreSearch;
     return loadMore
       ? this.searchWithLoadMore(request)
       : this.searchWithQueryParams(request);
   }
 
-  async searchWithQueryParams(request: SearchRequest): Promise<PagedResult> {
+  async searchWithQueryParams(request: DirectoryRequest): Promise<PagedResult> {
     const base = `${this.context.baseUrl}/page/${request.page ?? 1}/`;
     const params: Record<string, any> = {
       post_type: "wp-manga",
@@ -159,94 +155,88 @@ export class Controller {
         s: request.query,
       }),
     };
-    for (const filter of request.filters ?? []) {
-      switch (filter.id) {
-        case "genres":
-          if (!filter.included) break;
-          params["genres[]"] = filter.included;
-          break;
-        case "adult":
-          if (!filter.included || !filter.included[0]) break; // Guard
-          params["adult"] = filter.included[0] == "hidden" ? "0" : "1";
-          break;
-      }
-    }
+    // for (const filter of request.filters ?? []) {
+    //   switch (filter.id) {
+    //     case "genres":
+    //       if (!filter.included) break;
+    //       params["genres[]"] = filter.included;
+    //       break;
+    //     case "adult":
+    //       if (!filter.included || !filter.included[0]) break; // Guard
+    //       params["adult"] = filter.included[0] == "hidden" ? "0" : "1";
+    //       break;
+    //   }
+    // }
 
     const response = await this.client.get(base, {
       params,
     });
-    console.log(base, params);
-    const data = this.parser.searchResponse(
-      this.context,
-      response.data,
-      request.page ?? 1
-    );
+    const data = this.parser.searchResponse(this.context, response.data);
 
     return data;
   }
-  async searchWithLoadMore(request: SearchRequest): Promise<PagedResult> {
+  async searchWithLoadMore(request: DirectoryRequest): Promise<PagedResult> {
     const net = AJAXDirectoryRequest(this.context, request, true);
     const response = await this.client.request(net);
     const highlights = this.parser.AJAXResponse(this.context, response.data);
     return {
       results: highlights,
       isLastPage: highlights.length <= 18,
-      page: request.page ?? 1,
     };
   }
 
-  getSorters(): SearchSort[] {
+  getSorters(): Option[] {
     if (this.context.useLoadMoreSearch) {
       return [
         {
-          label: "Popularity",
+          title: "Popularity",
           id: AJAX_DIRECTORY.POPULAR_AT,
         },
         {
-          label: "Top Monthly",
+          title: "Top Monthly",
           id: AJAX_DIRECTORY.TRENDING_MONTHLY,
         },
         {
-          label: "Top Daily",
+          title: "Top Daily",
           id: AJAX_DIRECTORY.TRENDING_DAILY,
         },
         {
-          label: "Rating",
+          title: "Rating",
           id: AJAX_DIRECTORY.TOP_RATED,
         },
         {
-          label: "New",
+          title: "New",
           id: AJAX_DIRECTORY.NEW,
         },
         {
-          label: "Name",
+          title: "Name",
           id: AJAX_DIRECTORY.NAME,
         },
       ];
     }
     return [
       {
-        label: "Views",
+        title: "Views",
         id: "views",
       },
       {
-        label: "Rating",
+        title: "Rating",
         id: "rating",
       },
       {
-        label: "Trending",
+        title: "Trending",
         id: "trending",
       },
       {
-        label: "Latest",
+        title: "Latest",
         id: "latest",
       },
       {
-        label: "New",
+        title: "New",
         id: "new-manga",
       },
       {
-        label: "Name",
+        title: "Name",
         id: "alphabet",
       },
     ];

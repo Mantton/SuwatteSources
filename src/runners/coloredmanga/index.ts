@@ -1,16 +1,15 @@
-import { ReadingMode, SourceInfo } from "@suwatte/daisuke";
+import { ReadingMode, RunnerInfo } from "@suwatte/daisuke";
 import { MadaraTemplate } from "../../template/madara";
 import { DEFAULT_CONTEXT } from "../../template/madara/constants";
 
 export class Target extends MadaraTemplate {
-  info: SourceInfo = {
+  info: RunnerInfo = {
     id: "com.colored_manga",
     name: "ColoredManga",
     thumbnail: "colored_manga.png",
     version: 1.0,
-    website: "hhttps://coloredmanga.com",
+    website: "https://coloredmanga.com",
     supportedLanguages: ["EN_US"],
-    nsfw: false,
     minSupportedAppVersion: "5.0",
   };
 

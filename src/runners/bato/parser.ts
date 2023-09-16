@@ -6,8 +6,8 @@ import {
   Property,
   Provider,
   ProviderLinkType,
+  PublicationStatus,
   ReadingMode,
-  Status,
 } from "@suwatte/daisuke";
 import { load, Element } from "cheerio";
 import { decode, encode } from "he";
@@ -33,7 +33,7 @@ export class Parser {
         ?.trim()
         .match(/series\/(\d+)/)?.[1];
       if (!title || !cover || !contentId) throw "Failed to Parse";
-      return { contentId, cover, title };
+      return { id: contentId, cover, title };
     };
     const highlights = items.map(parseElement);
     return highlights;
@@ -61,15 +61,17 @@ export class Parser {
     ).trim();
     const imgElem = $("div.attr-cover img");
     const cover = imgElem.attr("abs:src") ?? imgElem.attr("src") ?? "";
-    let status = Status.UNKNOWN;
+    let status: PublicationStatus | undefined;
 
     if (workStatus) {
-      if (workStatus.includes("Ongoing")) status = Status.ONGOING;
-      if (workStatus.includes("Cancelled")) status = Status.CANCELLED;
-      if (workStatus.includes("Hiatus")) status = Status.HIATUS;
+      if (workStatus.includes("Ongoing")) status = PublicationStatus.ONGOING;
+      if (workStatus.includes("Cancelled"))
+        status = PublicationStatus.CANCELLED;
+      if (workStatus.includes("Hiatus")) status = PublicationStatus.HIATUS;
       if (workStatus.includes("Completed")) {
-        if (uploadStatus?.includes("Ongoing")) status = Status.ONGOING;
-        else status = Status.COMPLETED;
+        if (uploadStatus?.includes("Ongoing"))
+          status = PublicationStatus.ONGOING;
+        else status = PublicationStatus.COMPLETED;
       }
     }
 
@@ -79,7 +81,7 @@ export class Parser {
     const direction = textFromInfo("Read direction");
     let recommendedReadingMode = ReadingMode.PAGED_MANGA;
     if (direction === "Top to Bottom")
-      recommendedReadingMode = ReadingMode.VERTICAL;
+      recommendedReadingMode = ReadingMode.WEBTOON;
     else if (direction === "Left to Right")
       recommendedReadingMode = ReadingMode.PAGED_COMIC;
 
@@ -87,44 +89,43 @@ export class Parser {
     const selected = textFromInfo("Genres:")
       ?.split(", ")
       .map((v) => v.trim());
-    const tags = getAllGenreTags().filter((v) => selected.includes(v.label));
-    const adultContent = tags.some((v) => v.adultContent);
+    const tags = getAllGenreTags().filter((v) => selected.includes(v.title));
+    const adultContent = tags.some((v) => v.nsfw);
     const properties: Property[] = [];
     properties.push({
       id: "genres",
-      label: "Genres",
+      title: "Genres",
       tags,
     });
 
     // Creators
     properties.push({
       id: "creators",
-      label: "Credits",
+      title: "Credits",
       tags: [artist, author].map((v) => ({
         id: encode(v),
-        label: v,
-        adultContent: false,
+        title: v,
+        nsfw: false,
       })),
     });
 
-    const chapters = this.parseChapters(html, contentId);
+    const chapters = this.parseChapters(html);
 
     return {
-      contentId,
       title,
       cover,
       summary,
       status,
       creators: [author, artist],
-      recommendedReadingMode,
+      recommendedPanelMode: recommendedReadingMode,
       properties,
-      adultContent,
+      isNSFW: adultContent,
       chapters,
       webUrl: `https://bato.to/series/${contentId}`,
     };
   }
 
-  parseChapters(html: string, contentId: string) {
+  parseChapters(html: string) {
     const $ = load(html);
 
     const listSelector = $("div.main div.p-2").toArray();
@@ -193,7 +194,6 @@ export class Parser {
         number,
         volume,
         date,
-        contentId,
         index,
         providers,
         title,

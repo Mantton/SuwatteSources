@@ -48,21 +48,21 @@ export const GENRES = [
 ];
 
 export const TYPES = [
-  { id: "all", label: "All" },
-  { id: "manga", label: "Manga" },
-  { id: "novel", label: "Novel" },
-  { id: "one-shot", label: "One-Shot" },
-  { id: "doujinshi", label: "Doujinshi" },
-  { id: "manhwa", label: "Manhwa" },
-  { id: "manhua", label: "Manhua" },
-  { id: "oel", label: "OEL" },
+  { id: "all", title: "All" },
+  { id: "manga", title: "Manga" },
+  { id: "novel", title: "Novel" },
+  { id: "one-shot", title: "One-Shot" },
+  { id: "doujinshi", title: "Doujinshi" },
+  { id: "manhwa", title: "Manhwa" },
+  { id: "manhua", title: "Manhua" },
+  { id: "oel", title: "OEL" },
 ];
 
 export const STATUS = [
-  { id: "all", label: "All" },
-  { id: "publishing", label: "Publishing" },
-  { id: "finished", label: "Finished" },
-  { id: "on hiatus", label: "On Hiatus" },
-  { id: "discontinued", label: "Discontinued" },
-  { id: "not yet published", label: "Not Yet Published" },
+  { id: "all", title: "All" },
+  { id: "publishing", title: "Publishing" },
+  { id: "finished", title: "Finished" },
+  { id: "on hiatus", title: "On Hiatus" },
+  { id: "discontinued", title: "Discontinued" },
+  { id: "not yet published", title: "Not Yet Published" },
 ];

@@ -2,27 +2,23 @@ import {
   Chapter,
   ChapterData,
   Content,
-  Filter,
-  MultiSelectPreference,
+  ContentSource,
+  DirectoryConfig,
+  DirectoryRequest,
   PagedResult,
-  PreferenceGroup,
   Property,
-  SearchRequest,
-  SearchSort,
-  Source,
-  SourceInfo,
+  RunnerInfo,
 } from "@suwatte/daisuke";
-import { LANG_TAGS, SORTERS } from "./constants";
+import { SORTERS } from "./constants";
 import { Controller } from "./controller";
 
-export class Target extends Source {
-  info: SourceInfo = {
+export class Target implements ContentSource {
+  info: RunnerInfo = {
     id: "to.bato",
     name: "Bato",
     version: 0.3,
     website: "https://bato.to",
     supportedLanguages: [],
-    nsfw: false,
     thumbnail: "bato.png",
     minSupportedAppVersion: "5.0",
   };
@@ -35,49 +31,54 @@ export class Target extends Source {
     return this.controller.getChapters(contentId);
   }
   getChapterData(contentId: string, chapterId: string): Promise<ChapterData> {
-    return this.controller.getChapterData(contentId, chapterId);
+    return this.controller.getChapterData(chapterId);
   }
-  getSearchResults(query: SearchRequest): Promise<PagedResult> {
-    return this.controller.getSearchResults(query);
-  }
-  async getSourceTags(): Promise<Property[]> {
+
+  async getTags?(): Promise<Property[]> {
     return this.controller.getProperties();
   }
 
-  async getSearchFilters(): Promise<Filter[]> {
-    return this.controller.getFilters();
+  getDirectory(request: DirectoryRequest): Promise<PagedResult> {
+    return this.controller.getSearchResults(request);
   }
-
-  async getSearchSorters(): Promise<SearchSort[]> {
-    return SORTERS;
-  }
-
-  async getUserPreferences(): Promise<PreferenceGroup[]> {
-    const store = new ObjectStore();
-
-    return [
-      {
-        id: "language",
-        children: [
-          new MultiSelectPreference({
-            label: "Languages",
-            key: "n_content_search_langs",
-            options: LANG_TAGS.map((v) => ({ label: v.label, value: v.id })),
-            value: {
-              get: async () => {
-                return (
-                  ((await store.get("n_content_search_langs")) as
-                    | string[]
-                    | null) ?? ["en"]
-                );
-              },
-              set: async (v) => {
-                return await store.set("n_content_search_langs", v);
-              },
-            },
-          }),
-        ],
+  async getDirectoryConfig(
+    _configID?: string | undefined
+  ): Promise<DirectoryConfig> {
+    return {
+      filters: this.controller.getFilters(),
+      sort: {
+        options: SORTERS,
+        canChangeOrder: false,
       },
-    ];
+    };
   }
+
+  // async getUserPreferences(): Promise<PreferenceGroup[]> {
+  //   const store = new ObjectStore();
+
+  //   return [
+  //     {
+  //       id: "language",
+  //       children: [
+  //         new MultiSelectPreference({
+  //           label: "Languages",
+  //           key: "n_content_search_langs",
+  //           options: LANG_TAGS.map((v) => ({ label: v.label, value: v.id })),
+  //           value: {
+  //             get: async () => {
+  //               return (
+  //                 ((await store.get("n_content_search_langs")) as
+  //                   | string[]
+  //                   | null) ?? ["en"]
+  //               );
+  //             },
+  //             set: async (v) => {
+  //               return await store.set("n_content_search_langs", v);
+  //             },
+  //           },
+  //         }),
+  //       ],
+  //     },
+  //   ];
+  // }
 }
