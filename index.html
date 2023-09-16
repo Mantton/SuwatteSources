@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mantton&#39;s List</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="output.css" rel="stylesheet" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://suwatte.mantton.com/favicon.svg"
+    />
+    <script>
+      function redirectToSuwatte(runner) {
+        var currentLocation = window.location.href;
+        currentLocation = currentLocation.replace(/\/$/, "");
+
+        var url = currentLocation;
+        if (runner) {
+          url = `suwatte://runner?url=${currentLocation}&runner=${runner}`;
+        } else {
+          url = `suwatte://list?url=${currentLocation}`;
+        }
+        window.location.href = url;
+      }
+    </script>
+  </head>
+  <body class="container mx-auto p-8 flex-col gap-8">
+    <div class="flex gap-4 items-center">
+      <h1 class="text-4xl py-4 font-bold">Mantton&#39;s List</h1>
+      <a
+        href="javascript:redirectToSuwatte()"
+        class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full hidden sm:flex"
+        >Add To Suwatte</a
+      >
+    </div>
+    <div class="py-4">
+      <a
+        href="javascript:redirectToSuwatte()"
+        class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full sm:hidden"
+        >Add To Suwatte</a
+      >
+    </div>
+    <div class="flex flex-col gap-4">
+
+      <div class="flex flex-col gap-2">
+        <p class="text-xl font-medium">Sources</p>
+        <div class="flex flex-col gap-2">
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/bato.png"
+                alt="Bato"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">Bato</h2>
+                  <p class="text-sm text-gray-400">v0.3</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;bato.to"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;bato.to</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('bato')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/colored_manga.png"
+                alt="ColoredManga"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">ColoredManga</h2>
+                  <p class="text-sm text-gray-400">v1</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;coloredmanga.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;coloredmanga.com</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('coloredmanga')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/comick.png"
+                alt="ComicK"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">ComicK</h2>
+                  <p class="text-sm text-gray-400">v0.3</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;comick.app&#x2F;home"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;comick.app&#x2F;home</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('comick')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/mangadex.png"
+                alt="MangaDex"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">MangaDex</h2>
+                  <p class="text-sm text-gray-400">v1.6</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;mangadex.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;mangadex.org</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('mangadex')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/manganato.png"
+                alt="MangaNato"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">MangaNato</h2>
+                  <p class="text-sm text-gray-400">v0.3</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;manganto.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;manganto.com</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('manganato')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/mangapill.png"
+                alt="MangaPill"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">MangaPill</h2>
+                  <p class="text-sm text-gray-400">v0.2</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;mangapill.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;mangapill.com</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('mangapill')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/nepnep.png"
+                alt="NepNep"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">NepNep</h2>
+                  <p class="text-sm text-gray-400">v1.5</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;mangasee123.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;mangasee123.com</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('nepnep')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+          <div class="runner flex justify-between items-center">
+            <div class="flex gap-2">
+              <img
+                src="/assets/toonily.png"
+                alt="Toonily"
+                height="44px"
+                width="44px"
+                class="object-cover rounded-lg"
+              />
+
+              <div class="flex flex-col">
+                <div class="flex gap-1 items-center font-medium">
+                  <h2 class="text-md">Toonily</h2>
+                  <p class="text-sm text-gray-400">v1.4</p>
+                </div>
+                <a
+                  href="https:&#x2F;&#x2F;toonily.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm font-light text-gray-400"
+                  >https:&#x2F;&#x2F;toonily.com</a
+                >
+              </div>
+            </div>
+
+            <div>
+              <a
+                href="javascript:redirectToSuwatte('toonily')"
+                class="px-3 py-2 text-md font-bold bg-purple-200 text-purple-600 rounded-full"
+                >GET</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

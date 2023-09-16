@@ -1,765 +1,961 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.STTPackage = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-module.exports=[
-    {
-        "id": "391b0423-d847-456f-aff0-8b0cfc03066b",
-        "label": "Action",
-        "adultContent": false,
-        "imageUrl": "https://dwgkfo5b3odmw.cloudfront.net/img/manga_series_link_img/540-th-WSJ_JuJutsuKaisen_400x320.jpg"
-    },
-    {
-        "id": "e5301a23-ebd9-49dd-a0cb-2add944c7fe9",
-        "label": "Slice of Life",
-        "adultContent": false,
-        "imageUrl": "https://uploads.mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/ee2b3b20-9a67-45a0-9777-d00b95bae4e2.png.256.jpg"
-    },
-    {
-        "id": "ace04997-f6bd-436e-b261-779182193d3d",
-        "label": "Isekai",
-        "adultContent": false,
-        "imageUrl": "https://uploads.mangadex.org/covers/0f237a5f-07ad-4e43-bbd9-2a320694434d/db984f48-cf2a-4359-85ca-cc256c66d659.jpg.256.jpg"
-    },
-    {
-        "id": "7064a261-a137-4d3a-8848-2d385de3a99c",
-        "label": "Superhero",
-        "adultContent": false,
-        "imageUrl": "https://uploads.mangadex.org/covers/4f3bcae4-2d96-4c9d-932c-90181d9c873e/8f980e57-7c0e-4c2b-afdb-404d782fb4c2.jpg.256.jpg"
-    },
-    {
-        "id": "07251805-a27e-4d59-b488-f0bfbec15168",
-        "label": "Thriller",
-        "adultContent": false,
-        "imageUrl": "https://uploads.mangadex.org/covers/b5b21ca1-bba5-4b9a-8cd1-6248f731650b/331c54cb-f1bb-4a46-8792-f94916a76f33.png.256.jpg"
-    },
-    {
-        "id": "b9af3a63-f058-46de-a9a0-e0c13906197a",
-        "label": "Drama",
-        "adultContent": false,
-        "imageUrl": "https://uploads.mangadex.org/covers/30196491-8fc2-4961-8886-a58f898b1b3e/a3b8e228-a9d2-48df-8ae6-2014d01a2d8f.jpg.256.jpg"
-    },
-    {
-        "id": "0a39b5a1-b235-4886-a747-1d05d216532d",
-        "label": "Award Winning",
-        "adultContent": false,
-        "imageUrl": "https://uploads.mangadex.org/covers/304ceac3-8cdb-4fe7-acf7-2b6ff7a60613/badf78c9-cf96-4fb5-919e-5892f552e8ba.png.256.jpg"
-    }
-]
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GlobalStore = exports.PUBLICATION_STATUS = exports.LANGUAGES = exports.CONTENT_RATINGS = exports.DEMOGRAPHICS = exports.RESULT_LIMIT = exports.LAST_SEASONAL_LIST_ID = exports.SEASONAL_LIST_ID = exports.ADULT_TAG_IDS = exports.COVER_URL = exports.API_URL = void 0;
+const store_1 = require("./store");
+exports.API_URL = "https://api.mangadex.org";
+exports.COVER_URL = "https://uploads.mangadex.org/covers";
+exports.ADULT_TAG_IDS = [
+    "b29d6a3d-1569-4e7a-8caf-7557bc92cd5d",
+    "97893a4c-12af-4dac-b6be-0dffb353568e",
+    "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
+];
+exports.SEASONAL_LIST_ID = "4be9338a-3402-4f98-b467-43fb56663927";
+exports.LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
+exports.RESULT_LIMIT = 30;
+exports.DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
+exports.CONTENT_RATINGS = [
+    "safe",
+    "suggestive",
+    "erotica",
+    "pornographic",
+];
+exports.LANGUAGES = ["en", "ko", "ja", "zh", "zh-hk"];
+exports.PUBLICATION_STATUS = [
+    "ongoing",
+    "completed",
+    "hiatus",
+    "cancelled",
+];
+exports.GlobalStore = new store_1.MDStore();
 
-},{}],2:[function(require,module,exports){
-(function (Buffer){(function (){
+},{"./store":18}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDBasicAuthProvider = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const network_1 = require("../network");
+exports.MDBasicAuthProvider = {
+    BasicAuthUIIdentifier: daisuke_1.BasicAuthenticationUIIdentifier.USERNAME,
+    async handleBasicAuth(username, password) {
+        const response = await (0, network_1.POST)("/auth/login", {
+            body: {
+                username,
+                password,
+            },
+        });
+        const session = response.token.session;
+        const refresh = response.token.refresh;
+        await SecureStore.set("session", session);
+        await SecureStore.set("refresh", refresh);
+    },
+    async getAuthenticatedUser() {
+        const token = await SecureStore.get("session");
+        if (!token) {
+            return null;
+        }
+        const { data } = await (0, network_1.GET)(`/user/me`);
+        const user = {
+            handle: data.attributes.username,
+            avatar: "https://mangadex.org/avatar.png",
+        };
+        return user;
+    },
+    async handleUserSignOut() {
+        try {
+            await (0, network_1.GET)(`/auth/logout`);
+        }
+        catch (err) {
+            console.log(err);
+        }
+        await SecureStore.remove("session");
+        await SecureStore.remove("refresh");
+    },
+};
+
+},{"../network":14,"@suwatte/daisuke":20}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDContentSource = void 0;
+const network_1 = require("../network");
+const content_1 = require("../parser/content");
+const chapter_1 = require("../parser/chapter");
+exports.MDContentSource = {
+    getContent: async function (contentId) {
+        const path = `/manga/${contentId}`;
+        const params = {
+            includes: ["artist", "author", "cover_art"],
+        };
+        const response = await (0, network_1.GET)(path, { params });
+        return (0, content_1.parseContent)(response, contentId);
+    },
+    getChapters: function (contentId) {
+        return (0, chapter_1.getChapters)(contentId);
+    },
+    getChapterData: async function (_, chapterId) {
+        const json = await (0, network_1.GET)(`/at-home/server/${chapterId}`);
+        return {
+            pages: await (0, chapter_1.parseChapterData)(json),
+        };
+    },
+    // async getIdentifierForURL(url: string): Promise<ContentIdentifier | null> {
+    //   const titleRegex =
+    //     /^https:\/\/mangadex.org\/title\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
+    //   const contentId = url.match(titleRegex)?.[1];
+    //   if (contentId)
+    //     return {
+    //       contentId,
+    //     };
+    //   const chapterRegex =
+    //     /^https:\/\/mangadex.org\/chapter\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
+    //   const chapterId = url.match(chapterRegex)?.[1];
+    //   async function getMangaFromChapterId(id: string) {
+    //     const url = `/chapter/${id}?includes[]=manga`;
+    //     const {
+    //       data: { data },
+    //     } = await GET(url);
+    //     const contentId = data.relationships.find(
+    //       (v: any) => v.type === "manga"
+    //     )?.id;
+    //     return contentId;
+    //   }
+    //   if (chapterId) {
+    //     const id = await getMangaFromChapterId(chapterId);
+    //     return {
+    //       contentId: id,
+    //       chapterId,
+    //     };
+    //   }
+    //   return null;
+    // },
+};
+
+},{"../network":14,"../parser/chapter":15,"../parser/content":16}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDDirectoryHandler = void 0;
+const directory_1 = require("../misc/directory");
+const md_1 = require("../misc/md");
+exports.MDDirectoryHandler = {
+    getDirectory: function (request) {
+        return (0, md_1.getMDSearchResults)(request);
+    },
+    getDirectoryConfig: async function (_key) {
+        return {
+            filters: await (0, md_1.buildFilters)(),
+            sort: {
+                options: await (0, directory_1.getSearchSorters)(),
+                canChangeOrder: false,
+                default: {
+                    id: "followedCount",
+                    ascending: false,
+                },
+            },
+        };
+    },
+};
+
+},{"../misc/directory":10,"../misc/md":12}],5:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./contentSource"), exports);
+__exportStar(require("./directoryHandler"), exports);
+__exportStar(require("./pageResolver"), exports);
+__exportStar(require("./pageProvider"), exports);
+__exportStar(require("./preferences"), exports);
+__exportStar(require("./auth"), exports);
+
+},{"./auth":2,"./contentSource":3,"./directoryHandler":4,"./pageProvider":6,"./pageResolver":7,"./preferences":8}],6:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDPageProvider = void 0;
+exports.MDPageProvider = {
+    async getLibraryPageLinks() {
+        return [];
+    },
+};
+
+},{}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDPageLinkResolver = void 0;
+const homepage_1 = require("../misc/homepage");
+exports.MDPageLinkResolver = {
+    getSectionsForPage: function ({ id }) {
+        if (id === "home")
+            return (0, homepage_1.getHomePageSections)();
+        throw new Error(`Unknown Page ${id}`);
+    },
+    resolvePageSection: function (link, sectionID) {
+        if (link.id === "home")
+            return (0, homepage_1.resolveHomepageSection)(link, sectionID);
+        throw new Error(`Unknown Page ${link.id}`);
+    },
+};
+
+},{"../misc/homepage":11}],8:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDPreferenceProvider = void 0;
+const lodash_1 = require("lodash");
+const store_1 = require("../store");
+const utils_1 = require("../utils");
+const daisuke_1 = require("@suwatte/daisuke");
+const constants_1 = require("../constants");
+exports.MDPreferenceProvider = {
+    getPreferenceMenu: async function () {
+        const languageOptions = utils_1.languages.map((v) => ({
+            id: v.languageCode,
+            title: v.label,
+        }));
+        const ratingOptions = ["safe", "suggestive", "erotica", "pornographic"].map((v) => ({
+            title: (0, lodash_1.capitalize)(v),
+            id: v,
+        }));
+        return {
+            sections: [
+                // * LANGUAGE
+                {
+                    header: "Languages",
+                    children: [
+                        (0, daisuke_1.UIMultiPicker)({
+                            id: store_1.PREF_KEYS.lang,
+                            title: "Content Languages",
+                            options: languageOptions,
+                            value: await constants_1.GlobalStore.getLanguages(),
+                            didChange: constants_1.GlobalStore.setLanguages,
+                        }),
+                    ],
+                },
+                // * IMAGE
+                {
+                    header: "Image Options",
+                    children: [
+                        (0, daisuke_1.UIToggle)({
+                            id: store_1.PREF_KEYS.dataSaver,
+                            title: "Data Saver Mode",
+                            value: await constants_1.GlobalStore.getDSMode(),
+                            didChange: constants_1.GlobalStore.setDSMode,
+                        }),
+                        (0, daisuke_1.UIPicker)({
+                            id: store_1.PREF_KEYS.coverQuality,
+                            title: "Cover/Thumbnail Quality",
+                            options: utils_1.CoverQualityOptions,
+                            value: await constants_1.GlobalStore.getCoverQuality(),
+                            didChange: constants_1.GlobalStore.setCoverQuality,
+                        }),
+                    ],
+                },
+                // * HOMEPAGE
+                {
+                    header: "Explore Page",
+                    children: [
+                        (0, daisuke_1.UIMultiPicker)({
+                            id: store_1.PREF_KEYS.exploreCR,
+                            title: "Content Rating",
+                            options: ratingOptions,
+                            value: await constants_1.GlobalStore.getContentRatings(),
+                            didChange: constants_1.GlobalStore.setContentRatings,
+                        }),
+                        (0, daisuke_1.UIToggle)({
+                            id: store_1.PREF_KEYS.showSeasonal,
+                            title: "Show Seasonal Lists",
+                            value: await constants_1.GlobalStore.getSeasonal(),
+                            didChange: constants_1.GlobalStore.setSeasonal,
+                        }),
+                    ],
+                },
+                // * MIMAS
+                {
+                    header: "Mimas Recommendations",
+                    children: [
+                        (0, daisuke_1.UIToggle)({
+                            id: store_1.PREF_KEYS.mimasEnabled,
+                            title: "Enable Recommendations",
+                            value: await constants_1.GlobalStore.getMimasEnabled(),
+                            didChange: constants_1.GlobalStore.setMimasEnabled,
+                        }),
+                        (0, daisuke_1.UIStepper)({
+                            id: store_1.PREF_KEYS.mimasLimit,
+                            title: "Limit",
+                            upperBound: 10,
+                            value: await constants_1.GlobalStore.getMimasLimit(),
+                            didChange: constants_1.GlobalStore.setMimasLimit,
+                        }),
+                        (0, daisuke_1.UIButton)({
+                            id: "mimas_clear",
+                            title: "Clear Current Recommendations",
+                            isDestructive: true,
+                            systemImage: "trash",
+                            action: constants_1.GlobalStore.clearMimasTargets,
+                        }),
+                    ],
+                },
+                // * AUTH
+                {
+                    header: "Authentication",
+                    children: [
+                        (0, daisuke_1.UIButton)({
+                            id: "force_sign_out",
+                            title: "Force Sign Out",
+                            isDestructive: true,
+                            async action() {
+                                //
+                            },
+                        }),
+                    ],
+                },
+            ],
+        };
+    },
+};
+
+},{"../constants":1,"../store":18,"../utils":19,"@suwatte/daisuke":20,"lodash":undefined}],9:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Target = exports.info = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const impl_1 = require("./impl");
+const directoryHandler_1 = require("./impl/directoryHandler");
+const utils_1 = require("./utils");
+exports.info = {
+    name: "MangaDex",
+    id: "org.mangadex",
+    version: 1.6,
+    website: "https://mangadex.org",
+    supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
+        ? v.languageCode
+        : v.languageCode + "-" + v.regionCode),
+    thumbnail: "mangadex.png",
+    minSupportedAppVersion: "6.0.0",
+    rating: daisuke_1.CatalogRating.MIXED,
+};
+exports.Target = {
+    info: exports.info,
+    ...impl_1.MDContentSource,
+    ...directoryHandler_1.MDDirectoryHandler,
+    ...impl_1.MDPageLinkResolver,
+    ...impl_1.MDPreferenceProvider,
+    ...impl_1.MDBasicAuthProvider,
+};
+// export class T implements ContentSource {
+//   private KEYCHAIN = SecureStore;
+//   private STORE = new MDStore();
+//   private PROPERTIES: Property[] = [];
+//   // * Explore
+//   // * Search
+//   // Events
+//   async onChapterRead(contentId: string, chapterId: string): Promise<void> {
+//     await this.STORE.saveToMimasTargets(contentId);
+//     const signedIn = await this.isSignedIn();
+//     if (!signedIn) return;
+//     await this.syncToMD(contentId, [chapterId]);
+//   }
+//   async onChaptersMarked(
+//     contentId: string,
+//     chapterIds: string[],
+//     completed: boolean
+//   ): Promise<void> {
+//     const signedIn = await this.isSignedIn();
+//     if (!signedIn) return;
+//     if (completed) {
+//       await this.syncToMD(contentId, chapterIds);
+//     } else {
+//       await this.syncToMD(contentId, [], chapterIds);
+//     }
+//   }
+//   async onContentsAddedToLibrary(ids: string[]): Promise<void> {
+//     const signedIn = await this.isSignedIn();
+//     if (!signedIn) return;
+//     for (const id of ids) {
+//       await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/status`, {
+//         body: {
+//           status: "reading",
+//         },
+//         transformRequest: requestHandler,
+//       });
+//     }
+//   }
+//   // * Syncing
+//   async syncUserLibrary(
+//     library: UpSyncedContent[]
+//   ): Promise<DownSyncedContent[]> {
+//     const fetchedLib = await this.fetchUserLibrary();
+//     // Titles in local but not cloud
+//     const toUpSync = library.filter(
+//       (v) => !fetchedLib.find((a) => a.id === v.id)
+//     );
+//     // Titles in cloud but not local
+//     const toDownSync = fetchedLib.filter((v) => {
+//       const target = library.find((a) => a.id === v.id);
+//       // Not in library, down sync
+//       if (!target) return true;
+//       // NonMatching Reading Flag
+//       if (v.readingFlag && target.flag != v.readingFlag) return true;
+//       return false;
+//     });
+//     // Handle UpSync
+//     await this.handleUpSync(toUpSync);
+//     return toDownSync;
+//   }
+//   async handleUpSync(entries: UpSyncedContent[]) {
+//     for (const entry of entries) {
+//       const url = `${this.API_URL}/manga/${entry.id}/status`;
+//       const status = this.getStatusFlagForReadingFlag(entry.flag);
+//       await this.NETWORK_CLIENT.post(url, {
+//         body: {
+//           status,
+//         },
+//         transformRequest: requestHandler,
+//       });
+//     }
+//   }
+//   async fetchUserLibrary() {
+//     const library: DownSyncedContent[] = [];
+//     // Fetch Reading Status
+//     const statuses = await this.getMDUserStatuses();
+//     const limit = 100;
+//     let offset = 0;
+//     // eslint-disable-next-line no-constant-condition
+//     while (true) {
+//       const response = await this.NETWORK_CLIENT.get(
+//         `${this.API_URL}/user/follows/manga`,
+//         {
+//           params: {
+//             limit,
+//             offset,
+//             includes: ["cover_art"],
+//           },
+//           transformRequest: requestHandler,
+//         }
+//       );
+//       const highlights = (
+//         await this.parsePagedResponse(response, 1, false, false)
+//       ).results;
+//       // prepare
+//       const mapped: DownSyncedContent[] = highlights.map(
+//         (v): DownSyncedContent => {
+//           const status = this.getMDReadingStatus(statuses[v.contentId]);
+//           return {
+//             id: v.contentId,
+//             title: v.title,
+//             cover: v.cover,
+//             readingFlag: status,
+//           };
+//         }
+//       );
+//       library.push(...mapped);
+//       // Loop Logic
+//       offset += limit;
+//       if (highlights.length < limit) {
+//         break;
+//       }
+//     }
+//     return library;
+//   }
+//   async getReadChapterMarkers(contentId: string): Promise<string[]> {
+//     const response = await this.NETWORK_CLIENT.get(
+//       `${this.API_URL}/manga/read`,
+//       {
+//         params: { ids: [contentId], grouped: true },
+//         transformRequest: requestHandler,
+//       }
+//     );
+//     const data = JSON.parse(response.data);
+//     const ids = data.data[contentId];
+//     return ids ?? [];
+//   }
+//   async syncToMD(
+//     id: string,
+//     chapterIdsRead: string[],
+//     chapterIdsUnread: string[] = []
+//   ) {
+//     try {
+//       await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
+//         body: {
+//           chapterIdsUnread,
+//           chapterIdsRead,
+//         },
+//         transformRequest: requestHandler,
+//       });
+//     } catch {
+//       console.error("failed to sync to mangadex");
+//     }
+//   }
+// }
+
+},{"./impl":5,"./impl/directoryHandler":4,"./utils":19,"@suwatte/daisuke":20}],10:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSearchSorters = void 0;
+async function getSearchSorters() {
+    const data = {
+        followedCount: "Popular",
+        rating: "User Rating",
+        createdAt: "New",
+        relevance: "Relevant",
+        title: "Alphabetically",
+        year: "Yearly",
+        updatedAt: "Last Updated",
+        latestUploadedChapter: "Last Uploaded Chapter",
+    };
+    return Object.entries(data).map(([id, title]) => ({
+        id,
+        title,
+    }));
+}
+exports.getSearchSorters = getSearchSorters;
+
+},{}],11:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolveHomepageSection = exports.getHomePageSections = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const constants_1 = require("../constants");
+const md_1 = require("./md");
+const lodash_1 = require("lodash");
+const directory_1 = require("./directory");
+const mimas_1 = require("./mimas");
+const getHomePageSections = async () => {
+    const shuffle = (array) => {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            // And swap it with the current element.
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+        return array;
+    };
+    const injectMimasRecs = await constants_1.GlobalStore.getMimasEnabled();
+    const injectSeasonal = await constants_1.GlobalStore.getSeasonal();
+    const sections = [
+        {
+            id: "followedCount",
+            title: "Popular Titles...",
+            subtitle: "The general consensus is never wrong.",
+            style: daisuke_1.SectionStyle.INFO,
+        },
+        {
+            id: "createdAt",
+            title: "Recently Added",
+            style: daisuke_1.SectionStyle.DEFAULT,
+        },
+        {
+            id: "rating",
+            title: "Highly Rated Titles",
+            subtitle: "Masterpieces",
+            style: daisuke_1.SectionStyle.INFO,
+        },
+        {
+            id: "relevance",
+            title: "Relevant Titles",
+            subtitle: "This sort option makes no fucking sense.",
+            style: daisuke_1.SectionStyle.DEFAULT,
+        },
+        {
+            id: "popular_new",
+            title: "Popular New Titles",
+            style: daisuke_1.SectionStyle.GALLERY,
+        },
+    ];
+    // Seasonal Lists
+    if (injectSeasonal) {
+        sections.push(...[
+            {
+                id: "seasonal",
+                title: "Seasonal List",
+                subtitle: "Titles from this anime season.",
+                style: daisuke_1.SectionStyle.GALLERY,
+            },
+        ]);
+    }
+    // Mimas Recommendations
+    if (injectMimasRecs) {
+        const ids = await constants_1.GlobalStore.getMimasTargets();
+        const recommended = ids.map((v) => ({
+            id: `mimas|${v}`,
+            title: "Recommendation",
+            style: daisuke_1.SectionStyle.DEFAULT,
+        }));
+        sections.push(...recommended);
+    }
+    const shuffled = shuffle(sections);
+    shuffled.push({
+        id: "recentlyUpdated",
+        title: "Latest Updates",
+        style: daisuke_1.SectionStyle.PADDED_LIST,
+    });
+    return shuffled;
+};
+exports.getHomePageSections = getHomePageSections;
+const resolveHomepageSection = async (_link, section) => {
+    switch (section) {
+        case "popular_new":
+            return {
+                items: (await (0, md_1.getPopularNewTitles)()).results,
+            };
+        case "seasonal": {
+            const { highlights: items, title: updatedTitle } = await (0, md_1.getCollectionForList)(constants_1.SEASONAL_LIST_ID);
+            return { items, updatedTitle };
+        }
+        case "seasonal_last": {
+            const { highlights: items, title: updatedTitle } = await (0, md_1.getCollectionForList)(constants_1.LAST_SEASONAL_LIST_ID);
+            return { items, updatedTitle };
+        }
+        // Get
+        case "recentlyUpdated":
+            return {
+                items: await (0, md_1.getMDUpdates)(1),
+            };
+        default:
+            if (section.includes("mimas")) {
+                const id = section.split("|").pop();
+                if (!id)
+                    throw new Error("Improper Config");
+                const name = (0, lodash_1.sample)(["More Like", "Because you read", "Similar to"]) ??
+                    "More Like";
+                const { target, recs } = await (0, mimas_1.getMimasRecommendations)(id);
+                return {
+                    items: [(0, mimas_1.convertMimasRec)(target), ...recs.map(mimas_1.convertMimasRec)],
+                    updatedTitle: `${name} "${target.title}"`,
+                };
+            }
+            else {
+                const sort = (await (0, directory_1.getSearchSorters)()).find((v) => v.id === section)?.id;
+                const content_ratings = await constants_1.GlobalStore.getContentRatings();
+                const query = {
+                    page: 1,
+                    filters: { content_rating: { included: content_ratings } },
+                    ...(sort && {
+                        sort: {
+                            id: sort,
+                            ascending: false,
+                        },
+                    }),
+                };
+                const overrides = {
+                    limit: 20,
+                    getStats: ["followedCount", "rating"].includes(section),
+                };
+                return {
+                    items: (await (0, md_1.getMDSearchResults)(query, overrides)).results,
+                };
+            }
+    }
+};
+exports.resolveHomepageSection = resolveHomepageSection;
+
+},{"../constants":1,"./directory":10,"./md":12,"./mimas":13,"@suwatte/daisuke":20,"lodash":undefined}],12:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Target = void 0;
+exports.getMDUserStatuses = exports.getMDReadingStatus = exports.getStatusFlagForReadingFlag = exports.isSignedIn = exports.clearTokens = exports.getPopularNewTitles = exports.getCollectionForList = exports.buildFilters = exports.getMDSearchResults = exports.getMDUpdates = exports.getMDList = exports.getMDStatistics = exports.getMDRelatedCollections = exports.getMDCovers = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
-const explore_json_1 = __importDefault(require("./explore.json"));
+const constants_1 = require("../constants");
+const network_1 = require("../network");
+const pagedResponse_1 = require("../parser/pagedResponse");
 const he_1 = require("he");
 const lodash_1 = require("lodash");
-const store_1 = require("./store");
-const utils_1 = require("./utils");
-const preferences_1 = require("./preferences");
+const utils_1 = require("../utils");
 const moment_1 = __importDefault(require("moment"));
-class Target extends daisuke_1.Source {
-    info = {
-        name: "MangaDex",
-        id: "org.mangadex",
-        version: 1.6,
-        website: "https://mangadex.org",
-        supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
-            ? v.languageCode
-            : v.languageCode + "-" + v.regionCode),
-        nsfw: false,
-        thumbnail: "mangadex.png",
-        minSupportedAppVersion: "5.0",
-        config: {
-            authenticationMethod: daisuke_1.AuthMethod.USERNAME_PW,
+// Fetches Covers for the provided ids
+async function getMDCovers(ids) {
+    const results = {};
+    const response = await (0, network_1.GET)("/cover", {
+        params: {
+            manga: ids,
+            limit: 100,
+            "order[volume]": "desc",
         },
-    };
-    API_URL = "https://api.mangadex.org";
-    COVER_URL = "https://uploads.mangadex.org/covers";
-    NETWORK_CLIENT;
-    constructor() {
-        super();
-        this.NETWORK_CLIENT = new NetworkClient();
+    });
+    const suffix = await constants_1.GlobalStore.getCoverQuality();
+    for (const id of ids) {
+        const files = response.data.filter((data) => Object.values(data.relationships.flatMap((x) => x.id)).includes(id));
+        const covers = files.map((val) => `${constants_1.COVER_URL}/${id}/${val.attributes.fileName}${suffix}`);
+        results[id] = covers;
     }
-    ADULT_TAG_IDS = [
-        "b29d6a3d-1569-4e7a-8caf-7557bc92cd5d",
-        "97893a4c-12af-4dac-b6be-0dffb353568e",
-        "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
-    ];
-    SEASONAL_LIST_ID = "4be9338a-3402-4f98-b467-43fb56663927";
-    LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
-    RESULT_LIMIT = 30;
-    DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
-    CONTENT_RATINGS = ["safe", "suggestive", "erotica", "pornographic"];
-    LANGUAGES = ["en", "ko", "ja", "zh", "zh-hk"];
-    PUBLICATION_STATUS = ["ongoing", "completed", "hiatus", "cancelled"];
-    VALUE_STORE = new ObjectStore();
-    KEYCHAIN = new SecureStore();
-    STORE = new store_1.MDStore(this.VALUE_STORE);
-    PROPERTIES = [];
-    async getContent(contentId) {
-        const url = `${this.API_URL}/manga/${contentId}`;
-        const params = {
-            includes: ["artist", "author", "cover_art"],
-        };
-        const response = await this.NETWORK_CLIENT.get(url, { params });
-        const mdResponse = JSON.parse(response.data);
-        const data = mdResponse.data;
-        const attributes = data.attributes;
-        const relationships = data.relationships;
-        const titles = [attributes.title[Object.keys(attributes.title)[0]]].concat(attributes.altTitles.map((x) => (0, he_1.decode)(x[Object.keys(x)[0]])));
-        let adultContent = false;
-        const summary = (0, he_1.decode)(attributes.description.en ?? "").replace(/\[\/{0,1}[bus]\]/g, "");
-        // Status
-        let status = daisuke_1.Status.UNKNOWN;
-        switch (attributes.status) {
-            case "ongoing": {
-                status = daisuke_1.Status.ONGOING;
-                break;
-            }
-            case "completed": {
-                status = daisuke_1.Status.COMPLETED;
-                break;
-            }
-            case "hiatus": {
-                status = daisuke_1.Status.HIATUS;
-                break;
-            }
-            case "cancelled": {
-                status = daisuke_1.Status.CANCELLED;
-                break;
-            }
-        }
-        // Properties
-        const properties = [];
-        // Genres
-        const genreTags = [];
-        for (const tag of attributes.tags) {
-            const adult = this.ADULT_TAG_IDS.includes(tag.id);
-            const t = {
-                id: tag.id,
-                adultContent: adult,
-                label: tag.attributes.name.en,
-            };
-            if (adult) {
-                adultContent = true;
-            }
-            genreTags.push(t);
-        }
-        const propertyTags = {
-            id: "genres",
-            label: "Genres",
-            tags: genreTags,
-        };
-        properties.push(propertyTags);
-        // * Reading Mode
-        let recommendedReadingMode = daisuke_1.ReadingMode.PAGED_MANGA;
-        const longStripId = "3e2b8dae-350e-4ab8-a8ce-016e844b9f0d";
-        const fullColorId = "f5ba408b-0e7a-484d-8d49-4e9125ac96de";
-        const mapped = genreTags.map((v) => v.id);
-        if (mapped.includes(longStripId)) {
-            recommendedReadingMode = daisuke_1.ReadingMode.VERTICAL;
-        }
-        else if (mapped.includes(fullColorId)) {
-            recommendedReadingMode = daisuke_1.ReadingMode.PAGED_COMIC;
-        }
-        // * Content Rating & Publication Demographic & Original Language
-        if (attributes.contentRating) {
-            const tags = [];
-            const tag = {
-                id: attributes.contentRating.toLowerCase(),
-                label: (0, lodash_1.capitalize)(attributes.contentRating),
-                adultContent: attributes.contentRating == "pornographic",
-            };
-            if (!adultContent)
-                adultContent = attributes.contentRating == "pornographic";
-            tags.push(tag);
-            const contentRatingProperty = {
-                id: "content_rating",
-                label: "Content Rating",
-                tags,
-            };
-            properties.push(contentRatingProperty);
-        }
-        // Original Language
-        const originalLang = attributes.originalLanguage;
-        if (originalLang) {
-            const tags = [];
-            const languageTag = {
-                id: originalLang,
-                label: (0, utils_1.languageLabel)(originalLang ?? "unknown"),
-                adultContent: false,
-            };
-            // Properly Rename, Common Languages
-            tags.push(languageTag);
-            const languageTags = {
-                id: "lang",
-                label: "Original Language",
-                tags,
-            };
-            properties.push(languageTags);
-        }
-        // Creators
-        const credits = relationships.filter((x) => ["author", "artist"].includes(x.type));
-        const authors = relationships
-            .filter((x) => x.type == "author")
-            .map((x) => x.attributes.name);
-        const artists = relationships
-            .filter((x) => x.type == "artist")
-            .map((x) => x.attributes.name);
-        if (credits.length != 0) {
-            try {
-                const tags = [];
-                // Clickable artist & author properties
-                const appendedIds = [];
-                credits.forEach((obj) => {
-                    const tag = {
-                        id: obj.id,
-                        label: (0, he_1.decode)(obj.attributes.name),
-                        adultContent: false,
-                    };
-                    if (!appendedIds.includes(obj.id)) {
-                        tags.push(tag);
-                        appendedIds.push(obj.id);
-                    }
-                });
-                const creditsProperty = {
-                    id: "authors",
-                    label: "Credits",
-                    tags,
-                };
-                properties.push(creditsProperty);
-                // let ids = creators;
-            }
-            catch (err) {
-                // handle error
-                console.log("MangaDex: Failed To Parse Creators");
-            }
-        }
-        // Links
-        const trackerInfo = {
-            al: attributes?.links?.al,
-            kt: attributes?.links?.kt,
-            mal: attributes?.links?.mal,
-            mu: attributes?.links?.mu,
-        };
-        // Related Content
-        const includedCollections = [];
-        const relatedManga = relationships
-            .filter((v) => v.type === "manga")
-            .map((v) => v.id);
-        if (relatedManga.length > 0) {
-            const highlights = await this.getMDRelatedCollections(relatedManga);
-            includedCollections.push({
-                id: "related_manga",
-                title: "Related Titles",
-                highlights,
-                style: daisuke_1.CollectionStyle.NORMAL,
-            });
-        }
-        const covers = (await this.getMDCovers([contentId]))[contentId];
-        const stats = (await this.getMDStatistics([contentId]))[contentId];
-        const nonInteractive = {
-            id: "base",
-            label: "Additional Info",
-            tags: [
-                `📚 Follows: ${stats.follows.toLocaleString()}`,
-                stats.rating ? `⭐️ Rating: ${stats.rating.toFixed(1)} / 10 ` : "",
-            ].filter((v) => v),
-        };
-        let contentType = daisuke_1.ContentType.UNKNOWN;
-        switch (originalLang) {
-            case "jp":
-                contentType = daisuke_1.ContentType.MANGA;
-                break;
-            case "ko":
-                contentType = daisuke_1.ContentType.MANHWA;
-                break;
-        }
-        return {
-            title: titles[0],
-            additionalTitles: titles,
-            adultContent,
-            cover: covers[0],
-            contentId,
-            additionalCovers: covers,
-            properties,
-            summary,
-            webUrl: `${this.info.website}/title/${contentId}`,
-            trackerInfo,
-            status,
-            creators: Array.from(new Set(artists.concat(authors))),
-            recommendedReadingMode,
-            includedCollections,
-            contentType,
-            nonInteractiveProperties: [nonInteractive],
-        };
-    }
-    async getChapters(contentId) {
-        const translatedLanguage = await this.STORE.getLanguages();
-        const chapters = [];
-        let offset = 0;
-        const limit = 500;
-        let loop = true;
-        let index = 0;
-        while (loop) {
-            const url = `${this.API_URL}/manga/${contentId}/feed`;
-            const params = {
-                limit,
-                offset,
-                translatedLanguage,
-                contentRating: this.CONTENT_RATINGS,
-                includes: ["scanlation_group"],
-                "order[volume]": "desc",
-                "order[chapter]": "desc",
-                "order[publishAt]": "desc",
-            };
-            const response = await this.NETWORK_CLIENT.get(url, { params });
-            const json = JSON.parse(response.data);
-            for (const chapter of json.data) {
-                const id = chapter.id;
-                const attributes = chapter.attributes;
-                const title = attributes.title ? (0, he_1.decode)(attributes.title) : undefined;
-                const number = Number(attributes.chapter);
-                const volume = attributes.volume
-                    ? Number(attributes.volume)
-                    : undefined;
-                const date = new Date(attributes.publishAt);
-                const language = (0, utils_1.languageCode)(attributes.translatedLanguage);
-                let webUrl = attributes.externalUrl;
-                if (!webUrl) {
-                    webUrl = `${this.info.website}/chapter/${id}`;
-                }
-                const providers = chapter.relationships
-                    .filter((v) => v.type === "scanlation_group")
-                    .map((data) => {
-                    const links = [];
-                    if (data.attributes.website) {
-                        links.push({
-                            type: daisuke_1.ProviderLinkType.WEBSITE,
-                            url: data.attributes.website,
-                        });
-                    }
-                    if (data.attributes.twitter) {
-                        links.push({
-                            type: daisuke_1.ProviderLinkType.TWITTER,
-                            url: data.attributes.twitter,
-                        });
-                    }
-                    if (data.attributes.discord) {
-                        const str = data.attributes.discord;
-                        links.push({
-                            type: daisuke_1.ProviderLinkType.DISCORD,
-                            url: `https://discord.gg/${str}`,
-                        });
-                    }
-                    return {
-                        id: data.id,
-                        name: data.attributes.name,
-                        links,
-                    };
-                });
-                if (attributes.pages <= 0) {
-                    continue;
-                }
-                chapters.push({
-                    contentId,
-                    chapterId: id,
-                    title,
-                    number,
-                    volume,
-                    date,
-                    language,
-                    webUrl,
-                    providers,
-                    index,
-                });
-                index++;
-            }
-            offset += 500;
-            if (json.total <= offset) {
-                loop = false;
-            }
-        }
-        return chapters;
-    }
-    async getChapterData(contentId, chapterId) {
-        const isDataSaver = await this.STORE.getDSMode();
-        const url = `${this.API_URL}/at-home/server/${chapterId}`;
-        const response = await this.NETWORK_CLIENT.get(url);
-        const json = JSON.parse(response.data);
-        const serverUrl = json.baseUrl;
-        const chapter = json.chapter;
-        const key = isDataSaver ? "dataSaver" : "data";
-        const path = isDataSaver ? "data-saver" : "data";
-        const urls = chapter[key].map((v) => `${serverUrl}/${path}/${chapter.hash}/${v}`);
-        return {
-            contentId,
-            chapterId,
-            pages: urls.map((url) => ({ url })),
-        };
-    }
-    getSearchResults(query) {
-        return this.getMDSearchResults(query);
-    }
-    // * Explore
-    async createExploreCollections() {
-        const shuffle = (array) => {
-            let currentIndex = array.length, temporaryValue, randomIndex;
-            // While there remain elements to shuffle...
-            while (0 !== currentIndex) {
-                // Pick a remaining element...
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex -= 1;
-                // And swap it with the current element.
-                temporaryValue = array[currentIndex];
-                array[currentIndex] = array[randomIndex];
-                array[randomIndex] = temporaryValue;
-            }
-            return array;
-        };
-        const injectMimasRecs = await this.STORE.getMimasEnabled();
-        const injectSeasonal = await this.STORE.getSeasonal();
-        const sections = [
-            {
-                id: "followedCount",
-                title: "Popular Titles...",
-                subtitle: "The general consensus is never wrong.",
-                style: daisuke_1.CollectionStyle.INFO,
-            },
-            {
-                id: "createdAt",
-                title: "Recently Added",
-                style: daisuke_1.CollectionStyle.NORMAL,
-            },
-            {
-                id: "rating",
-                title: "Highly Rated Titles",
-                subtitle: "Masterpieces",
-                style: daisuke_1.CollectionStyle.INFO,
-            },
-            {
-                id: "relevance",
-                title: "Relevant Titles",
-                subtitle: "This sort option makes no fucking sense.",
-                style: daisuke_1.CollectionStyle.NORMAL,
-            },
-            {
-                id: "recentlyUpdated",
-                title: "Latest Updates",
-                style: daisuke_1.CollectionStyle.UPDATE_LIST,
-            },
-            {
-                id: "popular_new",
-                title: "Popular New Titles",
-                style: daisuke_1.CollectionStyle.GALLERY,
-            },
-        ];
-        // Seasonal Lists
-        if (injectSeasonal) {
-            sections.push(...[
-                {
-                    id: "seasonal",
-                    title: "Seasonal List",
-                    subtitle: "Titles from this anime season.",
-                    style: daisuke_1.CollectionStyle.GALLERY,
-                },
-            ]);
-        }
-        // Mimas Recommendations
-        if (injectMimasRecs) {
-            const ids = await this.STORE.getMimasTargets();
-            const recommended = ids.map((v) => ({
-                id: `mimas|${v}`,
-                title: "Recommendation",
-                style: daisuke_1.CollectionStyle.NORMAL,
-            }));
-            sections.push(...recommended);
-        }
-        return shuffle(sections);
-    }
-    async resolveExploreCollection(excerpt) {
-        switch (excerpt.id) {
-            case "popular_new":
-                return {
-                    ...excerpt,
-                    highlights: (await this.getPopularNewTitles()).results,
-                };
-            case "seasonal":
-                return this.getCollectionForList(this.SEASONAL_LIST_ID, excerpt);
-            case "seasonal_last":
-                return this.getCollectionForList(this.LAST_SEASONAL_LIST_ID, excerpt);
-            // Get
-            case "recentlyUpdated":
-                return {
-                    ...excerpt,
-                    highlights: await this.getMDUpdates(1),
-                };
-            default:
-                if (excerpt.id.includes("mimas")) {
-                    const id = excerpt.id.split("|").pop();
-                    if (!id)
-                        throw new Error("Improper Config");
-                    const name = (0, lodash_1.sample)(["More Like", "Because you read", "Similar to"]) ??
-                        "More Like";
-                    const recs = await this.getMimasRecommendations(id);
-                    return {
-                        highlights: recs.recs.map((v) => ({
-                            title: v.title,
-                            contentId: v.contentId,
-                            cover: v.coverImage,
-                        })),
-                        title: `${name} "${recs.target.title}"`,
-                    };
-                }
-                else {
-                    const sort = (await this.getSearchSorters()).find((v) => v.id === excerpt.id)?.id;
-                    const content_ratings = await this.STORE.getContentRatings();
-                    const query = {
-                        page: 1,
-                        filters: [{ id: "content_rating", included: content_ratings }],
-                        sort,
-                    };
-                    const overrides = {
-                        limit: 20,
-                        getStats: ["followedCount", "rating"].includes(excerpt.id),
-                    };
-                    return {
-                        ...excerpt,
-                        highlights: (await this.getMDSearchResults(query, overrides))
-                            .results,
-                    };
-                }
-        }
-    }
-    async getCollectionForList(id, excerpt) {
-        const list = await this.getMDList(id);
-        return { ...excerpt, highlights: list.highlights, title: list.title };
-    }
-    async getPopularNewTitles() {
-        const date = (0, moment_1.default)().subtract({ month: 1 }).toDate();
-        const contentRating = await this.STORE.getContentRatings();
-        const params = {
+    return results;
+}
+exports.getMDCovers = getMDCovers;
+// Gets related titles for provided ids
+async function getMDRelatedCollections(ids) {
+    const response = await (0, network_1.GET)("/manga", {
+        params: {
             includes: ["cover_art"],
-            "order[followedCount]": "desc",
+            ids,
+        },
+    });
+    const paged = await (0, pagedResponse_1.parsePagedResponse)(response);
+    return paged.results;
+}
+exports.getMDRelatedCollections = getMDRelatedCollections;
+// Gets the stats for the provided ids
+async function getMDStatistics(ids) {
+    const response = await (0, network_1.GET)("/statistics/manga", {
+        params: {
+            manga: ids,
+        },
+    });
+    const stats = response.statistics;
+    const getValue = (key) => {
+        const obj = stats[key];
+        return {
+            follows: obj.follows,
+            rating: obj.rating.average,
+            // views: 0,
+        };
+    };
+    return ids.reduce((a, v) => ({ ...a, [v]: getValue(v) }), {});
+}
+exports.getMDStatistics = getMDStatistics;
+// Fetches an MD List
+async function getMDList(listId) {
+    const { data } = await (0, network_1.GET)(`/list/${listId}`);
+    const contentIds = data.relationships
+        .filter((x) => x.type == "manga")
+        .map((x) => x.id);
+    const listName = data.attributes.name ?? "Seasonal";
+    const page = await (0, network_1.GET)(`/manga`, {
+        params: {
+            includes: ["cover_art"],
+            ids: contentIds,
+            limit: constants_1.RESULT_LIMIT,
+        },
+    });
+    return {
+        title: listName,
+        highlights: (await (0, pagedResponse_1.parsePagedResponse)(page)).results,
+    };
+}
+exports.getMDList = getMDList;
+// Fetches Updates from MD
+async function getMDUpdates(page) {
+    const contentRating = await constants_1.GlobalStore.getContentRatings();
+    const langs = await constants_1.GlobalStore.getLanguages();
+    let response = await (0, network_1.GET)(`/chapter`, {
+        params: {
+            limit: 50,
+            offset: 50 * (page - 1),
+            "order[readableAt]": "desc",
+            translatedLanguage: langs,
+            contentRating: contentRating,
+            includeFutureUpdates: "0",
+        },
+    });
+    const chapterListJSON = JSON.parse(response.data);
+    const base = chapterListJSON.data.map((x) => x.relationships.find((y) => y.type == "manga").id);
+    const ids = Array.from(new Set(base));
+    response = await (0, network_1.GET)(`/manga`, {
+        params: {
+            ids,
+            limit: ids.length,
             contentRating,
-            hasAvailableChapters: true,
-            limit: 15,
-            createdAtSince: date.toISOString().split(".")[0],
+            includes: ["cover_art"],
+        },
+    });
+    const highlights = (await (0, pagedResponse_1.parsePagedResponse)(response)).results.sort((a, b) => {
+        return ids.indexOf(a.id) - ids.indexOf(b.id);
+    });
+    highlights.forEach((entry) => {
+        const chapterObject = chapterListJSON.data.find((json) => entry.id == json.relationships.find((y) => y.type == "manga").id);
+        const volume = chapterObject.attributes.volume;
+        const chapter = chapterObject.attributes.chapter;
+        const chapterName = `${volume ? `Volume ${volume} ` : ""}Chapter ${chapter}`;
+        const _chapterDate = new Date(chapterObject.attributes.publishAt);
+        const getOccurrences = (array, value) => {
+            let count = 0;
+            array.forEach((v) => v === value && count++);
+            return count;
         };
-        const response = await this.NETWORK_CLIENT.get(this.API_URL + "/manga", {
-            params,
-        });
-        return this.parsePagedResponse(response, 1, true, false);
+        const chapterCount = getOccurrences(base, entry.id);
+        const info = `${chapterCount} Update${chapterCount != 1 ? "s" : ""}\n${chapterName}`;
+        entry.info = [info];
+    });
+    return highlights;
+}
+exports.getMDUpdates = getMDUpdates;
+// Fetches Search results from MD
+async function getMDSearchResults(query, overrides = {}) {
+    const page = query.page ?? 1;
+    const limit = overrides.limit ?? constants_1.RESULT_LIMIT;
+    const offset = (page - 1) * limit;
+    const params = { limit, offset, includes: ["cover_art"] };
+    // Keyword
+    if (query.query) {
+        params.title = (0, he_1.encode)(query.query);
     }
-    async getExplorePageTags() {
-        return explore_json_1.default.map((v) => ({
-            ...v,
-            request: { filters: [{ id: "", included: [v.id] }] },
-        }));
+    // Order
+    if (query.sort) {
+        params[`order[${query.sort.id}]`] = "desc";
     }
-    // * Search
-    async getSearchSorters() {
-        const data = {
-            followedCount: "Popular",
-            rating: "User Rating",
-            createdAt: "New",
-            relevance: "Relevant",
-            title: "Alphabetically",
-            year: "Yearly",
-            updatedAt: "Last Updated",
-            latestUploadedChapter: "Last Uploaded Chapter",
-        };
-        return Object.entries(data).map(([id, label]) => ({
-            id,
-            label,
-        }));
+    else {
+        params["order[followedCount]"] = "desc";
     }
-    getSourceTags() {
-        return this.getMDTags();
-    }
-    async getSearchFilters() {
-        const filters = [];
-        const nonExcludable = [
-            "pb_status",
-            "demographic",
-            "content_rating",
-            "lang",
-        ];
-        for (const property of await this.getMDTags()) {
-            const filter = {
-                id: property.id,
-                title: property.label,
-                options: property.tags,
-                type: nonExcludable.includes(property.id)
-                    ? daisuke_1.FilterType.MULTISELECT
-                    : daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
+    // for (const filter of query.filters ?? []) {
+    //   const included = filter.included ?? [];
+    //   const excluded = filter.excluded ?? [];
+    //   switch (filter.id) {
+    //     case "demographic":
+    //       params.publicationDemographic = included;
+    //       break;
+    //     case "content_rating":
+    //       params.contentRating =
+    //         included.length == 0
+    //           ? ["safe", "suggestive", "erotica", "pornographic"]
+    //           : included;
+    //       break;
+    //     case "lang":
+    //     case "language":
+    //       params.originalLanguage = included;
+    //       break;
+    //     case "pb_status":
+    //     case "status":
+    //       params.status = included;
+    //       break;
+    //     case "author":
+    //     case "credits":
+    //       params.authors = included;
+    //       break;
+    //     default:
+    //       params.includedTags = included;
+    //       params.excludedTags = excluded;
+    //       break;
+    //   }
+    // }
+    const response = await (0, network_1.GET)("/manga", { params });
+    return (0, pagedResponse_1.parsePagedResponse)(response);
+}
+exports.getMDSearchResults = getMDSearchResults;
+async function buildFilters() {
+    const filters = [];
+    const { data } = await (0, network_1.GET)(`/manga/tag`);
+    const grouped = (0, lodash_1.groupBy)(data, (v) => v.attributes.group);
+    for (const group in grouped) {
+        const title = (0, lodash_1.capitalize)(group);
+        const options = grouped[group].map((tag) => {
+            return {
+                title: tag.attributes.name.en,
+                id: tag.id,
             };
-            filters.push(filter);
-        }
-        return filters;
-    }
-    // Events
-    async onChapterRead(contentId, chapterId) {
-        await this.STORE.saveToMimasTargets(contentId);
-        const signedIn = await this.isSignedIn();
-        if (!signedIn)
-            return;
-        await this.syncToMD(contentId, [chapterId]);
-    }
-    async onChaptersMarked(contentId, chapterIds, completed) {
-        const signedIn = await this.isSignedIn();
-        if (!signedIn)
-            return;
-        if (completed) {
-            await this.syncToMD(contentId, chapterIds);
-        }
-        else {
-            await this.syncToMD(contentId, [], chapterIds);
-        }
-    }
-    async onContentsAddedToLibrary(ids) {
-        const signedIn = await this.isSignedIn();
-        if (!signedIn)
-            return;
-        for (const id of ids) {
-            await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/status`, {
-                body: {
-                    status: "reading",
-                },
-                transformRequest: requestHandler,
-            });
-        }
-    }
-    // Preferences
-    async getSourcePreferences() {
-        return (0, preferences_1.getPreferenceList)(this.STORE, this);
-    }
-    // Auth
-    async handleBasicAuth(username, password) {
-        const response = await this.NETWORK_CLIENT.post(`${this.API_URL}/auth/login`, {
-            body: {
-                username,
-                password,
-            },
-            transformRequest: requestHandler,
         });
-        const data = JSON.parse(response.data);
-        const session = data.token.session;
-        const refresh = data.token.refresh;
-        await this.KEYCHAIN.set("session", session);
-        await this.KEYCHAIN.set("refresh", refresh);
-    }
-    async getAuthenticatedUser() {
-        const token = await this.KEYCHAIN.get("session");
-        if (!token) {
-            return null;
-        }
-        const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/user/me`, {
-            transformRequest: requestHandler,
-        });
-        const data = JSON.parse(response.data);
-        const mdUser = data.data;
-        const user = {
-            id: mdUser.id,
-            username: mdUser.attributes.username,
-            avatar: "https://mangadex.org/avatar.png",
-            info: ["Testing"],
+        const filter = {
+            id: group,
+            title,
+            options,
+            type: daisuke_1.FilterType.EXCLUDABLE_MULTISELECT,
         };
-        return user;
+        filters.push(filter);
     }
-    async handleUserSignOut() {
-        try {
-            await this.NETWORK_CLIENT.get(`${this.API_URL}/auth/logout`, {
-                transformRequest: requestHandler,
-            });
-        }
-        catch (err) {
-            console.log(err);
-        }
-        await this.KEYCHAIN.remove("session");
-        await this.KEYCHAIN.remove("refresh");
+    filters.push({
+        id: "pb_status",
+        title: "Publication Status",
+        options: constants_1.PUBLICATION_STATUS.map((id) => {
+            return {
+                id,
+                title: (0, lodash_1.capitalize)(id),
+            };
+        }),
+        type: daisuke_1.FilterType.MULTISELECT,
+    });
+    filters.push({
+        id: "demographic",
+        title: "Publication Demographic",
+        options: constants_1.DEMOGRAPHICS.map((id) => {
+            return {
+                id,
+                title: (0, lodash_1.capitalize)(id),
+            };
+        }),
+        type: daisuke_1.FilterType.MULTISELECT,
+    });
+    filters.push({
+        id: "content_rating",
+        title: "Content Rating",
+        options: constants_1.CONTENT_RATINGS.map((id) => {
+            return {
+                id,
+                title: (0, lodash_1.capitalize)(id),
+            };
+        }),
+        type: daisuke_1.FilterType.MULTISELECT,
+    });
+    filters.push({
+        id: "lang",
+        title: "Original Language",
+        type: daisuke_1.FilterType.MULTISELECT,
+        options: constants_1.LANGUAGES.map((id) => {
+            return {
+                id,
+                title: (0, utils_1.languageLabel)(id),
+            };
+        }),
+    });
+    return filters;
+}
+exports.buildFilters = buildFilters;
+async function getCollectionForList(id) {
+    const list = await getMDList(id);
+    return { highlights: list.highlights, title: list.title };
+}
+exports.getCollectionForList = getCollectionForList;
+async function getPopularNewTitles() {
+    const date = (0, moment_1.default)().subtract({ month: 1 }).toDate();
+    const contentRating = await constants_1.GlobalStore.getContentRatings();
+    const params = {
+        includes: ["cover_art"],
+        "order[followedCount]": "desc",
+        contentRating,
+        hasAvailableChapters: true,
+        limit: 15,
+        createdAtSince: date.toISOString().split(".")[0],
+    };
+    const response = await (0, network_1.GET)("/manga", {
+        params,
+    });
+    return (0, pagedResponse_1.parsePagedResponse)(response);
+}
+exports.getPopularNewTitles = getPopularNewTitles;
+async function clearTokens() {
+    await SecureStore.remove("session");
+    await SecureStore.remove("refresh");
+}
+exports.clearTokens = clearTokens;
+async function isSignedIn() {
+    const session = await SecureStore.string("session");
+    const refresh = await SecureStore.string("refresh");
+    if (!session || !refresh)
+        return false; // Either Refresh or Access is missing, not signed in
+    if ((0, network_1.isTokenExpired)(refresh)) {
+        // Refresh is expired, not signed in
+        await clearTokens(); // clear tokens
+        return false;
     }
-    // * Syncing
-    async syncUserLibrary(library) {
-        const fetchedLib = await this.fetchUserLibrary();
-        // Titles in local but not cloud
-        const toUpSync = library.filter((v) => !fetchedLib.find((a) => a.id === v.id));
-        // Titles in cloud but not local
-        const toDownSync = fetchedLib.filter((v) => {
-            const target = library.find((a) => a.id === v.id);
-            // Not in library, down sync
-            if (!target)
-                return true;
-            // NonMatching Reading Flag
-            if (v.readingFlag && target.flag != v.readingFlag)
-                return true;
-            return false;
-        });
-        // Handle UpSync
-        await this.handleUpSync(toUpSync);
-        return toDownSync;
-    }
-    async handleUpSync(entries) {
-        for (const entry of entries) {
-            const url = `${this.API_URL}/manga/${entry.id}/status`;
-            const status = this.getStatusFlagForReadingFlag(entry.flag);
-            await this.NETWORK_CLIENT.post(url, {
-                body: {
-                    status,
-                },
-                transformRequest: requestHandler,
-            });
-        }
-    }
-    async fetchUserLibrary() {
-        const library = [];
-        // Fetch Reading Status
-        const statuses = await this.getMDUserStatuses();
-        const limit = 100;
-        let offset = 0;
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/user/follows/manga`, {
-                params: {
-                    limit,
-                    offset,
-                    includes: ["cover_art"],
-                },
-                transformRequest: requestHandler,
-            });
-            const highlights = (await this.parsePagedResponse(response, 1, false, false)).results;
-            // prepare
-            const mapped = highlights.map((v) => {
-                const status = this.getMDReadingStatus(statuses[v.contentId]);
-                return {
-                    id: v.contentId,
-                    title: v.title,
-                    cover: v.cover,
-                    readingFlag: status,
-                };
-            });
-            library.push(...mapped);
-            // Loop Logic
-            offset += limit;
-            if (highlights.length < limit) {
-                break;
-            }
-        }
-        return library;
-    }
-    async getReadChapterMarkers(contentId) {
-        const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/manga/read`, {
-            params: { ids: [contentId], grouped: true },
-            transformRequest: requestHandler,
-        });
-        const data = JSON.parse(response.data);
-        const ids = data.data[contentId];
-        return ids ?? [];
-    }
-    READING_STATUS = {
+    return true;
+}
+exports.isSignedIn = isSignedIn;
+async function getStatusFlagForReadingFlag(flag) {
+    const READING_STATUS = {
         reading: daisuke_1.ReadingFlag.READING,
         plan_to_read: daisuke_1.ReadingFlag.PLANNED,
         dropped: daisuke_1.ReadingFlag.DROPPED,
@@ -767,389 +963,78 @@ class Target extends daisuke_1.Source {
         re_reading: daisuke_1.ReadingFlag.REREADING,
         on_hold: daisuke_1.ReadingFlag.PAUSED,
     };
-    getStatusFlagForReadingFlag(flag) {
-        return (Object.keys(this.READING_STATUS).find((key) => this.READING_STATUS[key] === flag) ?? "reading");
-    }
-    // Authenticated User
-    getMDReadingStatus(str) {
-        switch (str) {
-            case "reading":
-                return daisuke_1.ReadingFlag.READING;
-            case "plan_to_read":
-                return daisuke_1.ReadingFlag.PLANNED;
-            case "dropped":
-                return daisuke_1.ReadingFlag.DROPPED;
-            case "completed":
-                return daisuke_1.ReadingFlag.COMPLETED;
-            case "re_reading":
-                return daisuke_1.ReadingFlag.REREADING;
-            case "on_hold":
-                return daisuke_1.ReadingFlag.PAUSED;
-            default:
-                break;
-        }
-        return daisuke_1.ReadingFlag.UNKNOWN;
-    }
-    async getMDUserStatuses() {
-        try {
-            const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/manga/status`, {
-                transformRequest: requestHandler,
-            });
-            return JSON.parse(response.data).statuses;
-        }
-        catch (err) {
-            console.log(err.response.data);
-        }
-        return {};
-    }
-    // Helpers
-    async getMDTags() {
-        if (this.PROPERTIES.length != 0) {
-            return this.PROPERTIES;
-        }
-        const properties = [];
-        const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/manga/tag`);
-        const data = JSON.parse(response.data).data;
-        const grouped = (0, lodash_1.groupBy)(data, (v) => v.attributes.group);
-        for (const group in grouped) {
-            const label = (0, lodash_1.capitalize)(group);
-            const tags = grouped[group].map((tag) => {
-                return {
-                    label: tag.attributes.name.en,
-                    adultContent: this.ADULT_TAG_IDS.includes(tag.id),
-                    id: tag.id,
-                };
-            });
-            const property = {
-                id: group,
-                label,
-                tags,
-            };
-            properties.push(property);
-        }
-        properties.push({
-            id: "pb_status",
-            label: "Publication Status",
-            tags: this.PUBLICATION_STATUS.map((v) => {
-                return {
-                    id: v,
-                    label: (0, lodash_1.capitalize)(v),
-                    adultContent: false,
-                };
-            }),
-        });
-        properties.push({
-            id: "demographic",
-            label: "Publication Demographic",
-            tags: this.DEMOGRAPHICS.map((v) => {
-                return {
-                    id: v,
-                    label: (0, lodash_1.capitalize)(v),
-                    adultContent: false,
-                };
-            }),
-        });
-        properties.push({
-            id: "content_rating",
-            label: "Content Rating",
-            tags: this.CONTENT_RATINGS.map((v) => {
-                return {
-                    id: v,
-                    label: (0, lodash_1.capitalize)(v),
-                    adultContent: v === "pornographic",
-                };
-            }),
-        });
-        properties.push({
-            id: "lang",
-            label: "Original Language",
-            tags: this.LANGUAGES.map((v) => {
-                return {
-                    id: v,
-                    label: (0, utils_1.languageLabel)(v),
-                    adultContent: false,
-                };
-            }),
-        });
-        this.PROPERTIES = properties;
-        return properties;
-    }
-    async getMDList(listId) {
-        let response = await this.NETWORK_CLIENT.get(`${this.API_URL}/list/${listId}`);
-        const data = JSON.parse(response.data).data;
-        const contentIds = data.relationships
-            .filter((x) => x.type == "manga")
-            .map((x) => x.id);
-        const listName = data.attributes.name ?? "Seasonal";
-        response = await this.NETWORK_CLIENT.get(`${this.API_URL}/manga`, {
-            params: {
-                includes: ["cover_art"],
-                ids: contentIds,
-                limit: this.RESULT_LIMIT,
-            },
-        });
-        return {
-            title: listName,
-            highlights: (await this.parsePagedResponse(response, 1, true)).results,
-        };
-    }
-    async parsePagedResponse(response, page = 1, fetchCovers = false, fetchStatistics = false) {
-        const json = JSON.parse(response.data);
-        const ids = json.data.map((v) => v.id);
-        let stats = {};
-        if (fetchStatistics) {
-            stats = await this.getMDStatistics(ids);
-        }
-        // batch
-        const highlights = json.data.map(async (manga) => {
-            const attributes = manga.attributes;
-            const tags = attributes.tags.map((tag) => tag.attributes.name.en);
-            const title = (0, he_1.decode)(attributes.title[Object.keys(attributes.title)[0]]);
-            const fileName = manga.relationships
-                .filter((x) => x.type == "cover_art")
-                .map((x) => x.attributes?.fileName)[0];
-            const suffix = await this.STORE.getCoverQuality();
-            const defaultCover = `${this.COVER_URL}/${manga.id}/${fileName}${suffix}`;
-            const highlight = {
-                title,
-                tags,
-                cover: defaultCover,
-                contentId: manga.id,
-            };
-            if (fetchCovers) {
-                highlight.additionalCovers = (await this.getMDCovers([manga.id]))[manga.id].slice(0, 5);
-            }
-            if (fetchStatistics) {
-                highlight.stats = stats[manga.id];
-            }
-            return highlight;
-        });
-        const results = await Promise.all(highlights);
-        return {
-            page,
-            results,
-            isLastPage: highlights.length === 0,
-            totalResultCount: json.total,
-        };
-    }
-    async getMDStatistics(ids) {
-        const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/statistics/manga`, {
-            params: {
-                manga: ids,
-            },
-        });
-        const json = JSON.parse(response.data);
-        const stats = json.statistics;
-        const getValue = (key) => {
-            const obj = stats[key];
-            return {
-                follows: obj.follows,
-                rating: obj.rating.average,
-                // views: 0,
-            };
-        };
-        return ids.reduce((a, v) => ({ ...a, [v]: getValue(v) }), {});
-    }
-    async getMDCovers(ids) {
-        const results = {};
-        const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/cover`, {
-            params: {
-                manga: ids,
-                limit: 100,
-                "order[volume]": "desc",
-            },
-        });
-        const json = typeof response.data === "string"
-            ? JSON.parse(response.data)
-            : response.data;
-        for (const id of ids) {
-            const files = json.data.filter((data) => Object.values(data.relationships.flatMap((x) => x.id)).includes(id));
-            const suffix = await this.STORE.getCoverQuality();
-            const covers = files.map((val) => `${this.COVER_URL}/${id}/${val.attributes.fileName}${suffix}`);
-            results[id] = covers;
-        }
-        return results;
-    }
-    async getMDUpdates(page) {
-        const contentRating = await this.STORE.getContentRatings();
-        const langs = await this.STORE.getLanguages();
-        let response = await this.NETWORK_CLIENT.get(`${this.API_URL}/chapter`, {
-            params: {
-                limit: 50,
-                offset: 50 * (page - 1),
-                "order[readableAt]": "desc",
-                translatedLanguage: langs,
-                contentRating: contentRating,
-                includeFutureUpdates: "0",
-            },
-        });
-        const chapterListJSON = JSON.parse(response.data);
-        const base = chapterListJSON.data.map((x) => x.relationships.find((y) => y.type == "manga").id);
-        const ids = Array.from(new Set(base));
-        response = await this.NETWORK_CLIENT.get(`${this.API_URL}/manga`, {
-            params: {
-                ids,
-                limit: ids.length,
-                contentRating,
-                includes: ["cover_art"],
-            },
-        });
-        const highlights = (await this.parsePagedResponse(response, 1)).results.sort((a, b) => {
-            return ids.indexOf(a.contentId) - ids.indexOf(b.contentId);
-        });
-        highlights.forEach((entry) => {
-            const chapterObject = chapterListJSON.data.find((json) => entry.contentId ==
-                json.relationships.find((y) => y.type == "manga").id);
-            const volume = chapterObject.attributes.volume;
-            const chapter = chapterObject.attributes.chapter;
-            const chapterName = `${volume ? `Volume ${volume} ` : ""}Chapter ${chapter}`;
-            const chapterDate = new Date(chapterObject.attributes.publishAt);
-            const getOccurrences = (array, value) => {
-                let count = 0;
-                array.forEach((v) => v === value && count++);
-                return count;
-            };
-            const chapterCount = getOccurrences(base, entry.contentId);
-            entry.updates = {
-                label: chapterName,
-                date: chapterDate,
-                count: chapterCount,
-            };
-        });
-        return highlights;
-    }
-    async getMDSearchResults(query, overrides = {}) {
-        const page = query.page ?? 1;
-        const limit = overrides.limit ?? this.RESULT_LIMIT;
-        const offset = (page - 1) * limit;
-        const url = `${this.API_URL}/manga`;
-        const params = { limit, offset, includes: ["cover_art"] };
-        // Keyword
-        if (query.query) {
-            params.title = (0, he_1.encode)(query.query);
-        }
-        // Order
-        if (query.sort) {
-            params[`order[${query.sort}]`] = "desc";
-        }
-        else {
-            params["order[followedCount]"] = "desc";
-        }
-        for (const filter of query.filters ?? []) {
-            const included = filter.included ?? [];
-            const excluded = filter.excluded ?? [];
-            switch (filter.id) {
-                case "demographic":
-                    params.publicationDemographic = included;
-                    break;
-                case "content_rating":
-                    params.contentRating =
-                        included.length == 0
-                            ? ["safe", "suggestive", "erotica", "pornographic"]
-                            : included;
-                    break;
-                case "lang":
-                case "language":
-                    params.originalLanguage = included;
-                    break;
-                case "pb_status":
-                case "status":
-                    params.status = included;
-                    break;
-                case "author":
-                case "credits":
-                    params.authors = included;
-                    break;
-                default:
-                    params.includedTags = included;
-                    params.excludedTags = excluded;
-                    break;
-            }
-        }
-        const response = await this.NETWORK_CLIENT.get(url, { params });
-        return this.parsePagedResponse(response, page, false, overrides.getStats ?? false);
-    }
-    async getMDRelatedCollections(ids) {
-        const response = await this.NETWORK_CLIENT.get(`${this.API_URL}/manga`, {
-            params: {
-                includes: ["cover_art"],
-                ids,
-            },
-        });
-        const paged = await this.parsePagedResponse(response);
-        return paged.results;
-    }
-    // Network Functions
-    // Ref: https://stackoverflow.com/a/69058154
-    async clearTokens() {
-        await this.KEYCHAIN.remove("session");
-        await this.KEYCHAIN.remove("refresh");
-    }
-    async isSignedIn() {
-        const session = await this.KEYCHAIN.string("session");
-        const refresh = await this.KEYCHAIN.string("refresh");
-        if (!session || !refresh)
-            return false; // Either Refresh or Access is missing, not signed in
-        if (isTokenExpired(refresh)) {
-            // Refresh is expired, not signed in
-            this.clearTokens(); // clear tokens
-            return false;
-        }
-        return true;
-    }
-    async getMimasRecommendations(id) {
-        const MIMAS_URL = "https://mimas.mantton.com";
-        const response = await this.NETWORK_CLIENT.get(`${MIMAS_URL}/similar/org.mangadex/${id}?page=1`);
-        const data = JSON.parse(response.data);
-        return {
-            recs: data.results,
-            target: data.target,
-        };
-    }
-    async syncToMD(id, chapterIdsRead, chapterIdsUnread = []) {
-        try {
-            await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
-                body: {
-                    chapterIdsUnread,
-                    chapterIdsRead,
-                },
-                transformRequest: requestHandler,
-            });
-        }
-        catch {
-            console.error("failed to sync to mangadex");
-        }
-    }
-    async handleIdentifierForUrl(url) {
-        const titleRegex = /^https:\/\/mangadex.org\/title\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
-        const contentId = url.match(titleRegex)?.[1];
-        if (contentId)
-            return {
-                contentId,
-            };
-        const chapterRegex = /^https:\/\/mangadex.org\/chapter\/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})\/?/;
-        const chapterId = url.match(chapterRegex)?.[1];
-        if (chapterId) {
-            const id = await this.getMangaFromChapterId(chapterId);
-            return {
-                contentId: id,
-                chapterId,
-            };
-        }
-        return null;
-    }
-    async getMangaFromChapterId(id) {
-        const url = `${this.API_URL}/chapter/${id}?includes[]=manga`;
-        const { data: res } = await this.NETWORK_CLIENT.get(url);
-        const { data } = JSON.parse(res);
-        const contentId = data.relationships.find((v) => v.type === "manga")?.id;
-        return contentId;
-    }
+    return (Object.keys(READING_STATUS).find((key) => READING_STATUS[key] === flag) ??
+        "reading");
 }
-exports.Target = Target;
-const requestHandler = async (request) => {
+exports.getStatusFlagForReadingFlag = getStatusFlagForReadingFlag;
+// Authenticated User
+function getMDReadingStatus(str) {
+    switch (str) {
+        case "reading":
+            return daisuke_1.ReadingFlag.READING;
+        case "plan_to_read":
+            return daisuke_1.ReadingFlag.PLANNED;
+        case "dropped":
+            return daisuke_1.ReadingFlag.DROPPED;
+        case "completed":
+            return daisuke_1.ReadingFlag.COMPLETED;
+        case "re_reading":
+            return daisuke_1.ReadingFlag.REREADING;
+        case "on_hold":
+            return daisuke_1.ReadingFlag.PAUSED;
+        default:
+            break;
+    }
+    return daisuke_1.ReadingFlag.UNKNOWN;
+}
+exports.getMDReadingStatus = getMDReadingStatus;
+async function getMDUserStatuses() {
+    try {
+        const response = await (0, network_1.GET)(`$/manga/status`);
+        return response.statuses;
+    }
+    catch (err) {
+        console.log(err.response.data);
+    }
+    return {};
+}
+exports.getMDUserStatuses = getMDUserStatuses;
+
+},{"../constants":1,"../network":14,"../parser/pagedResponse":17,"../utils":19,"@suwatte/daisuke":20,"he":undefined,"lodash":undefined,"moment":undefined}],13:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.convertMimasRec = exports.getMimasRecommendations = void 0;
+async function getMimasRecommendations(id) {
+    const MIMAS_URL = "https://mimas.mantton.com";
+    const client = new NetworkClient();
+    const response = await client.get(`${MIMAS_URL}/similar/org.mangadex/${id}?page=1`);
+    const data = JSON.parse(response.data);
+    return {
+        recs: data.results,
+        target: data.target,
+    };
+}
+exports.getMimasRecommendations = getMimasRecommendations;
+const convertMimasRec = ({ contentId: id, title, coverImage: cover, }) => ({
+    id,
+    title,
+    cover,
+});
+exports.convertMimasRec = convertMimasRec;
+
+},{}],14:[function(require,module,exports){
+(function (Buffer){(function (){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.POST = exports.GET = exports.isTokenExpired = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const constants_1 = require("./constants");
+const client = new daisuke_1.NetworkClientBuilder()
+    .addRequestInterceptor(AuthInterceptor)
+    .build();
+async function AuthInterceptor(request) {
     let token = null;
-    const chain = new SecureStore();
+    const chain = SecureStore;
     try {
         token = await chain.string("session");
     }
@@ -1172,13 +1057,12 @@ const requestHandler = async (request) => {
         referer: "https://mangadex.org",
     };
     return request;
-};
+}
 const refreshTokens = async () => {
-    const KEYCHAIN = new SecureStore();
-    const token = await KEYCHAIN.string("refresh");
+    const token = await SecureStore.string("refresh");
     const removeTokens = async () => {
-        await KEYCHAIN.remove("refresh");
-        await KEYCHAIN.remove("session");
+        await SecureStore.remove("refresh");
+        await SecureStore.remove("session");
     };
     if (!token) {
         await removeTokens();
@@ -1190,215 +1074,402 @@ const refreshTokens = async () => {
     }
     // Refresh
     try {
-        const NETWORK_CLIENT = new NetworkClient();
-        const refreshResponse = await NETWORK_CLIENT.post(`https://api.mangadex.org/auth/refresh`, {
+        const client = new NetworkClient();
+        const refreshResponse = await client.post(`https://api.mangadex.org/auth/refresh`, {
             body: {
                 token,
             },
         });
         const data = JSON.parse(refreshResponse.data);
-        await KEYCHAIN.set("session", data.token.session);
-        await KEYCHAIN.set("refresh", data.token.refresh);
+        await SecureStore.set("session", data.token.session);
+        await SecureStore.set("refresh", data.token.refresh);
     }
     catch {
         await removeTokens();
     }
     console.log("Refreshed Token");
 };
-const isTokenExpired = (token) => Date.now() >=
-    JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).exp * 1000;
+function isTokenExpired(token) {
+    return (Date.now() >=
+        JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).exp * 1000);
+}
+exports.isTokenExpired = isTokenExpired;
+async function GET(path, config) {
+    const url = `${constants_1.API_URL}${path}`;
+    const { data: response } = await client.get(url, config);
+    const data = JSON.parse(response);
+    return data;
+}
+exports.GET = GET;
+async function POST(path, config) {
+    const { data: response } = await client.post(`${constants_1.API_URL}${path}`, config);
+    const data = JSON.parse(response);
+    return data;
+}
+exports.POST = POST;
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./explore.json":1,"./preferences":3,"./store":4,"./utils":5,"@suwatte/daisuke":8,"buffer":28,"he":"he","lodash":"lodash","moment":"moment"}],3:[function(require,module,exports){
+},{"./constants":1,"@suwatte/daisuke":20,"buffer":84}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPreferenceList = void 0;
+exports.parseChapterData = exports.getChapters = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
-const lodash_1 = require("lodash");
-const store_1 = require("./store");
-const utils_1 = require("./utils");
-const getPreferenceList = (store, ctx) => {
-    const groups = [];
-    // Language
-    const language = new daisuke_1.MultiSelectPreference({
-        key: store_1.PREF_KEYS.lang,
-        label: "Content Language",
-        options: utils_1.languages.map((v) => ({
-            label: v.label,
-            value: v.languageCode,
-        })),
-        value: {
-            get: async () => {
-                return store.getLanguages();
-            },
-            set: async (v) => {
-                return store.setLanguages(v);
-            },
-        },
-    });
-    groups.push({
-        id: "language",
-        children: [language],
-    });
-    // Data Saver
-    const dataSaver = new daisuke_1.TogglePreference({
-        key: store_1.PREF_KEYS.dataSaver,
-        label: "DataSaver Mode",
-        value: {
-            get: async () => {
-                return store.getDSMode();
-            },
-            set: async (v) => {
-                return store.setDSMode(v);
-            },
-        },
-    });
-    // Cover Quality
-    const coverQuality = new daisuke_1.SelectPreference({
-        key: store_1.PREF_KEYS.coverQuality,
-        label: "Cover/Thumbnail Quality",
-        options: [
-            {
-                label: "Original",
-                value: "original",
-            },
-            {
-                label: "Medium",
-                value: "medium",
-            },
-            {
-                label: "Low",
-                value: "low",
-            },
-        ],
-        value: {
-            get: async () => {
-                return store.getCQ();
-            },
-            set: async (v) => {
-                return store.setCoverQuality(v);
-            },
-        },
-    });
-    const imageGroup = {
-        id: "group_1",
-        header: "Image Preferences",
-        children: [coverQuality, dataSaver],
-    };
-    groups.push(imageGroup);
-    const ratings = ["safe", "suggestive", "erotica", "pornographic"];
-    const exploreContentRating = new daisuke_1.MultiSelectPreference({
-        key: store_1.PREF_KEYS.exploreCR,
-        label: "Content Rating",
-        options: ratings.map((v) => ({
-            label: (0, lodash_1.capitalize)(v),
-            value: v,
-        })),
-        value: {
-            get: async () => {
-                return store.getContentRatings();
-            },
-            set: async (v) => {
-                return store.setContentRatings(v);
-            },
-        },
-    });
-    const showSeasonal = new daisuke_1.TogglePreference({
-        key: store_1.PREF_KEYS.showSeasonal,
-        label: "Show Seasonal Lists",
-        value: {
-            get: async () => {
-                return store.getSeasonal();
-            },
-            set: async (v) => {
-                return store.setSeasonal(v);
-            },
-        },
-    });
-    const exploreGroup = {
-        id: "explore",
-        header: "Explore Page",
-        children: [exploreContentRating, showSeasonal],
-    };
-    groups.push(exploreGroup);
-    //
-    const mimasEnabled = new daisuke_1.TogglePreference({
-        key: store_1.PREF_KEYS.mimasEnabled,
-        label: "Enabled",
-        value: {
-            get: async () => {
-                return store.getMimasEnabled();
-            },
-            set: async (v) => {
-                return store.setMimasEnabled(v);
-            },
-        },
-    });
-    const recommendationsCount = new daisuke_1.StepperPreference({
-        key: store_1.PREF_KEYS.mimasLimit,
-        label: "Limit",
-        maxValue: 10,
-        value: {
-            get: async () => {
-                return store.getMimasLimit();
-            },
-            set: async (v) => {
-                return store.setMimasLimit(v);
-            },
-        },
-    });
-    const clearMimas = new daisuke_1.ButtonPreference({
-        isDestructive: true,
-        systemImage: "trash",
-        label: "Clear Recommendations",
-        key: "mimas_clear",
-        action: store.clearMimasTargets,
-    });
-    const mimasGroup = {
-        id: "mimas",
-        header: "Mimas Recommendations",
-        children: [mimasEnabled, recommendationsCount, clearMimas],
-        footer: "For more info, visit https://github.com/Mantton/SimilarManga",
-    };
-    groups.push(mimasGroup);
-    // Auth Group
-    const clearTokens = new daisuke_1.ButtonPreference({
-        isDestructive: true,
-        systemImage: "trash",
-        label: "Force Sign Out",
-        key: "force_sign_out",
-        action: ctx.clearTokens,
-    });
-    const authGroup = {
-        id: "auth",
-        header: "Authentication",
-        children: [clearTokens],
-    };
-    groups.push(authGroup);
-    return groups;
+const he_1 = require("he");
+const constants_1 = require("../constants");
+const utils_1 = require("../utils");
+const network_1 = require("../network");
+const getChapters = async (contentId) => {
+    const translatedLanguage = await constants_1.GlobalStore.getLanguages();
+    const chapters = [];
+    let offset = 0;
+    const limit = 500;
+    let loop = true;
+    let index = 0;
+    while (loop) {
+        const path = `/manga/${contentId}/feed`;
+        const params = {
+            limit,
+            offset,
+            translatedLanguage,
+            contentRating: constants_1.CONTENT_RATINGS,
+            includes: ["scanlation_group"],
+            "order[volume]": "desc",
+            "order[chapter]": "desc",
+            "order[publishAt]": "desc",
+        };
+        const json = await (0, network_1.GET)(path, { params });
+        for (const chapter of json.data) {
+            const id = chapter.id;
+            const attributes = chapter.attributes;
+            const title = attributes.title ? (0, he_1.decode)(attributes.title) : undefined;
+            const number = Number(attributes.chapter);
+            const volume = attributes.volume ? Number(attributes.volume) : undefined;
+            const date = new Date(attributes.publishAt);
+            const language = (0, utils_1.languageCode)(attributes.translatedLanguage);
+            let webUrl = attributes.externalUrl;
+            if (!webUrl) {
+                webUrl = `https://mangadex.org/chapter/${id}`;
+            }
+            const providers = chapter.relationships
+                .filter((v) => v.type === "scanlation_group")
+                .map((data) => {
+                const links = [];
+                if (data.attributes.website) {
+                    links.push({
+                        type: daisuke_1.ProviderLinkType.WEBSITE,
+                        url: data.attributes.website,
+                    });
+                }
+                if (data.attributes.twitter) {
+                    links.push({
+                        type: daisuke_1.ProviderLinkType.TWITTER,
+                        url: data.attributes.twitter,
+                    });
+                }
+                if (data.attributes.discord) {
+                    const str = data.attributes.discord;
+                    links.push({
+                        type: daisuke_1.ProviderLinkType.DISCORD,
+                        url: `https://discord.gg/${str}`,
+                    });
+                }
+                return {
+                    id: data.id,
+                    name: data.attributes.name,
+                    links,
+                };
+            });
+            if (attributes.pages <= 0) {
+                continue;
+            }
+            chapters.push({
+                chapterId: id,
+                title,
+                number,
+                volume,
+                date,
+                language,
+                webUrl,
+                providers,
+                index,
+            });
+            index++;
+        }
+        offset += 500;
+        if (json.total <= offset) {
+            loop = false;
+        }
+    }
+    return chapters;
 };
-exports.getPreferenceList = getPreferenceList;
+exports.getChapters = getChapters;
+const parseChapterData = async (json) => {
+    const isDataSaver = await constants_1.GlobalStore.getDSMode();
+    const serverUrl = json.baseUrl;
+    const chapter = json.chapter;
+    const key = isDataSaver ? "dataSaver" : "data";
+    const path = isDataSaver ? "data-saver" : "data";
+    const urls = chapter[key].map((v) => ({
+        url: `${serverUrl}/${path}/${chapter.hash}/${v}`,
+    }));
+    return urls;
+};
+exports.parseChapterData = parseChapterData;
 
-},{"./store":4,"./utils":5,"@suwatte/daisuke":8,"lodash":"lodash"}],4:[function(require,module,exports){
+},{"../constants":1,"../network":14,"../utils":19,"@suwatte/daisuke":20,"he":undefined}],16:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseContent = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const he_1 = require("he");
+const lodash_1 = require("lodash");
+const utils_1 = require("../utils");
+const constants_1 = require("../constants");
+const md_1 = require("../misc/md");
+const parseContent = async ({ data }, contentId) => {
+    const attributes = data.attributes;
+    const relationships = data.relationships;
+    const titles = [attributes.title[Object.keys(attributes.title)[0]]].concat(attributes.altTitles.map((x) => (0, he_1.decode)(x[Object.keys(x)[0]])));
+    let nsfw = false;
+    const summary = (0, he_1.decode)(attributes.description.en ?? "").replace(/\[\/{0,1}[bus]\]/g, "");
+    // Status
+    let status;
+    switch (attributes.status) {
+        case "ongoing": {
+            status = daisuke_1.PublicationStatus.ONGOING;
+            break;
+        }
+        case "completed": {
+            status = daisuke_1.PublicationStatus.COMPLETED;
+            break;
+        }
+        case "hiatus": {
+            status = daisuke_1.PublicationStatus.HIATUS;
+            break;
+        }
+        case "cancelled": {
+            status = daisuke_1.PublicationStatus.CANCELLED;
+            break;
+        }
+    }
+    // Properties
+    const properties = [];
+    // Genres
+    const genreTags = [];
+    for (const tag of attributes.tags) {
+        const tagIsNSFW = constants_1.ADULT_TAG_IDS.includes(tag.id);
+        const t = {
+            id: tag.id,
+            nsfw: tagIsNSFW,
+            title: tag.attributes.name.en,
+        };
+        if (tagIsNSFW) {
+            nsfw = true;
+        }
+        genreTags.push(t);
+    }
+    const propertyTags = {
+        id: "genres",
+        title: "Genres",
+        tags: genreTags,
+    };
+    properties.push(propertyTags);
+    // * Reading Mode
+    let recommendedPanelMode = daisuke_1.ReadingMode.PAGED_MANGA;
+    const longStripId = "3e2b8dae-350e-4ab8-a8ce-016e844b9f0d";
+    const fullColorId = "f5ba408b-0e7a-484d-8d49-4e9125ac96de";
+    const mapped = genreTags.map((v) => v.id);
+    if (mapped.includes(longStripId)) {
+        recommendedPanelMode = daisuke_1.ReadingMode.WEBTOON;
+    }
+    else if (mapped.includes(fullColorId)) {
+        recommendedPanelMode = daisuke_1.ReadingMode.PAGED_COMIC;
+    }
+    // * Content Rating & Publication Demographic & Original Language
+    if (attributes.contentRating) {
+        const tags = [];
+        const tag = {
+            id: attributes.contentRating.toLowerCase(),
+            title: (0, lodash_1.capitalize)(attributes.contentRating),
+            nsfw: attributes.contentRating == "pornographic",
+        };
+        if (!nsfw)
+            nsfw = attributes.contentRating == "pornographic";
+        tags.push(tag);
+        const contentRatingProperty = {
+            id: "content_rating",
+            title: "Content Rating",
+            tags,
+        };
+        properties.push(contentRatingProperty);
+    }
+    // Original Language
+    const originalLang = attributes.originalLanguage;
+    if (originalLang) {
+        const tags = [];
+        const languageTag = {
+            id: originalLang,
+            title: (0, utils_1.languageLabel)(originalLang ?? "unknown"),
+            nsfw: false,
+        };
+        // Properly Rename, Common Languages
+        tags.push(languageTag);
+        const languageTags = {
+            id: "lang",
+            title: "Original Language",
+            tags,
+        };
+        properties.push(languageTags);
+    }
+    // Creators
+    const credits = relationships.filter((x) => ["author", "artist"].includes(x.type));
+    const authors = relationships
+        .filter((x) => x.type == "author")
+        .map((x) => x.attributes.name);
+    const artists = relationships
+        .filter((x) => x.type == "artist")
+        .map((x) => x.attributes.name);
+    if (credits.length != 0) {
+        try {
+            const tags = [];
+            // Clickable artist & author properties
+            const appendedIds = [];
+            credits.forEach((obj) => {
+                const tag = {
+                    id: obj.id,
+                    title: (0, he_1.decode)(obj.attributes.name),
+                    nsfw: false,
+                };
+                if (!appendedIds.includes(obj.id)) {
+                    tags.push(tag);
+                    appendedIds.push(obj.id);
+                }
+            });
+            const creditsProperty = {
+                id: "authors",
+                title: "Credits",
+                tags,
+            };
+            properties.push(creditsProperty);
+            // let ids = creators;
+        }
+        catch (err) {
+            // handle error
+            console.log("MangaDex: Failed To Parse Creators");
+        }
+    }
+    // Links
+    const trackerInfo = {
+        al: attributes?.links?.al,
+        kt: attributes?.links?.kt,
+        mal: attributes?.links?.mal,
+        mu: attributes?.links?.mu,
+    };
+    // Related Content
+    const includedCollections = [];
+    const relatedManga = relationships
+        .filter((v) => v.type === "manga")
+        .map((v) => v.id);
+    if (relatedManga.length > 0) {
+        const highlights = await (0, md_1.getMDRelatedCollections)(relatedManga);
+        includedCollections.push({
+            id: "related_manga",
+            title: "Related Titles",
+            highlights,
+        });
+    }
+    const covers = (await (0, md_1.getMDCovers)([contentId]))[contentId];
+    const stats = (await (0, md_1.getMDStatistics)([contentId]))[contentId];
+    const info = [
+        `📚 Follows: ${stats.follows.toLocaleString()}`,
+        stats.rating ? `⭐️ Rating: ${stats.rating.toFixed(1)} / 10 ` : "",
+    ].filter((v) => !!v);
+    let contentType;
+    switch (originalLang) {
+        case "jp":
+            contentType = daisuke_1.ContentType.MANGA;
+            break;
+        case "ko":
+            contentType = daisuke_1.ContentType.MANHWA;
+            break;
+    }
+    return {
+        title: titles[0],
+        additionalTitles: titles,
+        cover: covers[0],
+        additionalCovers: covers,
+        properties,
+        summary,
+        webUrl: `https://mangadex.org/title/${contentId}`,
+        trackerInfo,
+        status,
+        creators: Array.from(new Set(artists.concat(authors))),
+        isNSFW: nsfw,
+        recommendedPanelMode,
+        collections: includedCollections,
+        contentType,
+        info,
+    };
+};
+exports.parseContent = parseContent;
+
+},{"../constants":1,"../misc/md":12,"../utils":19,"@suwatte/daisuke":20,"he":undefined,"lodash":undefined}],17:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parsePagedResponse = void 0;
+const he_1 = require("he");
+const md_1 = require("../misc/md");
+const constants_1 = require("../constants");
+async function parsePagedResponse(json, fetchCovers = false) {
+    // batch
+    const highlights = json.data.map(async (manga) => {
+        const attributes = manga.attributes;
+        const tags = attributes.tags
+            .map((tag) => tag.attributes.name.en)
+            .slice(0, 4);
+        const title = (0, he_1.decode)(attributes.title[Object.keys(attributes.title)[0]]);
+        const fileName = manga.relationships
+            .filter((x) => x.type == "cover_art")
+            .map((x) => x.attributes?.fileName)[0];
+        const suffix = await constants_1.GlobalStore.getCoverQuality();
+        const defaultCover = `${constants_1.COVER_URL}/${manga.id}/${fileName}${suffix}`;
+        const highlight = {
+            title,
+            info: [tags.join(", ")],
+            cover: defaultCover,
+            id: manga.id,
+        };
+        if (fetchCovers) {
+            highlight.additionalCovers = (await (0, md_1.getMDCovers)([manga.id]))[manga.id].slice(0, 5);
+        }
+        return highlight;
+    });
+    const results = await Promise.all(highlights);
+    return {
+        results,
+        isLastPage: highlights.length === 0,
+        totalResultCount: json.total,
+    };
+}
+exports.parsePagedResponse = parsePagedResponse;
+
+},{"../constants":1,"../misc/md":12,"he":undefined}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDStore = exports.PREF_KEYS = void 0;
 const utils_1 = require("./utils");
 exports.PREF_KEYS = {
-    lang: "dfasdfas",
-    dataSaver: "ew23fs",
-    coverQuality: "43twedfsa",
-    exploreCR: "43qgrdsehwe",
-    showSeasonal: "463easrda",
-    mimasEnabled: "43qwaeds",
-    mimasLimit: "43y4wesr",
-    mimasTargets: "4324qewd",
+    lang: "_lang",
+    dataSaver: "_data_saver",
+    coverQuality: "_cover_quality",
+    exploreCR: "_explore_content_rating",
+    showSeasonal: "_show_seasonal",
+    mimasEnabled: "_mimas_enabled",
+    mimasLimit: "_mimas_limit",
+    mimasTargets: "_mimas_targets",
 };
 class MDStore {
-    store;
-    constructor(store) {
-        this.store = store;
-    }
+    store = ObjectStore;
     async getSeasonal() {
         const value = await this.store.boolean(exports.PREF_KEYS.showSeasonal);
         if (!value)
@@ -1410,8 +1481,7 @@ class MDStore {
     }
     async getContentRatings() {
         const DEFAULT = ["safe", "suggestive", "erotica"];
-        //TODO: Uncomment out the below line when V6.0 is released.
-        const ratings = (await this.store.get(exports.PREF_KEYS.exploreCR));
+        const ratings = await this.store.stringArray(exports.PREF_KEYS.exploreCR);
         if (!ratings)
             return DEFAULT;
         return ratings;
@@ -1443,9 +1513,7 @@ class MDStore {
     }
     async getLanguages() {
         const DEFAULT = ["en"];
-        //TODO: Uncomment out the below line when V6.0 is released.
-        // const value = await this.store.stringArray(PREF_KEYS.lang);
-        const value = (await this.store.get(exports.PREF_KEYS.lang));
+        const value = await this.store.stringArray(exports.PREF_KEYS.lang);
         if (!value)
             return DEFAULT;
         return value;
@@ -1462,8 +1530,7 @@ class MDStore {
         return this.store.set(exports.PREF_KEYS.mimasEnabled, v);
     }
     async getMimasTargets() {
-        //TODO: Uncomment out the below line when V6.0 is released.
-        const value = (await this.store.get(exports.PREF_KEYS.mimasTargets));
+        const value = await this.store.stringArray(exports.PREF_KEYS.mimasTargets);
         if (!value)
             return [];
         return value;
@@ -1492,10 +1559,10 @@ class MDStore {
 }
 exports.MDStore = MDStore;
 
-},{"./utils":5}],5:[function(require,module,exports){
+},{"./utils":19}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.languageCode = exports.languageLabel = exports.languages = exports.getURLSuffixFor = void 0;
+exports.CoverQualityOptions = exports.languageCode = exports.languageLabel = exports.languages = exports.getURLSuffixFor = void 0;
 const getURLSuffixFor = (id) => {
     switch (id) {
         case "medium":
@@ -1756,41 +1823,28 @@ exports.languageLabel = languageLabel;
 const languageCode = (lang) => {
     const t = exports.languages.find((v) => v.languageCode == lang);
     if (!t)
-        return undefined;
+        return "";
     return t.languageCode.includes("-")
         ? t.languageCode
         : t.languageCode + "-" + t.regionCode;
 };
 exports.languageCode = languageCode;
+exports.CoverQualityOptions = [
+    {
+        title: "Original",
+        id: "original",
+    },
+    {
+        title: "Medium",
+        id: "medium",
+    },
+    {
+        title: "Low",
+        id: "low",
+    },
+];
 
-},{}],6:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Source = void 0;
-class Source {
-}
-exports.Source = Source;
-
-},{}],7:[function(require,module,exports){
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./Source"), exports);
-
-},{"./Source":6}],8:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1807,40 +1861,295 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./classes"), exports);
+__exportStar(require("./runners"), exports);
 __exportStar(require("./types"), exports);
 
-},{"./classes":7,"./types":25}],9:[function(require,module,exports){
+},{"./runners":43,"./types":73}],21:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],10:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],11:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],23:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],24:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],25:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],26:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],27:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],28:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],29:[function(require,module,exports){
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CollectionStyle = void 0;
-var CollectionStyle;
-(function (CollectionStyle) {
-    CollectionStyle[CollectionStyle["NORMAL"] = 0] = "NORMAL";
-    CollectionStyle[CollectionStyle["INFO"] = 1] = "INFO";
-    CollectionStyle[CollectionStyle["GALLERY"] = 2] = "GALLERY";
-    CollectionStyle[CollectionStyle["UPDATE_LIST"] = 3] = "UPDATE_LIST";
-})(CollectionStyle = exports.CollectionStyle || (exports.CollectionStyle = {}));
+__exportStar(require("./ContentEvent"), exports);
+__exportStar(require("./ChapterEvent"), exports);
+__exportStar(require("./ProgressSync"), exports);
+__exportStar(require("./LibrarySync"), exports);
+__exportStar(require("./StreamContextProvider"), exports);
+__exportStar(require("./ContextMenuHandler"), exports);
+__exportStar(require("./GroupedUpdateProvider"), exports);
 
-},{}],12:[function(require,module,exports){
+},{"./ChapterEvent":22,"./ContentEvent":23,"./ContextMenuHandler":24,"./GroupedUpdateProvider":25,"./LibrarySync":26,"./ProgressSync":27,"./StreamContextProvider":28}],30:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./handlers"), exports);
+__exportStar(require("./ContentSource"), exports);
+
+},{"./ContentSource":21,"./handlers":29}],31:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],32:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],33:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./ContentTracker"), exports);
+__exportStar(require("./AdvancedTracker"), exports);
+
+},{"./AdvancedTracker":31,"./ContentTracker":32}],34:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.Status = void 0;
+exports.BasicAuthenticationUIIdentifier = void 0;
+var BasicAuthenticationUIIdentifier;
+(function (BasicAuthenticationUIIdentifier) {
+    BasicAuthenticationUIIdentifier[BasicAuthenticationUIIdentifier["EMAIL"] = 0] = "EMAIL";
+    BasicAuthenticationUIIdentifier[BasicAuthenticationUIIdentifier["USERNAME"] = 1] = "USERNAME";
+})(BasicAuthenticationUIIdentifier || (exports.BasicAuthenticationUIIdentifier = BasicAuthenticationUIIdentifier = {}));
+
+},{}],35:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],36:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],37:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],38:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],39:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],40:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],41:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Authentication"), exports);
+__exportStar(require("./Preferences"), exports);
+__exportStar(require("./ImageRequest"), exports);
+__exportStar(require("./DirectoryHandler"), exports);
+__exportStar(require("./PageProvider"), exports);
+__exportStar(require("./Setup"), exports);
+__exportStar(require("./PageResolver"), exports);
+
+},{"./Authentication":34,"./DirectoryHandler":35,"./ImageRequest":36,"./PageProvider":37,"./PageResolver":38,"./Preferences":39,"./Setup":40}],42:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RunnerEnvironment = void 0;
+__exportStar(require("./extensions"), exports);
+var RunnerEnvironment;
+(function (RunnerEnvironment) {
+    RunnerEnvironment[RunnerEnvironment["SOURCE"] = 0] = "SOURCE";
+    RunnerEnvironment[RunnerEnvironment["TRACKER"] = 1] = "TRACKER";
+})(RunnerEnvironment || (exports.RunnerEnvironment = RunnerEnvironment = {}));
+
+},{"./extensions":41}],43:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./ContentSource"), exports);
+__exportStar(require("./Runner"), exports);
+__exportStar(require("./ContentTracker"), exports);
+
+},{"./ContentSource":30,"./ContentTracker":33,"./Runner":42}],44:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],45:[function(require,module,exports){
+"use strict";
+// Picker
+Object.defineProperty(exports, "__esModule", { value: true });
+
+},{}],46:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UIStepper = exports.UIButton = exports.UIDatePicker = exports.UITextField = exports.UIToggle = exports.UIMultiPicker = exports.UIPicker = void 0;
+const UIElements_1 = require("./UIElements");
+const UIPicker = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.SELECT }));
+exports.UIPicker = UIPicker;
+const UIMultiPicker = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.MULTISELECT }));
+exports.UIMultiPicker = UIMultiPicker;
+const UIToggle = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.TOGGLE }));
+exports.UIToggle = UIToggle;
+const UITextField = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.TEXTFIELD }));
+exports.UITextField = UITextField;
+const UIDatePicker = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.DATEPICKER }));
+exports.UIDatePicker = UIDatePicker;
+const UIButton = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.BUTTON }));
+exports.UIButton = UIButton;
+const UIStepper = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.STEPPER }));
+exports.UIStepper = UIStepper;
+
+},{"./UIElements":47}],47:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UIComponentType = void 0;
+var UIComponentType;
+(function (UIComponentType) {
+    UIComponentType[UIComponentType["SELECT"] = 0] = "SELECT";
+    UIComponentType[UIComponentType["MULTISELECT"] = 1] = "MULTISELECT";
+    UIComponentType[UIComponentType["STEPPER"] = 2] = "STEPPER";
+    UIComponentType[UIComponentType["TOGGLE"] = 3] = "TOGGLE";
+    UIComponentType[UIComponentType["TEXTFIELD"] = 4] = "TEXTFIELD";
+    UIComponentType[UIComponentType["BUTTON"] = 5] = "BUTTON";
+    UIComponentType[UIComponentType["DATEPICKER"] = 6] = "DATEPICKER";
+})(UIComponentType || (exports.UIComponentType = UIComponentType = {}));
+
+},{}],48:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Form"), exports);
+__exportStar(require("./UIElements"), exports);
+__exportStar(require("./UIDefinitions"), exports);
+__exportStar(require("./UIElementBuilders"), exports);
+
+},{"./Form":44,"./UIDefinitions":45,"./UIElementBuilders":46,"./UIElements":47}],49:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],50:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DefinedLanguages = void 0;
+var DefinedLanguages;
+(function (DefinedLanguages) {
+    DefinedLanguages["UNIVERSAL"] = "UNIVERSAL";
+    DefinedLanguages["ENGLISH"] = "en_US";
+    DefinedLanguages["KOREAN"] = "ko_KR";
+    DefinedLanguages["JAPANESE"] = "ja_JP";
+    DefinedLanguages["FRENCH"] = "fr_FR";
+    DefinedLanguages["CHINESE"] = "zh-CN";
+    DefinedLanguages["SPANISH"] = "es_ES";
+    DefinedLanguages["PORTUGUESE"] = "pt_BR";
+})(DefinedLanguages || (exports.DefinedLanguages = DefinedLanguages = {}));
+
+},{}],51:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],52:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],53:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],54:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],55:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],56:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],57:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.PublicationStatus = void 0;
 // Enums
-var Status;
-(function (Status) {
-    Status[Status["UNKNOWN"] = 0] = "UNKNOWN";
-    Status[Status["ONGOING"] = 1] = "ONGOING";
-    Status[Status["COMPLETED"] = 2] = "COMPLETED";
-    Status[Status["CANCELLED"] = 3] = "CANCELLED";
-    Status[Status["HIATUS"] = 4] = "HIATUS";
-})(Status = exports.Status || (exports.Status = {}));
+var PublicationStatus;
+(function (PublicationStatus) {
+    PublicationStatus[PublicationStatus["ONGOING"] = 1] = "ONGOING";
+    PublicationStatus[PublicationStatus["COMPLETED"] = 2] = "COMPLETED";
+    PublicationStatus[PublicationStatus["CANCELLED"] = 3] = "CANCELLED";
+    PublicationStatus[PublicationStatus["HIATUS"] = 4] = "HIATUS";
+})(PublicationStatus || (exports.PublicationStatus = PublicationStatus = {}));
 /**
  * The method in which the content can be read
  */
@@ -1848,11 +2157,9 @@ var ReadingMode;
 (function (ReadingMode) {
     ReadingMode[ReadingMode["PAGED_MANGA"] = 0] = "PAGED_MANGA";
     ReadingMode[ReadingMode["PAGED_COMIC"] = 1] = "PAGED_COMIC";
-    ReadingMode[ReadingMode["VERTICAL"] = 2] = "VERTICAL";
-    ReadingMode[ReadingMode["VERTICAL_SEPARATED"] = 3] = "VERTICAL_SEPARATED";
-    ReadingMode[ReadingMode["NOVEL"] = 4] = "NOVEL";
-    ReadingMode[ReadingMode["WEB"] = 5] = "WEB";
-})(ReadingMode = exports.ReadingMode || (exports.ReadingMode = {}));
+    ReadingMode[ReadingMode["PAGED_VERTICAL"] = 2] = "PAGED_VERTICAL";
+    ReadingMode[ReadingMode["WEBTOON"] = 3] = "WEBTOON";
+})(ReadingMode || (exports.ReadingMode = ReadingMode = {}));
 var ReadingFlag;
 (function (ReadingFlag) {
     ReadingFlag[ReadingFlag["READING"] = 0] = "READING";
@@ -1862,41 +2169,23 @@ var ReadingFlag;
     ReadingFlag[ReadingFlag["REREADING"] = 4] = "REREADING";
     ReadingFlag[ReadingFlag["PAUSED"] = 5] = "PAUSED";
     ReadingFlag[ReadingFlag["UNKNOWN"] = 6] = "UNKNOWN";
-})(ReadingFlag = exports.ReadingFlag || (exports.ReadingFlag = {}));
+})(ReadingFlag || (exports.ReadingFlag = ReadingFlag = {}));
 var ContentType;
 (function (ContentType) {
-    ContentType[ContentType["NOVEL"] = 0] = "NOVEL";
-    ContentType[ContentType["MANGA"] = 1] = "MANGA";
-    ContentType[ContentType["MANHUA"] = 2] = "MANHUA";
-    ContentType[ContentType["MANHWA"] = 3] = "MANHWA";
-    ContentType[ContentType["COMIC"] = 4] = "COMIC";
-    ContentType[ContentType["UNKNOWN"] = 5] = "UNKNOWN";
-})(ContentType = exports.ContentType || (exports.ContentType = {}));
+    ContentType[ContentType["MANGA"] = 0] = "MANGA";
+    ContentType[ContentType["MANHUA"] = 1] = "MANHUA";
+    ContentType[ContentType["MANHWA"] = 2] = "MANHWA";
+    ContentType[ContentType["COMIC"] = 3] = "COMIC";
+    ContentType[ContentType["NOVEL"] = 4] = "NOVEL";
+})(ContentType || (exports.ContentType = ContentType = {}));
 
-},{}],13:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FilterType = void 0;
-var FilterType;
-(function (FilterType) {
-    FilterType[FilterType["TOGGLE"] = 0] = "TOGGLE";
-    FilterType[FilterType["SELECT"] = 1] = "SELECT";
-    FilterType[FilterType["MULTISELECT"] = 2] = "MULTISELECT";
-    FilterType[FilterType["EXCLUDABLE_MULTISELECT"] = 3] = "EXCLUDABLE_MULTISELECT";
-    FilterType[FilterType["TEXT"] = 4] = "TEXT";
-    FilterType[FilterType["INFO"] = 5] = "INFO";
-})(FilterType = exports.FilterType || (exports.FilterType = {}));
-
-},{}],14:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],15:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],16:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-// Types
-
-},{}],17:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],59:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],60:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],61:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProviderLinkType = void 0;
@@ -1906,13 +2195,11 @@ var ProviderLinkType;
     ProviderLinkType[ProviderLinkType["TWITTER"] = 1] = "TWITTER";
     ProviderLinkType[ProviderLinkType["DISCORD"] = 2] = "DISCORD";
     ProviderLinkType[ProviderLinkType["PATREON"] = 3] = "PATREON";
-})(ProviderLinkType = exports.ProviderLinkType || (exports.ProviderLinkType = {}));
+})(ProviderLinkType || (exports.ProviderLinkType = ProviderLinkType = {}));
 
-},{}],18:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],19:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],20:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],63:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1933,15 +2220,18 @@ __exportStar(require("./Content"), exports);
 __exportStar(require("./Highlight"), exports);
 __exportStar(require("./Chapter"), exports);
 __exportStar(require("./ChapterData"), exports);
-__exportStar(require("./SearchRequest"), exports);
-__exportStar(require("./PagedResult"), exports);
-__exportStar(require("./TrackerInfo"), exports);
 __exportStar(require("./Property"), exports);
 __exportStar(require("./Collection"), exports);
 __exportStar(require("./Provider"), exports);
-__exportStar(require("./Filter"), exports);
+__exportStar(require("./Enums"), exports);
+__exportStar(require("./ReaderContext"), exports);
+__exportStar(require("./ContextMenu"), exports);
+__exportStar(require("./DeepLinkContext"), exports);
+__exportStar(require("./BooleanState"), exports);
+__exportStar(require("./ContentProgressState"), exports);
+__exportStar(require("./GroupedUpdatesResponse"), exports);
 
-},{"./Chapter":9,"./ChapterData":10,"./Collection":11,"./Content":12,"./Filter":13,"./Highlight":14,"./PagedResult":15,"./Property":16,"./Provider":17,"./SearchRequest":18,"./TrackerInfo":19}],21:[function(require,module,exports){
+},{"./BooleanState":49,"./Chapter":50,"./ChapterData":51,"./Collection":52,"./Content":53,"./ContentProgressState":54,"./ContextMenu":55,"./DeepLinkContext":56,"./Enums":57,"./GroupedUpdatesResponse":58,"./Highlight":59,"./Property":60,"./Provider":61,"./ReaderContext":62}],64:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthMethod = void 0;
@@ -1951,85 +2241,36 @@ var AuthMethod;
     AuthMethod[AuthMethod["EMAIL_PW"] = 1] = "EMAIL_PW";
     AuthMethod[AuthMethod["WEB"] = 2] = "WEB";
     AuthMethod[AuthMethod["OAUTH"] = 3] = "OAUTH";
-})(AuthMethod = exports.AuthMethod || (exports.AuthMethod = {}));
+})(AuthMethod || (exports.AuthMethod = AuthMethod = {}));
 
-},{}],22:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],66:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],67:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ButtonPreference = exports.TextFieldPreference = exports.TogglePreference = exports.StepperPreference = exports.MultiSelectPreference = exports.SelectPreference = exports.PreferenceType = void 0;
-var PreferenceType;
-(function (PreferenceType) {
-    PreferenceType[PreferenceType["SELECT"] = 0] = "SELECT";
-    PreferenceType[PreferenceType["MULTISELECT"] = 1] = "MULTISELECT";
-    PreferenceType[PreferenceType["STEPPER"] = 2] = "STEPPER";
-    PreferenceType[PreferenceType["TOGGLE"] = 3] = "TOGGLE";
-    PreferenceType[PreferenceType["TEXTFIELD"] = 4] = "TEXTFIELD";
-    PreferenceType[PreferenceType["BUTTON"] = 5] = "BUTTON";
-})(PreferenceType = exports.PreferenceType || (exports.PreferenceType = {}));
-class Preference {
-    constructor(key, type, label, value) {
-        this.key = key;
-        this.type = type;
-        this.label = label;
-        this.value = value;
-    }
-}
-class SelectPreference extends Preference {
-    constructor({ key, label, options, value }) {
-        super(key, PreferenceType.SELECT, label, value);
-        this.options = options;
-    }
-}
-exports.SelectPreference = SelectPreference;
-class MultiSelectPreference extends Preference {
-    constructor({ key, label, options, value, maxSelectionCount, minSelectionCount, }) {
-        super(key, PreferenceType.MULTISELECT, label, value);
-        this.options = options;
-        this.maxSelectionCount = maxSelectionCount;
-        this.minSelectionCount = minSelectionCount;
-    }
-}
-exports.MultiSelectPreference = MultiSelectPreference;
-class StepperPreference extends Preference {
-    constructor({ key, value, label, minValue, maxValue, }) {
-        super(key, PreferenceType.STEPPER, label, value);
-        this.maxValue = maxValue;
-        this.minValue = minValue;
-    }
-}
-exports.StepperPreference = StepperPreference;
-class TogglePreference extends Preference {
-    constructor({ key, label, value }) {
-        super(key, PreferenceType.TOGGLE, label, value);
-    }
-}
-exports.TogglePreference = TogglePreference;
-class TextFieldPreference extends Preference {
-    constructor({ key, label, value }) {
-        super(key, PreferenceType.TEXTFIELD, label, value);
-    }
-}
-exports.TextFieldPreference = TextFieldPreference;
-class ButtonPreference extends Preference {
-    constructor({ key, label, action, systemImage, isDestructive, }) {
-        super(key, PreferenceType.BUTTON, label, {
-            get: function () {
-                throw new Error("Method Is Never Called");
-            },
-            set: function (value) {
-                throw new Error("Method Is Never Called");
-            },
-        });
-        this.action = action;
-        this.systemImage = systemImage;
-        this.isDestructive = isDestructive;
-    }
-}
-exports.ButtonPreference = ButtonPreference;
+exports.CatalogRating = void 0;
+var CatalogRating;
+(function (CatalogRating) {
+    /**
+     * Catalog does not contain ANY SUGGESTIVE OR NSFW content
+     */
+    CatalogRating[CatalogRating["SAFE"] = 0] = "SAFE";
+    /**
+     * Catalog may contain SUGGESTIVE OR NSFW content,
+     * runners must hide NSFW content by default,
+     * users will be required to verify they are of age to view NSFW content
+     */
+    CatalogRating[CatalogRating["MIXED"] = 1] = "MIXED";
+    /**
+     * Catalog contains MAINLY SUGGESTIVE OR NSFW content,
+     * users will be required to verify they are of age to view NSFW content
+     */
+    CatalogRating[CatalogRating["NSFW"] = 2] = "NSFW";
+})(CatalogRating || (exports.CatalogRating = CatalogRating = {}));
 
-},{}],23:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],24:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2047,10 +2288,47 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./Authentication"), exports);
-__exportStar(require("./Preferences"), exports);
 __exportStar(require("./RunnerInfo"), exports);
+__exportStar(require("./PagedResult"), exports);
+__exportStar(require("./ContextProvider"), exports);
 
-},{"./Authentication":21,"./Preferences":22,"./RunnerInfo":23}],25:[function(require,module,exports){
+},{"./Authentication":64,"./ContextProvider":65,"./PagedResult":66,"./RunnerInfo":67}],69:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],70:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FilterType = void 0;
+var FilterType;
+(function (FilterType) {
+    /**
+     * This Represents the filter as a toggle switch, the value returned in the directory request will be a `boolean`
+     */
+    FilterType[FilterType["TOGGLE"] = 0] = "TOGGLE";
+    /**
+     * This represents the filter as a picker, the value returned will be the `key` of the selected option as a `string`
+     */
+    FilterType[FilterType["SELECT"] = 1] = "SELECT";
+    /**
+     * This Represents the filter as a multi-picker, the value returned will the the keys of the selected options as an array of strings
+     */
+    FilterType[FilterType["MULTISELECT"] = 2] = "MULTISELECT";
+    /**
+     * This Represents the filter as a multi-picker,the value returned will be of type {@link ExcludableMultiSelectProp}
+     */
+    FilterType[FilterType["EXCLUDABLE_MULTISELECT"] = 3] = "EXCLUDABLE_MULTISELECT";
+    /**
+     * This will represent the filter as a textfield, the value returned will be a string
+     */
+    FilterType[FilterType["TEXT"] = 4] = "TEXT";
+    /**
+     * This is a basic filter that will only display the title or subtitle, it will not return any value in the populated `DirectoryRequest`
+     */
+    FilterType[FilterType["INFO"] = 5] = "INFO";
+})(FilterType || (exports.FilterType = FilterType = {}));
+
+},{}],71:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],72:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2067,13 +2345,241 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./DirectoryConfig"), exports);
+__exportStar(require("./DirectoryRequest"), exports);
+__exportStar(require("./DirectoryFilter"), exports);
+
+},{"./DirectoryConfig":69,"./DirectoryFilter":70,"./DirectoryRequest":71}],73:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Generate = void 0;
 __exportStar(require("./core"), exports);
 __exportStar(require("./content"), exports);
 __exportStar(require("./networking"), exports);
+__exportStar(require("./UI"), exports);
+__exportStar(require("./tracker"), exports);
+__exportStar(require("./directory"), exports);
+__exportStar(require("./page"), exports);
+const Generate = (v) => v;
+exports.Generate = Generate;
 
-},{"./content":20,"./core":24,"./networking":26}],26:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"dup":9}],27:[function(require,module,exports){
+},{"./UI":48,"./content":63,"./core":68,"./directory":72,"./networking":80,"./page":81,"./tracker":82}],74:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NetworkClientBuilder = void 0;
+/**
+ * NetworkClientBuilder is a builder class used for creating and configuring instances of NetworkClient.
+ * The builder allows you to configure various aspects of the NetworkClient, such as rate limits,
+ * request/response transformers (interceptors), headers, cookies, timeout, status validator, and more.
+ */
+class NetworkClientBuilder {
+    constructor() {
+        // Array of functions that transform requests
+        this.requestTransformers = [];
+        // Array of functions that transform responses
+        this.responseTransformers = [];
+        // Object representing HTTP headers, where each key-value pair represents a header
+        this.headers = {};
+        // Array of cookies
+        this.cookies = [];
+    }
+    /**
+     * Sets the rate limit for the NetworkClient.
+     *
+     * @param requests - The maximum number of requests to make per interval.
+     * @param interval - The length of the rate limiting interval in seconds.
+     * @returns The builder, to allow for method chaining.
+     */
+    setRateLimit(requests, interval) {
+        this.requestsPerSecond = requests / interval;
+        return this;
+    }
+    /**
+     * Adds a request interceptor to the NetworkClient.
+     *
+     * @param transformer - The interceptor to add. This should be a function that takes a request and modifies it in some way.
+     * @returns The builder, to allow for method chaining.
+     */
+    addRequestInterceptor(transformer) {
+        this.requestTransformers.push(transformer);
+        return this;
+    }
+    /**
+     * Adds a response interceptor to the NetworkClient.
+     *
+     * @param transformer - The interceptor to add. This should be a function that takes a response and modifies it in some way.
+     * @returns The builder, to allow for method chaining.
+     */
+    addResponseInterceptor(transformer) {
+        this.responseTransformers.push(transformer);
+        return this;
+    }
+    /**
+     * Sets the authorization token for the NetworkClient.
+     *
+     * @param token - The token to be included in the Authorization header of every request.
+     * @returns The builder, to allow for method chaining.
+     */
+    setAuthorizationToken(token) {
+        return this.addHeader("Authorization", token);
+    }
+    /**
+     * Sets the status validator for the NetworkClient.
+     *
+     * @param validator - A function that takes a status code and returns true if it is considered successful.
+     * @returns The builder, to allow for method chaining.
+     */
+    setStatusValidator(validator) {
+        this.statusValidator = validator;
+        return this;
+    }
+    /**
+     * Sets the timeout for requests made by the NetworkClient.
+     *
+     * @param timeout - The maximum time to wait for a request to complete, in milliseconds.
+     * @returns The builder, to allow for method chaining.
+     */
+    setTimeout(timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+    /**
+     * Sets the maximum number of retries for this request by the NetworkClient.
+     *
+     * @param retries - The maximum number of retries for this request
+     * @returns The builder, to allow for method chaining.
+     */
+    setMaxRetries(retries) {
+        this.maxRetries = retries;
+        return this;
+    }
+    /**
+     * Sets a header for the NetworkClient.
+     *
+     * @param key - The name of the header
+     * @param value - The value of the header
+     * @returns The builder, to allow for method chaining.
+     */
+    addHeader(key, value) {
+        this.headers[key] = value;
+        return this;
+    }
+    /**
+     * Sets a cookie for the NetworkClient.
+     *
+     * @param cookie - The cookie to be included in every request.
+     * @returns The builder, to allow for method chaining.
+     */
+    addCookie(cookie) {
+        this.cookies.push(cookie);
+        return this;
+    }
+    /**
+     * Builds a NetworkClient using the parameters set on the builder.
+     *
+     * @returns A NetworkClient with the configured parameters.
+     */
+    build() {
+        return new NetworkClient(this);
+    }
+}
+exports.NetworkClientBuilder = NetworkClientBuilder;
+
+},{}],75:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],76:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],77:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.name = void 0;
+const name = (base, known) => __awaiter(void 0, void 0, void 0, function* () {
+    return Object.assign(Object.assign({}, base), known);
+});
+exports.name = name;
+
+},{}],78:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],79:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}],80:[function(require,module,exports){
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./Builder"), exports);
+__exportStar(require("./Client"), exports);
+__exportStar(require("./Request"), exports);
+__exportStar(require("./Response"), exports);
+__exportStar(require("./Transformer"), exports);
+__exportStar(require("./Error"), exports);
+
+},{"./Builder":74,"./Client":75,"./Error":76,"./Request":77,"./Response":78,"./Transformer":79}],81:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SectionStyle = void 0;
+var SectionStyle;
+(function (SectionStyle) {
+    SectionStyle[SectionStyle["DEFAULT"] = 0] = "DEFAULT";
+    SectionStyle[SectionStyle["INFO"] = 1] = "INFO";
+    SectionStyle[SectionStyle["GALLERY"] = 2] = "GALLERY";
+    SectionStyle[SectionStyle["NAVIGATION_LIST"] = 3] = "NAVIGATION_LIST";
+    SectionStyle[SectionStyle["ITEM_LIST"] = 4] = "ITEM_LIST";
+    SectionStyle[SectionStyle["PADDED_LIST"] = 5] = "PADDED_LIST";
+    SectionStyle[SectionStyle["TAG"] = 6] = "TAG";
+    SectionStyle[SectionStyle["STANDARD_GRID"] = 7] = "STANDARD_GRID";
+})(SectionStyle || (exports.SectionStyle = SectionStyle = {}));
+
+},{}],82:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TrackStatus = void 0;
+var TrackStatus;
+(function (TrackStatus) {
+    TrackStatus["READING"] = "READING";
+    TrackStatus["PLANNING"] = "PLANNING";
+    TrackStatus["COMPLETED"] = "COMPLETED";
+    TrackStatus["PAUSED"] = "PAUSED";
+    TrackStatus["DROPPED"] = "DROPPED";
+    TrackStatus["REREADING"] = "REREADING";
+})(TrackStatus || (exports.TrackStatus = TrackStatus = {}));
+
+},{}],83:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -2225,7 +2731,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],28:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -4006,7 +4512,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":27,"buffer":28,"ieee754":29}],29:[function(require,module,exports){
+},{"base64-js":83,"buffer":84,"ieee754":85}],85:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -4093,5 +4599,5 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}]},{},[2])(2)
+},{}]},{},[9])(9)
 });
