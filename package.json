@@ -1,7 +1,7 @@
 {
   "name": "suwatte-runners",
   "version": "2.0.0",
-  "description": "Mangadex Content Source for Suwatte. Used for testing",
+  "description": "content sources made by mantton :]",
   "main": "index.js",
   "scripts": {
     "test": "jest",

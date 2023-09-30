@@ -105,8 +105,8 @@ export class Parser {
 
     if (filters) {
       return {
-        includedTags: filters.genres?.included.map(toLower),
-        excludedTags: filters.genres?.excluded.map(toLower),
+        includedTags: filters.genres?.included?.map(toLower) ?? [],
+        excludedTags: filters.genres?.excluded?.map(toLower) ?? [],
         p_status: filters.p_status,
         s_status: filters.s_status,
         includeTypes: filters.type?.included.map(toLower),

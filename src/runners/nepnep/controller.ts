@@ -22,7 +22,7 @@ export class Controller {
       return this.directoryHTML;
     }
     const url = await this.store.host();
-    const response = await this.client.get(`${url}/search`);
+    const response = await this.client.get(`${url}/search/`); // trailing slash required to avoid insecure redirect
     const html = response.data;
     this.directoryHTML = html;
     return this.directoryHTML;
