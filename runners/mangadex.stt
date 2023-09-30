@@ -335,7 +335,7 @@ const utils_1 = require("./utils");
 exports.info = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.6,
+    version: 1.7,
     website: "https://mangadex.org",
     supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
         ? v.languageCode
@@ -1469,80 +1469,79 @@ exports.PREF_KEYS = {
     mimasTargets: "_mimas_targets",
 };
 class MDStore {
-    store = ObjectStore;
     async getSeasonal() {
-        const value = await this.store.boolean(exports.PREF_KEYS.showSeasonal);
+        const value = await ObjectStore.boolean(exports.PREF_KEYS.showSeasonal);
         if (!value)
             return true;
         return !!value;
     }
     async setSeasonal(v) {
-        return this.store.set(exports.PREF_KEYS.showSeasonal, v);
+        return ObjectStore.set(exports.PREF_KEYS.showSeasonal, v);
     }
     async getContentRatings() {
         const DEFAULT = ["safe", "suggestive", "erotica"];
-        const ratings = await this.store.stringArray(exports.PREF_KEYS.exploreCR);
+        const ratings = await ObjectStore.stringArray(exports.PREF_KEYS.exploreCR);
         if (!ratings)
             return DEFAULT;
         return ratings;
     }
     async setContentRatings(v) {
-        return this.store.set(exports.PREF_KEYS.exploreCR, v);
+        return ObjectStore.set(exports.PREF_KEYS.exploreCR, v);
     }
     async getDSMode() {
-        const value = await this.store.boolean(exports.PREF_KEYS.dataSaver);
+        const value = await ObjectStore.boolean(exports.PREF_KEYS.dataSaver);
         return !!value;
     }
     async setDSMode(v) {
-        return this.store.set(exports.PREF_KEYS.dataSaver, v);
+        return ObjectStore.set(exports.PREF_KEYS.dataSaver, v);
     }
     async getCQ() {
-        const value = await this.store.string(exports.PREF_KEYS.coverQuality);
+        const value = await ObjectStore.string(exports.PREF_KEYS.coverQuality);
         if (!value)
             return "medium";
         return value;
     }
     async getCoverQuality() {
-        const value = await this.store.string(exports.PREF_KEYS.coverQuality);
+        const value = await ObjectStore.string(exports.PREF_KEYS.coverQuality);
         if (!value)
             return (0, utils_1.getURLSuffixFor)("medium");
         return (0, utils_1.getURLSuffixFor)(value);
     }
     async setCoverQuality(v) {
-        return this.store.set(exports.PREF_KEYS.coverQuality, v);
+        return ObjectStore.set(exports.PREF_KEYS.coverQuality, v);
     }
     async getLanguages() {
         const DEFAULT = ["en"];
-        const value = await this.store.stringArray(exports.PREF_KEYS.lang);
+        const value = await ObjectStore.stringArray(exports.PREF_KEYS.lang);
         if (!value)
             return DEFAULT;
         return value;
     }
     async setLanguages(value) {
-        return this.store.set(exports.PREF_KEYS.lang, value);
+        return ObjectStore.set(exports.PREF_KEYS.lang, value);
     }
     // Recommendations
     async getMimasEnabled() {
-        const value = await this.store.boolean(exports.PREF_KEYS.mimasEnabled);
+        const value = await ObjectStore.boolean(exports.PREF_KEYS.mimasEnabled);
         return !!value;
     }
     async setMimasEnabled(v) {
-        return this.store.set(exports.PREF_KEYS.mimasEnabled, v);
+        return ObjectStore.set(exports.PREF_KEYS.mimasEnabled, v);
     }
     async getMimasTargets() {
-        const value = await this.store.stringArray(exports.PREF_KEYS.mimasTargets);
+        const value = await ObjectStore.stringArray(exports.PREF_KEYS.mimasTargets);
         if (!value)
             return [];
         return value;
     }
     async getMimasLimit() {
-        const value = await this.store.number(exports.PREF_KEYS.mimasLimit);
+        const value = await ObjectStore.number(exports.PREF_KEYS.mimasLimit);
         if (!value)
             return 5;
         return value;
     }
     async setMimasLimit(v) {
-        return this.store.set(exports.PREF_KEYS.mimasLimit, v);
+        return ObjectStore.set(exports.PREF_KEYS.mimasLimit, v);
     }
     async saveToMimasTargets(id) {
         const limit = await this.getMimasLimit();
@@ -1551,10 +1550,10 @@ class MDStore {
         const newTargets = Array.from(new Set(targets))
             .filter((v) => !!v.trim())
             .slice(-limit);
-        await this.store.set(exports.PREF_KEYS.mimasTargets, newTargets);
+        await ObjectStore.set(exports.PREF_KEYS.mimasTargets, newTargets);
     }
     async clearMimasTargets() {
-        await this.store.remove(exports.PREF_KEYS.mimasTargets);
+        await ObjectStore.remove(exports.PREF_KEYS.mimasTargets);
     }
 }
 exports.MDStore = MDStore;

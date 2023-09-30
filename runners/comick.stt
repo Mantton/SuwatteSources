@@ -253,14 +253,13 @@ class Target {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.3,
+        version: 0.4,
         website: "https://comick.app/home",
         supportedLanguages: [],
         thumbnail: "comick.png",
         minSupportedAppVersion: "5.0",
     };
     client = new NetworkClient();
-    store = ObjectStore;
     API_URL = "https://api.comick.fun";
     async getContent(contentId) {
         const data = await this.getManga(contentId);
@@ -273,7 +272,7 @@ class Target {
         if (!limit || !hid)
             throw new Error("Could Not Get Chapter Count");
         const url = `${this.API_URL}/comic/${hid}/chapters`;
-        const lang = (await this.store.get("n_content_lang"));
+        const lang = (await ObjectStore.string("chapter_lang")) ?? "all";
         const { data: response } = await this.client.get(url, {
             params: {
                 ...(lang && lang !== "all" && { lang }),
@@ -328,15 +327,15 @@ class Target {
             sections: [
                 {
                     header: "Languages",
-                    footer: "Languages in which chapters will be available",
+                    footer: "Language in which chapters will be available",
                     children: [
-                        (0, daisuke_1.UIMultiPicker)({
-                            id: "lang",
+                        (0, daisuke_1.UIPicker)({
+                            id: "chapter_lang",
                             title: "Content Languages",
                             options: constants_1.LANGUAGE_OPTIONS,
-                            value: (await this.store.stringArray("langs")) ?? ["all"],
+                            value: (await ObjectStore.string("chapter_lang")) ?? "all",
                             async didChange(value) {
-                                return ObjectStore.set("lang", value);
+                                return ObjectStore.set("chapter_lang", value);
                             },
                         }),
                     ],

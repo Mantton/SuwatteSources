@@ -346,7 +346,7 @@ class Target {
     info = {
         id: "m.nepnep",
         website: "https://mangasee123.com",
-        version: 1.6,
+        version: 1.7,
         name: "NepNep",
         supportedLanguages: ["EN_US"],
         thumbnail: "nepnep.png",
@@ -720,16 +720,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Store = void 0;
 const constants_1 = require("./constants");
 class Store {
-    store = ObjectStore;
     async host() {
-        const value = await this.store.string("n_host");
+        const value = await ObjectStore.string("n_host");
         if (typeof value !== "string")
             return constants_1.NEPNEP_DOMAINS[0].url;
         const host = constants_1.NEPNEP_DOMAINS.find((v) => v.id === value) ?? constants_1.NEPNEP_DOMAINS[0];
         return host.url;
     }
     async hostName() {
-        const value = await this.store.string("n_host");
+        const value = await ObjectStore.string("n_host");
         if (typeof value !== "string")
             return constants_1.NEPNEP_DOMAINS[0].url;
         const host = constants_1.NEPNEP_DOMAINS.find((v) => v.id === value) ?? constants_1.NEPNEP_DOMAINS[0];
