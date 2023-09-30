@@ -149,7 +149,7 @@ class Controller {
             return this.directoryHTML;
         }
         const url = await this.store.host();
-        const response = await this.client.get(`${url}/search`);
+        const response = await this.client.get(`${url}/search/`); // trailing slash required to avoid insecure redirect
         const html = response.data;
         this.directoryHTML = html;
         return this.directoryHTML;
@@ -346,7 +346,7 @@ class Target {
     info = {
         id: "m.nepnep",
         website: "https://mangasee123.com",
-        version: 1.5,
+        version: 1.6,
         name: "NepNep",
         supportedLanguages: ["EN_US"],
         thumbnail: "nepnep.png",
@@ -511,8 +511,8 @@ class Parser {
         }
         if (filters) {
             return {
-                includedTags: filters.genres?.included.map(lodash_1.toLower),
-                excludedTags: filters.genres?.excluded.map(lodash_1.toLower),
+                includedTags: filters.genres?.included?.map(lodash_1.toLower) ?? [],
+                excludedTags: filters.genres?.excluded?.map(lodash_1.toLower) ?? [],
                 p_status: filters.p_status,
                 s_status: filters.s_status,
                 includeTypes: filters.type?.included.map(lodash_1.toLower),
