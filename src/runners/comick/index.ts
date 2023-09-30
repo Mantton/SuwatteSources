@@ -19,6 +19,7 @@ import {
   RunnerInfo,
   RunnerPreferenceProvider,
   UIMultiPicker,
+  UIPicker,
 } from "@suwatte/daisuke";
 import {
   EXPLORE_COLLECTIONS as HOMEPAGE_COLLECTIONS,
@@ -45,7 +46,7 @@ export class Target
   info: RunnerInfo = {
     id: "app.comick",
     name: "ComicK",
-    version: 0.3,
+    version: 0.4,
     website: "https://comick.app/home",
     supportedLanguages: [],
     thumbnail: "comick.png",
@@ -53,7 +54,6 @@ export class Target
   };
 
   private client = new NetworkClient();
-  private store = ObjectStore;
   private API_URL = "https://api.comick.fun";
 
   async getContent(contentId: string): Promise<Content> {
@@ -68,7 +68,7 @@ export class Target
     if (!limit || !hid) throw new Error("Could Not Get Chapter Count");
 
     const url = `${this.API_URL}/comic/${hid}/chapters`;
-    const lang = (await this.store.get("n_content_lang")) as string | null;
+    const lang = (await ObjectStore.string("chapter_lang")) ?? "all";
     const { data: response } = await this.client.get(url, {
       params: {
         ...(lang && lang !== "all" && { lang }),
@@ -132,15 +132,15 @@ export class Target
       sections: [
         {
           header: "Languages",
-          footer: "Languages in which chapters will be available",
+          footer: "Language in which chapters will be available",
           children: [
-            UIMultiPicker({
-              id: "lang",
+            UIPicker({
+              id: "chapter_lang",
               title: "Content Languages",
               options: LANGUAGE_OPTIONS,
-              value: (await this.store.stringArray("langs")) ?? ["all"],
+              value: (await ObjectStore.string("chapter_lang")) ?? "all",
               async didChange(value) {
-                return ObjectStore.set("lang", value);
+                return ObjectStore.set("chapter_lang", value);
               },
             }),
           ],

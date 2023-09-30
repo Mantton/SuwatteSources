@@ -11,7 +11,7 @@ import { languages } from "./utils";
 export const info: RunnerInfo = {
   name: "MangaDex",
   id: "org.mangadex",
-  version: 1.6,
+  version: 1.7,
   website: "https://mangadex.org",
   supportedLanguages: languages.map((v) =>
     v.languageCode.includes("-")
