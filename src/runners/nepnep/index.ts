@@ -28,7 +28,7 @@ export class Target
   info: RunnerInfo = {
     id: "m.nepnep",
     website: "https://mangasee123.com",
-    version: 1.5,
+    version: 1.6,
     name: "NepNep",
     supportedLanguages: ["EN_US"],
     thumbnail: "nepnep.png",
