@@ -18,7 +18,6 @@ import {
   ResolvedPageSection,
   RunnerInfo,
   RunnerPreferenceProvider,
-  UIMultiPicker,
   UIPicker,
 } from "@suwatte/daisuke";
 import {
@@ -46,7 +45,7 @@ export class Target
   info: RunnerInfo = {
     id: "app.comick",
     name: "ComicK",
-    version: 0.4,
+    version: 0.5,
     website: "https://comick.app/home",
     supportedLanguages: [],
     thumbnail: "comick.png",
@@ -68,7 +67,7 @@ export class Target
     if (!limit || !hid) throw new Error("Could Not Get Chapter Count");
 
     const url = `${this.API_URL}/comic/${hid}/chapters`;
-    const lang = (await ObjectStore.string("chapter_lang")) ?? "all";
+    const lang = (await ObjectStore.string("chapter_lang")) ?? "en";
     const { data: response } = await this.client.get(url, {
       params: {
         ...(lang && lang !== "all" && { lang }),
@@ -138,7 +137,7 @@ export class Target
               id: "chapter_lang",
               title: "Content Languages",
               options: LANGUAGE_OPTIONS,
-              value: (await ObjectStore.string("chapter_lang")) ?? "all",
+              value: (await ObjectStore.string("chapter_lang")) ?? "en",
               async didChange(value) {
                 return ObjectStore.set("chapter_lang", value);
               },
