@@ -117,13 +117,22 @@ export abstract class TachiTemplate {
 
   abstract latestUpdatesRequest(page: number): NetworkRequest;
   mangaDetailsRequest(fragment: string): NetworkRequest {
-    return { url: this.baseUrl + fragment };
+    return {
+      url: this.baseUrl + fragment,
+      headers: { ...this.headersBuilder() },
+    };
   }
   chapterListRequest(fragment: string): NetworkRequest {
-    return { url: this.baseUrl + fragment };
+    return {
+      url: this.baseUrl + fragment,
+      headers: { ...this.headersBuilder() },
+    };
   }
   pageListRequest(fragment: string): NetworkRequest {
-    return { url: this.baseUrl + fragment };
+    return {
+      url: this.baseUrl + fragment,
+      headers: { ...this.headersBuilder() },
+    };
   }
 
   abstract popularMangaFromElement(element: CheerioElement): Highlight;

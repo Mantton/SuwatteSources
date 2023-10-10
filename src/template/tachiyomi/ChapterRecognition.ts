@@ -33,7 +33,9 @@ export class ChapterRecognition {
       return this.getChapterNumberFromMatch(numberMatch);
     }
 
-    return chapterNumber !== undefined ? chapterNumber : -1.0;
+    return chapterNumber !== undefined
+      ? chapterNumber
+      : Math.round(Math.random() * 100) / 100;
   }
 
   private getChapterNumberFromMatch(match: RegExpMatchArray): number {
