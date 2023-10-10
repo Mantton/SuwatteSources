@@ -3,16 +3,16 @@ import {
   NetworkRequest,
   Highlight,
   PublicationStatus,
+  DirectoryRequest,
 } from "@suwatte/daisuke";
 import { CheerioAPI } from "cheerio";
 import {
   CheerioElement,
-  TachiTemplate,
-  getUrlWithoutDomain,
+  TachiParsedHttpSource,
 } from "../../template/tachiyomi";
 import moment from "moment";
 
-export class ComicExtra extends TachiTemplate {
+export class ComicExtra extends TachiParsedHttpSource {
   name = "ComicExtra";
   baseUrl = "https://comicextra.net";
   lang = "en-US";
@@ -36,17 +36,13 @@ export class ComicExtra extends TachiTemplate {
     method: "GET",
   });
 
-  searchMangaRequest: (
-    page: number,
-    query: string,
-    filters: any
-  ) => NetworkRequest = (page, query, _) => {
+  searchMangaRequest({ query, page }: DirectoryRequest): NetworkRequest {
     if (query) {
       return { url: `${this.baseUrl}/comic-search?key=${query}` };
     } else {
       return { url: this.baseUrl + `/f/${page}/` };
     }
-  };
+  }
 
   pageListRequest(fragment: string): NetworkRequest {
     return {
@@ -56,7 +52,7 @@ export class ComicExtra extends TachiTemplate {
   // Elements
 
   popularMangaFromElement(element: CheerioElement) {
-    const url = getUrlWithoutDomain(
+    const url = this.getUrlWithoutDomain(
       element.find("div.mb-right > h3 > a").attr("href") ?? ""
     );
     if (!url) throw new Error("Failed to parse");
@@ -69,7 +65,7 @@ export class ComicExtra extends TachiTemplate {
     };
   }
   latestUpdatesFromElement(element: CheerioElement): Highlight {
-    const url = getUrlWithoutDomain(
+    const url = this.getUrlWithoutDomain(
       element.find("div.hlb-t > a").attr("href") ?? ""
     );
     if (!url) throw new Error("Failed to parse");
@@ -90,7 +86,7 @@ export class ComicExtra extends TachiTemplate {
     const urlEl = element.find("td:nth-of-type(1) > a").first();
     const dateEl = element.find("td:nth-of-type(2)");
 
-    const chapterUrl = getUrlWithoutDomain(
+    const chapterUrl = this.getUrlWithoutDomain(
       urlEl.attr("href")?.replace(" ", "%20") ?? ""
     );
     const title = urlEl.text();

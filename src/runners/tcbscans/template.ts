@@ -9,11 +9,10 @@ import {
 import { CheerioAPI } from "cheerio";
 import {
   CheerioElement,
-  TachiTemplate,
-  getUrlWithoutDomain,
+  TachiParsedHttpSource,
 } from "../../template/tachiyomi";
 
-export class TCBScans extends TachiTemplate {
+export class TCBScans extends TachiParsedHttpSource {
   name = "TCB Scans";
   baseUrl = "https://onepiecechapters.com";
   lang = "en";
@@ -23,7 +22,7 @@ export class TCBScans extends TachiTemplate {
   popularMangaSelector = () => ".bg-card.border.border-border.rounded.p-3.mb-3";
   popularMangaRequest = (_: number) => ({ url: this.baseUrl + "/projects" });
   popularMangaFromElement(element: CheerioElement): Highlight {
-    const id = getUrlWithoutDomain(
+    const id = this.getUrlWithoutDomain(
       element.find("a.mb-3.text-white.text-lg.font-bold").attr("href") ?? ""
     );
     const cover =
@@ -54,16 +53,9 @@ export class TCBScans extends TachiTemplate {
   // * Search
   searchMangaFromElement = this.popularMangaFromElement;
   searchMangaSelector = this.popularMangaSelector;
-  searchMangaRequest(
-    _: number,
-    query: string,
-    __: Record<string, any>
-  ): NetworkRequest {
+  searchMangaRequest(_: DirectoryRequest): NetworkRequest {
     return {
       url: this.baseUrl + "/projects",
-      headers: {
-        query: query,
-      },
     };
   }
   parseSearchManga(html: string, ctx: DirectoryRequest): PagedResult {
@@ -110,7 +102,7 @@ export class TCBScans extends TachiTemplate {
     element: CheerioElement
   ): Omit<Chapter, "number" | "index" | "volume" | "language"> {
     const titleRegex = /[0-9]+$/;
-    const chapterId = getUrlWithoutDomain(element.attr("href") ?? "");
+    const chapterId = this.getUrlWithoutDomain(element.attr("href") ?? "");
     let title = element.find(".text-lg.font-bold:not(.flex)").text();
     const description = element.find(".text-gray-500").text().trim();
     const result = title.match(titleRegex)?.[1];

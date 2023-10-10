@@ -1,24 +1,18 @@
 import {
-  Chapter,
-  ChapterData,
-  Content,
-  DirectoryRequest,
   Highlight,
-  NetworkRequest,
+  Chapter,
+  Content,
+  ChapterData,
+  DirectoryRequest,
   PagedResult,
 } from "@suwatte/daisuke";
-import { load, type AnyNode, type Cheerio, type CheerioAPI } from "cheerio";
-import { ChapterRecognition } from "./ChapterRecognition";
+import { Cheerio, AnyNode, CheerioAPI, load } from "cheerio";
+import { TachiHttpSource } from "./HttpSource";
+import { ChapterRecognition } from "../ChapterRecognition";
 export type CheerioElement = Cheerio<AnyNode>;
 export type CheerioDocument = CheerioAPI;
 
-export abstract class TachiTemplate {
-  abstract readonly name: string;
-  abstract readonly baseUrl: string;
-  abstract readonly lang: string;
-  abstract readonly supportsLatest: boolean;
-
-  // Selectors
+export abstract class TachiParsedHttpSource extends TachiHttpSource {
   abstract popularMangaSelector(): string;
   abstract latestUpdatesSelector(): string;
   abstract searchMangaSelector(): string;
@@ -28,6 +22,15 @@ export abstract class TachiTemplate {
   popularMangaNextPageSelector?(): string;
   searchMangaNextPageSelector?(): string;
   latestUpdatesNextPageSelector?(): string;
+
+  abstract popularMangaFromElement(element: CheerioElement): Highlight;
+  abstract searchMangaFromElement(element: CheerioElement): Highlight;
+  abstract latestUpdatesFromElement(element: CheerioElement): Highlight;
+  abstract chapterFromElement(
+    element: CheerioElement
+  ): Omit<Chapter, "index" | "number" | "volume" | "language">;
+  abstract mangaDetailsParse(document: CheerioDocument): Content;
+  abstract pageListParse(document: CheerioDocument): string[];
 
   // Core Parsers
   parsePopularManga(html: string): PagedResult {
@@ -106,43 +109,4 @@ export abstract class TachiTemplate {
     const pages = this.pageListParse(load(html)).map((url) => ({ url }));
     return { pages };
   }
-
-  // Requests
-  abstract popularMangaRequest(page: number): NetworkRequest;
-  abstract searchMangaRequest(
-    page: number,
-    query: string,
-    filters: Record<string, any>
-  ): NetworkRequest;
-
-  abstract latestUpdatesRequest(page: number): NetworkRequest;
-  mangaDetailsRequest(fragment: string): NetworkRequest {
-    return {
-      url: this.baseUrl + fragment,
-      headers: { ...this.headersBuilder() },
-    };
-  }
-  chapterListRequest(fragment: string): NetworkRequest {
-    return {
-      url: this.baseUrl + fragment,
-      headers: { ...this.headersBuilder() },
-    };
-  }
-  pageListRequest(fragment: string): NetworkRequest {
-    return {
-      url: this.baseUrl + fragment,
-      headers: { ...this.headersBuilder() },
-    };
-  }
-
-  abstract popularMangaFromElement(element: CheerioElement): Highlight;
-  abstract searchMangaFromElement(element: CheerioElement): Highlight;
-  abstract latestUpdatesFromElement(element: CheerioElement): Highlight;
-  abstract chapterFromElement(
-    element: CheerioElement
-  ): Omit<Chapter, "index" | "number" | "volume" | "language">;
-  abstract mangaDetailsParse(document: CheerioDocument): Content;
-  abstract pageListParse(document: CheerioDocument): string[];
-
-  headersBuilder: () => Record<string, string> = () => ({});
 }

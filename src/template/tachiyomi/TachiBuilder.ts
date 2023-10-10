@@ -5,54 +5,33 @@ import {
   ContentSource,
   DirectoryConfig,
   DirectoryRequest,
-  NetworkClientBuilder,
   PagedResult,
   RunnerInfo,
 } from "@suwatte/daisuke";
-import { TachiTemplate } from "./TachiTemplate";
+import { TachiCatalogSource } from "./source";
 
 export class TachiBuilder implements ContentSource {
   info: RunnerInfo;
-  source: TachiTemplate;
-  client: NetworkClient;
+  source: TachiCatalogSource;
 
-  constructor(info: RunnerInfo, template: new () => TachiTemplate) {
+  constructor(info: RunnerInfo, template: new () => TachiCatalogSource) {
     this.info = info;
     this.source = new template();
-
-    const headers = this.source.headersBuilder();
-
-    if (Object.keys(headers).length) {
-      const builder = new NetworkClientBuilder();
-
-      for (const [k, v] of Object.entries(headers)) {
-        builder.addHeader(k, v);
-      }
-      this.client = builder.build();
-    } else {
-      this.client = new NetworkClient();
-    }
   }
 
   async getContent(contentId: string): Promise<Content> {
-    const request = this.source.mangaDetailsRequest(contentId);
-    const { data: response } = await this.client.request(request);
-    const content = this.source.parseMangaDetails(response);
-    return content;
+    return this.source.getMangaDetails(contentId);
   }
 
   async getChapters(contentId: string): Promise<Chapter[]> {
-    const request = this.source.chapterListRequest(contentId);
-    const { data: response } = await this.client.request(request);
-    const chapters = this.source.parseChapterList(response);
-    return chapters;
+    return this.source.getMangaChapters(contentId);
   }
 
-  async getChapterData(_: string, chapterId: string): Promise<ChapterData> {
-    const request = this.source.pageListRequest(chapterId);
-    const { data: response } = await this.client.request(request);
-    const data = this.source.parsePageList(response);
-    return data;
+  async getChapterData(
+    contentId: string,
+    chapterId: string
+  ): Promise<ChapterData> {
+    return this.source.getPageList(contentId, chapterId);
   }
   async getDirectory(search: DirectoryRequest): Promise<PagedResult> {
     if (
@@ -61,24 +40,11 @@ export class TachiBuilder implements ContentSource {
       (search.sort?.id === "popular" || search.sort?.id === "latest")
     ) {
       const isPopular = search.sort?.id === "popular";
-      const request = isPopular
-        ? this.source.popularMangaRequest(search.page)
-        : this.source.latestUpdatesRequest(search.page);
-      const { data: response } = await this.client.request(request);
-      const result = isPopular
-        ? this.source.parsePopularManga(response)
-        : this.source.parseLatestManga(response);
-      return result;
+      return isPopular
+        ? this.source.getPopularManga(search.page)
+        : this.source.getLatestManga(search.page);
     } else {
-      const request = this.source.searchMangaRequest(
-        search.page,
-        search.query ?? "",
-        search.filters ?? {}
-      );
-
-      const { data: response } = await this.client.request(request);
-      const result = this.source.parseSearchManga(response, search);
-      return result;
+      return this.source.getSearchManga(search);
     }
   }
   async getDirectoryConfig(_: string | undefined): Promise<DirectoryConfig> {
@@ -101,6 +67,7 @@ export class TachiBuilder implements ContentSource {
           return options;
         })(),
       },
+      filters: await this.source.getFilterList(),
     };
   }
 }
