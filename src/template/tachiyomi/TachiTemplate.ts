@@ -2,6 +2,7 @@ import {
   Chapter,
   ChapterData,
   Content,
+  DirectoryRequest,
   Highlight,
   NetworkRequest,
   PagedResult,
@@ -24,9 +25,9 @@ export abstract class TachiTemplate {
   abstract chapterListSelector(): string;
 
   // Next Selectors
-  abstract readonly popularMangaNextPageSelector?: () => string;
-  abstract readonly searchMangaNextPageSelector?: () => string;
-  abstract readonly latestUpdatesNextPageSelector?: () => string;
+  popularMangaNextPageSelector?(): string;
+  searchMangaNextPageSelector?(): string;
+  latestUpdatesNextPageSelector?(): string;
 
   // Core Parsers
   parsePopularManga(html: string): PagedResult {
@@ -46,7 +47,7 @@ export abstract class TachiTemplate {
     };
   }
 
-  parseSearchManga(html: string): PagedResult {
+  parseSearchManga(html: string, _: DirectoryRequest): PagedResult {
     const $ = load(html);
     const results = $(this.searchMangaSelector())
       .toArray()
@@ -107,12 +108,12 @@ export abstract class TachiTemplate {
   }
 
   // Requests
-  abstract popularMangaRequest: (page: number) => NetworkRequest;
-  abstract searchMangaRequest: (
+  abstract popularMangaRequest(page: number): NetworkRequest;
+  abstract searchMangaRequest(
     page: number,
     query: string,
-    filters: any
-  ) => NetworkRequest;
+    filters: Record<string, any>
+  ): NetworkRequest;
 
   abstract latestUpdatesRequest(page: number): NetworkRequest;
   mangaDetailsRequest(fragment: string): NetworkRequest {
@@ -121,7 +122,9 @@ export abstract class TachiTemplate {
   chapterListRequest(fragment: string): NetworkRequest {
     return { url: this.baseUrl + fragment };
   }
-  abstract pageListRequest(fragment: string): NetworkRequest;
+  pageListRequest(fragment: string): NetworkRequest {
+    return { url: this.baseUrl + fragment };
+  }
 
   abstract popularMangaFromElement(element: CheerioElement): Highlight;
   abstract searchMangaFromElement(element: CheerioElement): Highlight;

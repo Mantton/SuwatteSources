@@ -77,7 +77,7 @@ export class TachiBuilder implements ContentSource {
       );
 
       const { data: response } = await this.client.request(request);
-      const result = this.source.parseSearchManga(response);
+      const result = this.source.parseSearchManga(response, search);
       return result;
     }
   }
