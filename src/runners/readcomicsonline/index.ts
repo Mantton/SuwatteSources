@@ -1,5 +1,5 @@
 import { RunnerInfo } from "@suwatte/daisuke";
-import { MMRCMSTemplate } from "../../template/mmrcms/template";
+import { MMRCMSTemplate } from "../../template/mmrcms";
 import { TachiBuilder } from "../../template/tachiyomi";
 
 const info: RunnerInfo = {
