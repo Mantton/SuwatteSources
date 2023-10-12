@@ -88,7 +88,7 @@ describe("FlameScans Tests", () => {
       ],
     ];
 
-    test.each(ids)("run %s", async (id) => {
+    test.concurrent.each(ids)("run %s", async (id) => {
       const content = await source.getContent(id);
       expect(ContentSchema.parse(content)).toEqual(expect.any(Object));
       const chapters = await source.getChapters(id);

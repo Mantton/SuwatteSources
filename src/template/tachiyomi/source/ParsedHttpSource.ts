@@ -91,22 +91,29 @@ export abstract class TachiParsedHttpSource extends TachiHttpSource {
   parseChapterList(html: string): Chapter[] {
     const $ = load(html);
     const title = this.mangaDetailsParse($).title;
-    const rec = new ChapterRecognition();
     return $(this.chapterListSelector())
       .toArray()
       .map((element, idx) => {
         const data = this.chapterFromElement($(element));
-        return {
-          ...data,
-          number: rec.parseChapterNumber(title, data.title ?? ""),
-          language: this.lang,
-          index: idx,
-        };
+        return this.generateChapter(data, idx, title);
       });
+  }
+
+  generateChapter(data: any, index: number, title: string): Chapter {
+    return {
+      ...data,
+      index,
+      number: this.recognizer.parseChapterNumber(title, data.title ?? ""),
+      language: this.lang,
+    };
   }
 
   parsePageList(html: string): ChapterData {
     const pages = this.pageListParse(load(html)).map((url) => ({ url }));
     return { pages };
+  }
+
+  protected ownText(element: CheerioElement): string {
+    return element.contents().not(element.children()).text().trim();
   }
 }

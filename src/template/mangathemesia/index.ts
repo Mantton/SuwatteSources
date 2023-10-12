@@ -170,8 +170,6 @@ export abstract class MangaThemesiaTemplate extends TachiParsedHttpSource {
     const regex = /"images"\s*:\s*(\[.*?])/;
     const imageListJSON = html.match(regex)?.[1] ?? "";
     if (!imageListJSON) {
-      console.log(document.html());
-
       console.warn("Empty List");
       return [];
     }

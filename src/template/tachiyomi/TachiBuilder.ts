@@ -5,18 +5,20 @@ import {
   ContentSource,
   DirectoryConfig,
   DirectoryRequest,
+  ImageRequestHandler,
+  NetworkRequest,
   PagedResult,
   RunnerInfo,
 } from "@suwatte/daisuke";
-import { TachiCatalogSource } from "./source";
+import { TachiCatalogSource, TachiHttpSource } from "./source";
 
-export class TachiBuilder implements ContentSource {
+export class TachiBuilder implements ContentSource, ImageRequestHandler {
   info: RunnerInfo;
   source: TachiCatalogSource;
 
   constructor(info: RunnerInfo, template: new () => TachiCatalogSource) {
-    this.info = info;
     this.source = new template();
+    this.info = { ...info, supportedLanguages: [this.source.lang] };
   }
 
   async getContent(contentId: string): Promise<Content> {
@@ -47,6 +49,7 @@ export class TachiBuilder implements ContentSource {
       return this.source.getSearchManga(search);
     }
   }
+
   async getDirectoryConfig(_: string | undefined): Promise<DirectoryConfig> {
     return {
       sort: {
@@ -69,5 +72,14 @@ export class TachiBuilder implements ContentSource {
       },
       filters: await this.source.getFilterList(),
     };
+  }
+
+  // * Image Request Handler
+  async willRequestImage(imageURL: string): Promise<NetworkRequest> {
+    if (this.source instanceof TachiHttpSource) {
+      return this.source.imageRequest(imageURL);
+    } else {
+      return { url: imageURL };
+    }
   }
 }
