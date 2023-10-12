@@ -12,7 +12,7 @@ import { TachiCatalogSource } from "./CatalogSource";
 
 export abstract class TachiHttpSource extends TachiCatalogSource {
   abstract baseUrl: string;
-  protected client: NetworkClient;
+  public client: NetworkClient;
   constructor() {
     super();
     this.client = new NetworkClientBuilder()

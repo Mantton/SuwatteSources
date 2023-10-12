@@ -10,13 +10,13 @@ import {
   PagedResult,
   RunnerInfo,
 } from "@suwatte/daisuke";
-import { TachiCatalogSource, TachiHttpSource } from "./source";
+import { TachiHttpSource } from "./source";
 
 export class TachiBuilder implements ContentSource, ImageRequestHandler {
   info: RunnerInfo;
-  source: TachiCatalogSource;
+  source: TachiHttpSource;
 
-  constructor(info: RunnerInfo, template: new () => TachiCatalogSource) {
+  constructor(info: RunnerInfo, template: new () => TachiHttpSource) {
     this.source = new template();
     this.info = { ...info, supportedLanguages: [this.source.lang] };
   }
@@ -76,10 +76,6 @@ export class TachiBuilder implements ContentSource, ImageRequestHandler {
 
   // * Image Request Handler
   async willRequestImage(imageURL: string): Promise<NetworkRequest> {
-    if (this.source instanceof TachiHttpSource) {
-      return this.source.imageRequest(imageURL);
-    } else {
-      return { url: imageURL };
-    }
+    return this.source.imageRequest(imageURL);
   }
 }
