@@ -1,18 +1,13 @@
 import {
   ContentSource,
   DeepLinkContext,
-  GroupedUpdateResponse,
   RunnerInfo,
   SourceConfig,
 } from "@suwatte/daisuke";
 import { MadaraTemplate } from "../../template/madara";
 import { DEFAULT_CONTEXT } from "../../template/madara/constants";
-import { GroupedUpdatesProvider } from "@suwatte/daisuke";
 
-export class Target
-  extends MadaraTemplate
-  implements ContentSource, GroupedUpdatesProvider
-{
+export class Target extends MadaraTemplate implements ContentSource {
   info: RunnerInfo = {
     id: "com.toonily",
     name: "Toonily",
@@ -83,16 +78,6 @@ export class Target
     }
 
     return null;
-  }
-
-  async getGroupedUpdates(
-    ids: string[],
-    dateString: Date
-  ): Promise<GroupedUpdateResponse> {
-    console.log(ids);
-    console.log(dateString);
-    console.log(typeof dateString);
-    throw new Error("Complete");
   }
 
   // async willRequestWebViewAuth(): Promise<NetworkRequest> {

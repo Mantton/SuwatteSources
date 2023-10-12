@@ -35,7 +35,6 @@ export class Controller {
 
   async getDirectoryResults(request: DirectoryRequest) {
     const params = parseSearchRequest(request);
-    console.log(params);
 
     const { data } = await this.client.get(
       "https://manganato.com/advanced_search",
