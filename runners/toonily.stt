@@ -69,12 +69,6 @@ class Target extends madara_1.MadaraTemplate {
         }
         return null;
     }
-    async getGroupedUpdates(ids, dateString) {
-        console.log(ids);
-        console.log(dateString);
-        console.log(typeof dateString);
-        throw new Error("Complete");
-    }
 }
 exports.Target = Target;
 
