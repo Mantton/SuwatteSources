@@ -531,7 +531,11 @@ class TachiBuilder {
     source;
     constructor(info, template) {
         this.source = new template();
-        this.info = { ...info, supportedLanguages: [this.source.lang] };
+        this.info = {
+            ...info,
+            supportedLanguages: [this.source.lang],
+            website: this.source.baseUrl,
+        };
     }
     async getContent(contentId) {
         return this.source.getMangaDetails(contentId);
