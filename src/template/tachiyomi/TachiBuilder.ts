@@ -18,7 +18,11 @@ export class TachiBuilder implements ContentSource, ImageRequestHandler {
 
   constructor(info: RunnerInfo, template: new () => TachiHttpSource) {
     this.source = new template();
-    this.info = { ...info, supportedLanguages: [this.source.lang] };
+    this.info = {
+      ...info,
+      supportedLanguages: [this.source.lang],
+      website: this.source.baseUrl,
+    };
   }
 
   async getContent(contentId: string): Promise<Content> {
