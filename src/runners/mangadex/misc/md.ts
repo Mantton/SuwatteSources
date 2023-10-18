@@ -83,7 +83,7 @@ export async function getMDStatistics(ids: string[]): Promise<any> {
 }
 
 // Fetches an MD List
-export async function getMDList(listId: string) {
+export async function getMDList(listId: string, pageNumber = 1) {
   const { data } = await GET(`/list/${listId}`);
   const contentIds = data.relationships
     .filter((x: any) => x.type == "manga")
@@ -96,6 +96,7 @@ export async function getMDList(listId: string) {
       includes: ["cover_art"],
       ids: contentIds,
       limit: RESULT_LIMIT,
+      offset: RESULT_LIMIT * (pageNumber - 1),
     },
   });
   return {

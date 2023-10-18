@@ -12,7 +12,7 @@ export class Target extends MadaraTemplate implements ContentSource {
     id: "com.toonily",
     name: "Toonily",
     thumbnail: "toonily.png",
-    version: 1.4,
+    version: 1.5,
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
     minSupportedAppVersion: "6.0",
