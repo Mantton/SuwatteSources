@@ -23,7 +23,7 @@ import {
 
 export abstract class TachiDaraTemplate extends TachiParsedHttpSource {
   supportsLatest = true;
-  protected dateFormat = "MMMM DD, YYY";
+  protected dateFormat = "MMMM DD, YYYY";
 
   headers(): Record<string, string> {
     return {

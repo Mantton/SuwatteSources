@@ -1,39 +1,43 @@
 import { Target } from "../runners/bato";
 import emulate from "@suwatte/emulator";
-import { ReadingMode, Status } from "@suwatte/daisuke";
+import { ReadingMode, PublicationStatus } from "@suwatte/daisuke";
+import {
+  PagedResultSchema,
+  ContentSchema,
+  ChapterSchema,
+  ChapterDataSchema,
+} from "@suwatte/validate";
 
 describe("Bato Tests", () => {
   const source = emulate(Target);
 
-  test("Get Search Results", async () => {
-    const data = await source.getSearchResults({
-      filters: [
-        { id: "genre", included: ["action"], excluded: ["crime"] },
-        { id: "lang", included: ["en"] },
-      ],
+  test("Query", async () => {
+    const data = await source.getDirectory({
+      page: 1,
+      query: "doctor",
     });
-    expect(data.results.length).toBeGreaterThan(0);
+    expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object));
+    expect(data.results.length).toBeGreaterThan(1);
   });
 
-  test("Get Content", async () => {
-    const content = await source.getContent("84565");
-    expect(content.title).toBe("Sweet Days with a Boy");
-    expect(content.recommendedReadingMode).toBe(ReadingMode.PAGED_MANGA);
-    expect(content.status).toBe(Status.ONGOING);
-    expect(content.properties?.[0]).toBeDefined();
-    expect(content.creators?.includes("Aoi nuwi")).toBe(true);
-  });
-  test("Get Content", async () => {
+  test("Profile", async () => {
     const content = await source.getContent("72315");
+    expect(ContentSchema.parse(content)).toEqual(expect.any(Object));
     expect(content.title).toBe("Doctor Elise: The Royal Lady with the Lamp");
-    expect(content.recommendedReadingMode).toBe(ReadingMode.PAGED_COMIC);
-    expect(content.status).toBe(Status.COMPLETED);
+    expect(content.recommendedPanelMode).toBe(ReadingMode.PAGED_COMIC);
+    expect(content.status).toBe(PublicationStatus.COMPLETED);
     expect(content.properties?.[0]).toBeDefined();
     expect(content.creators?.includes("Mini")).toBe(true);
   });
-  test("Get Chapter Data", async () => {
+
+  test("Chapters", async () => {
+    const chapters = await source.getChapters("72315");
+    expect(ChapterSchema.array().parse(chapters)).toEqual(expect.any(Array));
+    expect(chapters.length).toBeGreaterThan(1);
+  });
+
+  test("Reader", async () => {
     const data = await source.getChapterData("84565", "2176683");
-    expect(data.pages).toBeDefined();
-    expect(data.pages?.length).toBeGreaterThan(0);
+    expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object));
   });
 });

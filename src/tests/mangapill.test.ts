@@ -1,43 +1,51 @@
-import { Status } from "@suwatte/daisuke";
+import { PublicationStatus } from "@suwatte/daisuke";
 import { Target } from "../runners/mangapill";
 import emulate from "@suwatte/emulator";
-import { Validate } from "@suwatte/validate";
-
+import {
+  ChapterDataSchema,
+  ChapterSchema,
+  ContentSchema,
+  PagedResultSchema,
+} from "@suwatte/validate";
 describe("MangaPill Tests", () => {
   const source = emulate(Target);
 
   describe("Search Tests", () => {
     test("Query Search", async () => {
-      const data = await source.getSearchResults({ query: "doctor" });
+      const data = await source.getDirectory({ query: "doctor", page: 1 });
       expect(data.results.length).toBeGreaterThan(3);
       expect(
         data.results.some((v) => v.title.toLowerCase().includes("doctor"))
       ).toBe(true);
-      expect(Validate.object.pagedResult(data)).toBe(true);
+      expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object));
+      expect(data.results.length).toBeGreaterThan(1);
     });
+
     test("Filter Search", async () => {
-      const data = await source.getSearchResults({
-        filters: [
-          { id: "genre", included: ["Historical"] },
-          { id: "status", included: ["on hiatus"] },
-          { id: "type", included: ["manga"] },
-        ],
+      const data = await source.getDirectory({
+        page: 1,
+        filters: {
+          genre: ["Historical"],
+          status: "on hiatus",
+          type: "manga",
+        },
       });
       expect(data.results.length).toBeGreaterThan(3);
-      expect(Validate.object.pagedResult(data)).toBe(true);
+      expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object));
     });
   });
 
   test("Get Content", async () => {
     const content = await source.getContent("1");
     expect(content.title).toBe("Berserk");
-    expect(content.status).toBe(Status.ONGOING);
-    expect(Validate.object.content(content)).toBe(true);
+    expect(content.status).toBe(PublicationStatus.ONGOING);
+    expect(ContentSchema.parse(content)).toEqual(expect.any(Object));
   });
 
   test("Get Chapters", async () => {
     const chapters = await source.getChapters("1");
-    expect(Validate.array.chapter(chapters)).toBe(true);
+    expect(ChapterSchema.array().parse(chapters)).toEqual(expect.any(Array));
+    expect(chapters.length).toBeGreaterThan(1);
   });
 
   test("Get Chapter Data", async () => {
@@ -46,6 +54,6 @@ describe("MangaPill Tests", () => {
       "/chapters/1-20370000/berserk-chapter-370"
     );
     expect(data.pages?.every((v) => v.url)).toBe(true);
-    expect(Validate.object.chapterData(data)).toBe(true);
+    expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object));
   });
 });

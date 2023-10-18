@@ -13,7 +13,7 @@ describe("Dark Scans Tests", () => {
     test("Popular", async () => {
       const data = await source.getDirectory({
         page: 1,
-        sort: { id: "popular" },
+        listId: "template_popular_list",
       });
       expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object));
       expect(data.results.length).toBeGreaterThan(1);
@@ -29,7 +29,7 @@ describe("Dark Scans Tests", () => {
     test("Latest", async () => {
       const data = await source.getDirectory({
         page: 1,
-        sort: { id: "latest" },
+        listId: "template_latest_list",
       });
       expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object));
       expect(data.results.length).toBeGreaterThan(1);

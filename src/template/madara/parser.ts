@@ -293,9 +293,13 @@ export class Parser {
         cover,
       };
     });
+
+    const isLast =
+      $("div.nav-previous, nav.navigation-ajax, a.nextpostslink").toArray()
+        .length === 0;
     return {
       results: highlights,
-      isLastPage: highlights.length <= (ctx.paginationLimit ?? 30),
+      isLastPage: isLast,
     };
   }
 }

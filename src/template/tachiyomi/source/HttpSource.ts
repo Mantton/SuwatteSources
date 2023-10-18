@@ -6,6 +6,7 @@ import {
   DirectoryRequest,
   NetworkClientBuilder,
   NetworkRequest,
+  Option,
   PagedResult,
 } from "@suwatte/daisuke";
 import { TachiCatalogSource } from "./CatalogSource";
@@ -110,5 +111,13 @@ export abstract class TachiHttpSource extends TachiCatalogSource {
 
   async getFilterList(): Promise<DirectoryFilter[]> {
     return [];
+  }
+
+  async getSortOptions(): Promise<Option[]> {
+    return [];
+  }
+
+  getMangaURL(fragment: string): string {
+    return this.mangaDetailsRequest(fragment).url;
   }
 }

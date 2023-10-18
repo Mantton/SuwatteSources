@@ -32,7 +32,7 @@ export class Target extends MadaraTemplate implements ContentSource {
       chapterUseAJAX: true,
       searchSelector: "div.page-item-detail.manga",
       useLoadMoreSearch: false,
-      dateFormat: "MMM d, yyyy",
+      dateFormat: "MMM D, YYYY",
       paginationLimit: 18,
       requestInterceptors: [
         async (req) => {
@@ -79,42 +79,4 @@ export class Target extends MadaraTemplate implements ContentSource {
 
     return null;
   }
-
-  // async willRequestWebViewAuth(): Promise<NetworkRequest> {
-  //   return {
-  //     url: this.info.website,
-  //   };
-  // }
-
-  // async didReceiveAuthenticationCookieFromWebView(cookie: {
-  //   name: string;
-  //   value: string;
-  // }): Promise<boolean> {
-  //   return cookie.name.includes("wordpress_logged_in");
-  // }
-
-  //   async getAuthenticatedUser(): Promise<User | null> {
-  //     const response = await this.controller.client.get(
-  //       "https://toonily.com/user-settings/?tab=account-settings"
-  //     );
-
-  //     const $ = load(response.data);
-
-  //     const username = $(
-  //       "#form-account-settings > div > div:nth-child(2) > div:nth-child(2) > div > span"
-  //     ).text();
-
-  //     const avatar = imageFromElement($(".c-user-avatar > img"));
-
-  //     if (!username) {
-  //       return null;
-  //     }
-
-  //     return {
-  //       id: username,
-  //       username,
-  //       avatar,
-  //       info: [],
-  //     };
-  //   }
 }

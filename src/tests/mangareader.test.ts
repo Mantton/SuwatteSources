@@ -1,12 +1,13 @@
 import emulate from "@suwatte/emulator";
-import { Target } from "../runners/luffymanga";
+import { Target } from "../runners/mangareader";
 import {
   ChapterDataSchema,
   ChapterSchema,
   ContentSchema,
+  PageSectionSchema,
   PagedResultSchema,
 } from "@suwatte/validate";
-describe("LuffyManga Tests", () => {
+describe("MangaReader Tests", () => {
   const source = emulate(Target);
 
   describe("Paged results", () => {
@@ -21,7 +22,7 @@ describe("LuffyManga Tests", () => {
     test("Query", async () => {
       const data = await source.getDirectory({
         page: 1,
-        query: "demon",
+        query: "doctor",
       });
       expect(PagedResultSchema.parse(data)).toEqual(expect.any(Object));
       expect(data.results.length).toBeGreaterThan(1);
@@ -35,7 +36,7 @@ describe("LuffyManga Tests", () => {
       expect(data.results.length).toBeGreaterThan(1);
     });
   });
-  const id = "/manga/chronicles-of-the-demon-faction/";
+  const id = "/one-piece-3";
 
   test("Profile", async () => {
     const content = await source.getContent(id);
@@ -49,9 +50,13 @@ describe("LuffyManga Tests", () => {
   });
 
   test("Reader", async () => {
-    const chapterId =
-      "https://luffymanga.com/manga/chronicles-of-the-demon-faction/chapter-34/?style=list";
+    const chapterId = "/read/one-piece-3/en/chapter-1094#chap/1965839";
     const data = await source.getChapterData(id, chapterId);
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object));
+  });
+
+  test("Homepage", async () => {
+    const data = await source.getSectionsForPage({ id: "home" });
+    expect(PageSectionSchema.array().parse(data)).toEqual(expect.any(Array));
   });
 });

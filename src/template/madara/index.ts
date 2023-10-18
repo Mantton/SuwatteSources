@@ -61,6 +61,11 @@ export abstract class MadaraTemplate
   async getDirectoryConfig(
     _configID?: string | undefined
   ): Promise<DirectoryConfig> {
-    return {};
+    return {
+      filters: await this.controller.getFilters(),
+      sort: {
+        options: this.controller.getSorters(),
+      },
+    };
   }
 }

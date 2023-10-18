@@ -26,7 +26,11 @@ export class TachiBuilder implements ContentSource, ImageRequestHandler {
   }
 
   async getContent(contentId: string): Promise<Content> {
-    return this.source.getMangaDetails(contentId);
+    const content = await this.source.getMangaDetails(contentId);
+    return {
+      ...content,
+      webUrl: this.source.getMangaURL(contentId),
+    };
   }
 
   async getChapters(contentId: string): Promise<Chapter[]> {
@@ -43,9 +47,10 @@ export class TachiBuilder implements ContentSource, ImageRequestHandler {
     if (
       !search.query &&
       !search.filters &&
-      (search.sort?.id === "popular" || search.sort?.id === "latest")
+      (search.listId === "template_popular_list" ||
+        search.listId === "template_latest_list")
     ) {
-      const isPopular = search.sort?.id === "popular";
+      const isPopular = search.listId === "template_popular_list";
       return isPopular
         ? this.source.getPopularManga(search.page)
         : this.source.getLatestManga(search.page);
@@ -55,24 +60,26 @@ export class TachiBuilder implements ContentSource, ImageRequestHandler {
   }
 
   async getDirectoryConfig(_: string | undefined): Promise<DirectoryConfig> {
+    const definedSortOptions = await this.source.getSortOptions();
+    const getLists = () => {
+      const options = [
+        {
+          id: "template_popular_list",
+          title: "Popular Titles",
+        },
+      ];
+      if (this.source.supportsLatest) {
+        options.push({
+          id: "template_latest_list",
+          title: "Latest Titles",
+        });
+      }
+      return options;
+    };
     return {
+      lists: getLists(),
       sort: {
-        default: { id: "popular" },
-        options: (() => {
-          const options = [
-            {
-              id: "popular",
-              title: "Popular",
-            },
-          ];
-          if (this.source.supportsLatest) {
-            options.push({
-              id: "latest",
-              title: "Latest",
-            });
-          }
-          return options;
-        })(),
+        options: definedSortOptions,
       },
       filters: await this.source.getFilterList(),
     };

@@ -119,7 +119,8 @@ export async function getMDUpdates(page: number): Promise<Highlight[]> {
     },
   });
 
-  const chapterListJSON = JSON.parse(response.data);
+  const chapterListJSON = { ...response };
+
   const base = chapterListJSON.data.map(
     (x: any) => x.relationships.find((y: any) => y.type == "manga").id
   );
@@ -150,7 +151,7 @@ export async function getMDUpdates(page: number): Promise<Highlight[]> {
     const chapterName = `${
       volume ? `Volume ${volume} ` : ""
     }Chapter ${chapter}`;
-    const _chapterDate = new Date(chapterObject.attributes.publishAt);
+    const chapterDate = moment(chapterObject.attributes.publishAt).fromNow();
     const getOccurrences = (array: string[], value: string) => {
       let count = 0;
       array.forEach((v: string) => v === value && count++);
@@ -160,7 +161,7 @@ export async function getMDUpdates(page: number): Promise<Highlight[]> {
 
     const info = `${chapterCount} Update${
       chapterCount != 1 ? "s" : ""
-    }\n${chapterName}`;
+    } • ${chapterDate}\n${chapterName}`;
     entry.info = [info];
   });
   return highlights;

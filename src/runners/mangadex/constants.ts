@@ -8,7 +8,7 @@ export const ADULT_TAG_IDS = [
   "97893a4c-12af-4dac-b6be-0dffb353568e",
   "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
 ];
-export const SEASONAL_LIST_ID = "4be9338a-3402-4f98-b467-43fb56663927";
+export const SEASONAL_LIST_ID = "1b9f88f8-9880-464d-9ed9-59b7e36392e2";
 export const LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
 export const RESULT_LIMIT = 30;
 export const DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];

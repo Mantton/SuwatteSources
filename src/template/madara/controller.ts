@@ -146,27 +146,19 @@ export class Controller {
   }
 
   async searchWithQueryParams(request: DirectoryRequest): Promise<PagedResult> {
-    const base = `${this.context.baseUrl}/page/${request.page ?? 1}/`;
+    const base = `${this.context.baseUrl}/search/page/${request.page ?? 1}/`;
     const params: Record<string, any> = {
-      post_type: "wp-manga",
       s: "",
-      m_orderby: request.sort ?? "views",
+      m_orderby: request.sort?.id ?? "views",
       ...(request.query && {
         s: request.query,
       }),
     };
-    // for (const filter of request.filters ?? []) {
-    //   switch (filter.id) {
-    //     case "genres":
-    //       if (!filter.included) break;
-    //       params["genres[]"] = filter.included;
-    //       break;
-    //     case "adult":
-    //       if (!filter.included || !filter.included[0]) break; // Guard
-    //       params["adult"] = filter.included[0] == "hidden" ? "0" : "1";
-    //       break;
-    //   }
-    // }
+    const genres = request.filters?.genres ?? [];
+    params["genre[]"] = genres;
+
+    const adult = request.filters?.adult === "hidden" ? "0" : "1";
+    params["adult"] = adult;
 
     const response = await this.client.get(base, {
       params,

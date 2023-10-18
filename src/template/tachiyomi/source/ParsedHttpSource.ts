@@ -103,7 +103,10 @@ export abstract class TachiParsedHttpSource extends TachiHttpSource {
     return {
       ...data,
       index,
-      number: this.recognizer.parseChapterNumber(title, data.title ?? ""),
+      number:
+        !!data.number && data.number !== -1
+          ? data.number
+          : this.recognizer.parseChapterNumber(title, data.title ?? ""),
       language: this.lang,
     };
   }
