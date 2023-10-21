@@ -1,6 +1,6 @@
 export class ChapterRecognition {
   private readonly NUMBER_PATTERN: string = "([0-9]+)(\\.[0-9]+)?(\\.?[a-z]+)?";
-  private basic = new RegExp(`(?<=ch\\.) *${this.NUMBER_PATTERN}`);
+  private basic = new RegExp(`(ch\\.) *${this.NUMBER_PATTERN}`, "i");
   private number = new RegExp(this.NUMBER_PATTERN);
   private unwanted = /\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+/;
   private unwantedWhiteSpace = /\s(?=extra|special|omake)/;
@@ -24,8 +24,9 @@ export class ChapterRecognition {
     name = name.replace(this.unwanted, "");
 
     const basicMatch = name.match(this.basic);
-    if (basicMatch) {
-      return this.getChapterNumberFromMatch(basicMatch);
+    if (basicMatch && basicMatch[1].toLowerCase() === "ch.") {
+      // Ensure the prefix is 'ch.'
+      return this.getChapterNumberFromMatch(basicMatch, true);
     }
 
     const numberMatch = name.match(this.number);
@@ -38,10 +39,14 @@ export class ChapterRecognition {
       : Math.round(Math.random() * 100) / 100;
   }
 
-  private getChapterNumberFromMatch(match: RegExpMatchArray): number {
-    const initial: number = parseFloat(match[1]);
-    const subChapterDecimal: string = match[2];
-    const subChapterAlpha: string = match[3];
+  private getChapterNumberFromMatch(
+    match: RegExpMatchArray,
+    isBasicMatch?: boolean
+  ): number {
+    const offset = isBasicMatch ? 1 : 0;
+    const initial: number = parseFloat(match[1 + offset]);
+    const subChapterDecimal: string = match[2 + offset];
+    const subChapterAlpha: string = match[3 + offset];
     const addition: number = this.checkForDecimal(
       subChapterDecimal,
       subChapterAlpha
