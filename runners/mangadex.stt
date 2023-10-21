@@ -10,7 +10,7 @@ exports.ADULT_TAG_IDS = [
     "97893a4c-12af-4dac-b6be-0dffb353568e",
     "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
 ];
-exports.SEASONAL_LIST_ID = "4be9338a-3402-4f98-b467-43fb56663927";
+exports.SEASONAL_LIST_ID = "1b9f88f8-9880-464d-9ed9-59b7e36392e2";
 exports.LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
 exports.RESULT_LIMIT = 30;
 exports.DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
@@ -29,7 +29,7 @@ exports.PUBLICATION_STATUS = [
 ];
 exports.GlobalStore = new store_1.MDStore();
 
-},{"./store":18}],2:[function(require,module,exports){
+},{"./store":21}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDBasicAuthProvider = void 0;
@@ -73,7 +73,7 @@ exports.MDBasicAuthProvider = {
     },
 };
 
-},{"../network":14,"@suwatte/daisuke":20}],3:[function(require,module,exports){
+},{"../network":17,"@suwatte/daisuke":23}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDContentSource = void 0;
@@ -130,14 +130,101 @@ exports.MDContentSource = {
     // },
 };
 
-},{"../network":14,"../parser/chapter":15,"../parser/content":16}],4:[function(require,module,exports){
+},{"../network":17,"../parser/chapter":18,"../parser/content":19}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDContentSyncHandler = void 0;
+const network_1 = require("../network");
+const md_1 = require("../misc/md");
+const pagedResponse_1 = require("../parser/pagedResponse");
+exports.MDContentSyncHandler = {
+    syncUserLibrary: function (library) {
+        return syncUserLibrary(library);
+    },
+};
+async function syncUserLibrary(library) {
+    const fetchedLib = await fetchUserLibrary();
+    // Titles in local but not cloud
+    const toUpSync = library.filter((v) => !fetchedLib.find((a) => a.id === v.id));
+    // Titles in cloud but not local
+    const toDownSync = fetchedLib.filter((v) => {
+        const target = library.find((a) => a.id === v.id);
+        // Not in library, down sync
+        if (!target)
+            return true;
+        // NonMatching Reading Flag
+        if (v.readingFlag && target.flag != v.readingFlag)
+            return true;
+        return false;
+    });
+    // Handle UpSync
+    await handleUpSync(toUpSync);
+    return toDownSync;
+}
+async function handleUpSync(entries) {
+    for (const entry of entries) {
+        const url = `/manga/${entry.id}/status`;
+        const status = (0, md_1.getStatusFlagForReadingFlag)(entry.flag);
+        await (0, network_1.POST)(url, {
+            body: {
+                status,
+            },
+        });
+    }
+}
+async function fetchUserLibrary() {
+    const library = [];
+    // Fetch Reading Status
+    const statuses = await (0, md_1.getMDUserStatuses)();
+    const limit = 100;
+    let offset = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        const response = await (0, network_1.GET)(`/user/follows/manga`, {
+            params: {
+                limit,
+                offset,
+                includes: ["cover_art"],
+            },
+        });
+        const highlights = (await (0, pagedResponse_1.parsePagedResponse)(response, false)).results;
+        // prepare
+        const mapped = highlights.map((v) => {
+            const status = (0, md_1.getMDReadingStatus)(statuses[v.id]);
+            return {
+                id: v.id,
+                title: v.title,
+                cover: v.cover,
+                readingFlag: status,
+            };
+        });
+        library.push(...mapped);
+        // Loop Logic
+        offset += limit;
+        if (highlights.length < limit) {
+            break;
+        }
+    }
+    return library;
+}
+
+},{"../misc/md":15,"../network":17,"../parser/pagedResponse":20}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDDirectoryHandler = void 0;
 const directory_1 = require("../misc/directory");
 const md_1 = require("../misc/md");
+const constants_1 = require("../constants");
 exports.MDDirectoryHandler = {
-    getDirectory: function (request) {
+    getDirectory: async function (request) {
+        if (request.context?.listId) {
+            const list = await (0, md_1.getMDList)(request.context.listId, request.page);
+            const isLastPage = list.highlights.length < constants_1.RESULT_LIMIT;
+            return {
+                results: list.highlights,
+                isLastPage,
+            };
+        }
         return (0, md_1.getMDSearchResults)(request);
     },
     getDirectoryConfig: async function (_key) {
@@ -155,7 +242,7 @@ exports.MDDirectoryHandler = {
     },
 };
 
-},{"../misc/directory":10,"../misc/md":12}],5:[function(require,module,exports){
+},{"../constants":1,"../misc/directory":13,"../misc/md":15}],6:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -178,18 +265,103 @@ __exportStar(require("./pageResolver"), exports);
 __exportStar(require("./pageProvider"), exports);
 __exportStar(require("./preferences"), exports);
 __exportStar(require("./auth"), exports);
+__exportStar(require("./contentSync"), exports);
+__exportStar(require("./libraryEvent"), exports);
+__exportStar(require("./progressSync"), exports);
 
-},{"./auth":2,"./contentSource":3,"./directoryHandler":4,"./pageProvider":6,"./pageResolver":7,"./preferences":8}],6:[function(require,module,exports){
+},{"./auth":2,"./contentSource":3,"./contentSync":4,"./directoryHandler":5,"./libraryEvent":7,"./pageProvider":8,"./pageResolver":9,"./preferences":10,"./progressSync":11}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDLibraryEventHandler = void 0;
+const md_1 = require("../misc/md");
+const network_1 = require("../network");
+const store_1 = require("../store");
+exports.MDLibraryEventHandler = {
+    async onChapterRead(contentId, chapterId) {
+        await new store_1.MDStore().saveToMimasTargets(contentId);
+        const signedIn = await (0, md_1.isSignedIn)();
+        if (!signedIn)
+            return;
+        await syncToMD(contentId, [chapterId]);
+    },
+    async onChaptersMarked(contentId, chapterIds, completed) {
+        const signedIn = await (0, md_1.isSignedIn)();
+        if (!signedIn)
+            return;
+        if (completed) {
+            await syncToMD(contentId, chapterIds);
+        }
+        else {
+            await syncToMD(contentId, [], chapterIds);
+        }
+    },
+    async onContentsAddedToLibrary(ids) {
+        const signedIn = await (0, md_1.isSignedIn)();
+        if (!signedIn)
+            return;
+        for (const id of ids) {
+            await (0, network_1.POST)(`/manga/${id}/status`, {
+                body: {
+                    status: "reading",
+                },
+            });
+        }
+    },
+    async onContentsReadingFlagChanged(ids, flag) {
+        //
+    },
+    async onContentsRemovedFromLibrary(ids) {
+        //
+    },
+};
+async function syncToMD(id, chapterIdsRead, chapterIdsUnread = []) {
+    try {
+        await (0, network_1.POST)(`/manga/${id}/read`, {
+            body: {
+                chapterIdsUnread,
+                chapterIdsRead,
+            },
+        });
+    }
+    catch {
+        console.error("failed to sync to mangadex");
+    }
+}
+
+},{"../misc/md":15,"../network":17,"../store":21}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDPageProvider = void 0;
+const daisuke_1 = require("@suwatte/daisuke");
+const auth_1 = require("./auth");
+const network_1 = require("../network");
 exports.MDPageProvider = {
     async getLibraryPageLinks() {
-        return [];
+        const user = await auth_1.MDBasicAuthProvider.getAuthenticatedUser()
+            .then((v) => v)
+            .catch((err) => {
+            console.log(err);
+            return null;
+        });
+        if (!user)
+            return [];
+        const lists = await (0, network_1.GET)("/user/list?limit=100");
+        return lists.data.map((v) => (0, daisuke_1.Generate)({
+            title: v.attributes.name,
+            subtitle: v.attributes.visibility === "private" ? "Private" : "",
+            link: {
+                request: {
+                    page: 1,
+                    context: {
+                        listId: v.id,
+                    },
+                },
+            },
+        }));
     },
 };
 
-},{}],7:[function(require,module,exports){
+},{"../network":17,"./auth":2,"@suwatte/daisuke":23}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDPageLinkResolver = void 0;
@@ -207,7 +379,7 @@ exports.MDPageLinkResolver = {
     },
 };
 
-},{"../misc/homepage":11}],8:[function(require,module,exports){
+},{"../misc/homepage":14}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDPreferenceProvider = void 0;
@@ -324,7 +496,26 @@ exports.MDPreferenceProvider = {
     },
 };
 
-},{"../constants":1,"../store":18,"../utils":19,"@suwatte/daisuke":20,"lodash":undefined}],9:[function(require,module,exports){
+},{"../constants":1,"../store":21,"../utils":22,"@suwatte/daisuke":23,"lodash":undefined}],11:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MDProgressStateHandler = void 0;
+const network_1 = require("../network");
+exports.MDProgressStateHandler = {
+    getProgressState: async function (contentId) {
+        return { readChapterIds: await getReadChapterMarkers(contentId) };
+    },
+};
+async function getReadChapterMarkers(contentId) {
+    const response = await (0, network_1.GET)(`/manga/read`, {
+        params: { ids: [contentId], grouped: true },
+    });
+    const data = JSON.parse(response.data);
+    const ids = data.data[contentId];
+    return ids ?? [];
+}
+
+},{"../network":17}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = exports.info = void 0;
@@ -335,7 +526,7 @@ const utils_1 = require("./utils");
 exports.info = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.7,
+    version: 1.8,
     website: "https://mangadex.org",
     supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
         ? v.languageCode
@@ -349,156 +540,15 @@ exports.Target = {
     ...impl_1.MDContentSource,
     ...directoryHandler_1.MDDirectoryHandler,
     ...impl_1.MDPageLinkResolver,
+    ...impl_1.MDPageProvider,
     ...impl_1.MDPreferenceProvider,
     ...impl_1.MDBasicAuthProvider,
+    ...impl_1.MDLibraryEventHandler,
+    ...impl_1.MDContentSyncHandler,
+    ...impl_1.MDProgressStateHandler,
 };
-// export class T implements ContentSource {
-//   private KEYCHAIN = SecureStore;
-//   private STORE = new MDStore();
-//   private PROPERTIES: Property[] = [];
-//   // * Explore
-//   // * Search
-//   // Events
-//   async onChapterRead(contentId: string, chapterId: string): Promise<void> {
-//     await this.STORE.saveToMimasTargets(contentId);
-//     const signedIn = await this.isSignedIn();
-//     if (!signedIn) return;
-//     await this.syncToMD(contentId, [chapterId]);
-//   }
-//   async onChaptersMarked(
-//     contentId: string,
-//     chapterIds: string[],
-//     completed: boolean
-//   ): Promise<void> {
-//     const signedIn = await this.isSignedIn();
-//     if (!signedIn) return;
-//     if (completed) {
-//       await this.syncToMD(contentId, chapterIds);
-//     } else {
-//       await this.syncToMD(contentId, [], chapterIds);
-//     }
-//   }
-//   async onContentsAddedToLibrary(ids: string[]): Promise<void> {
-//     const signedIn = await this.isSignedIn();
-//     if (!signedIn) return;
-//     for (const id of ids) {
-//       await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/status`, {
-//         body: {
-//           status: "reading",
-//         },
-//         transformRequest: requestHandler,
-//       });
-//     }
-//   }
-//   // * Syncing
-//   async syncUserLibrary(
-//     library: UpSyncedContent[]
-//   ): Promise<DownSyncedContent[]> {
-//     const fetchedLib = await this.fetchUserLibrary();
-//     // Titles in local but not cloud
-//     const toUpSync = library.filter(
-//       (v) => !fetchedLib.find((a) => a.id === v.id)
-//     );
-//     // Titles in cloud but not local
-//     const toDownSync = fetchedLib.filter((v) => {
-//       const target = library.find((a) => a.id === v.id);
-//       // Not in library, down sync
-//       if (!target) return true;
-//       // NonMatching Reading Flag
-//       if (v.readingFlag && target.flag != v.readingFlag) return true;
-//       return false;
-//     });
-//     // Handle UpSync
-//     await this.handleUpSync(toUpSync);
-//     return toDownSync;
-//   }
-//   async handleUpSync(entries: UpSyncedContent[]) {
-//     for (const entry of entries) {
-//       const url = `${this.API_URL}/manga/${entry.id}/status`;
-//       const status = this.getStatusFlagForReadingFlag(entry.flag);
-//       await this.NETWORK_CLIENT.post(url, {
-//         body: {
-//           status,
-//         },
-//         transformRequest: requestHandler,
-//       });
-//     }
-//   }
-//   async fetchUserLibrary() {
-//     const library: DownSyncedContent[] = [];
-//     // Fetch Reading Status
-//     const statuses = await this.getMDUserStatuses();
-//     const limit = 100;
-//     let offset = 0;
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       const response = await this.NETWORK_CLIENT.get(
-//         `${this.API_URL}/user/follows/manga`,
-//         {
-//           params: {
-//             limit,
-//             offset,
-//             includes: ["cover_art"],
-//           },
-//           transformRequest: requestHandler,
-//         }
-//       );
-//       const highlights = (
-//         await this.parsePagedResponse(response, 1, false, false)
-//       ).results;
-//       // prepare
-//       const mapped: DownSyncedContent[] = highlights.map(
-//         (v): DownSyncedContent => {
-//           const status = this.getMDReadingStatus(statuses[v.contentId]);
-//           return {
-//             id: v.contentId,
-//             title: v.title,
-//             cover: v.cover,
-//             readingFlag: status,
-//           };
-//         }
-//       );
-//       library.push(...mapped);
-//       // Loop Logic
-//       offset += limit;
-//       if (highlights.length < limit) {
-//         break;
-//       }
-//     }
-//     return library;
-//   }
-//   async getReadChapterMarkers(contentId: string): Promise<string[]> {
-//     const response = await this.NETWORK_CLIENT.get(
-//       `${this.API_URL}/manga/read`,
-//       {
-//         params: { ids: [contentId], grouped: true },
-//         transformRequest: requestHandler,
-//       }
-//     );
-//     const data = JSON.parse(response.data);
-//     const ids = data.data[contentId];
-//     return ids ?? [];
-//   }
-//   async syncToMD(
-//     id: string,
-//     chapterIdsRead: string[],
-//     chapterIdsUnread: string[] = []
-//   ) {
-//     try {
-//       await this.NETWORK_CLIENT.post(`${this.API_URL}/manga/${id}/read`, {
-//         body: {
-//           chapterIdsUnread,
-//           chapterIdsRead,
-//         },
-//         transformRequest: requestHandler,
-//       });
-//     } catch {
-//       console.error("failed to sync to mangadex");
-//     }
-//   }
-// }
 
-},{"./impl":5,"./impl/directoryHandler":4,"./utils":19,"@suwatte/daisuke":20}],10:[function(require,module,exports){
+},{"./impl":6,"./impl/directoryHandler":5,"./utils":22,"@suwatte/daisuke":23}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSearchSorters = void 0;
@@ -520,7 +570,7 @@ async function getSearchSorters() {
 }
 exports.getSearchSorters = getSearchSorters;
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolveHomepageSection = exports.getHomePageSections = void 0;
@@ -664,7 +714,7 @@ const resolveHomepageSection = async (_link, section) => {
 };
 exports.resolveHomepageSection = resolveHomepageSection;
 
-},{"../constants":1,"./directory":10,"./md":12,"./mimas":13,"@suwatte/daisuke":20,"lodash":undefined}],12:[function(require,module,exports){
+},{"../constants":1,"./directory":13,"./md":15,"./mimas":16,"@suwatte/daisuke":23,"lodash":undefined}],15:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -730,7 +780,7 @@ async function getMDStatistics(ids) {
 }
 exports.getMDStatistics = getMDStatistics;
 // Fetches an MD List
-async function getMDList(listId) {
+async function getMDList(listId, pageNumber = 1) {
     const { data } = await (0, network_1.GET)(`/list/${listId}`);
     const contentIds = data.relationships
         .filter((x) => x.type == "manga")
@@ -741,6 +791,7 @@ async function getMDList(listId) {
             includes: ["cover_art"],
             ids: contentIds,
             limit: constants_1.RESULT_LIMIT,
+            offset: constants_1.RESULT_LIMIT * (pageNumber - 1),
         },
     });
     return {
@@ -763,7 +814,7 @@ async function getMDUpdates(page) {
             includeFutureUpdates: "0",
         },
     });
-    const chapterListJSON = JSON.parse(response.data);
+    const chapterListJSON = { ...response };
     const base = chapterListJSON.data.map((x) => x.relationships.find((y) => y.type == "manga").id);
     const ids = Array.from(new Set(base));
     response = await (0, network_1.GET)(`/manga`, {
@@ -782,14 +833,14 @@ async function getMDUpdates(page) {
         const volume = chapterObject.attributes.volume;
         const chapter = chapterObject.attributes.chapter;
         const chapterName = `${volume ? `Volume ${volume} ` : ""}Chapter ${chapter}`;
-        const _chapterDate = new Date(chapterObject.attributes.publishAt);
+        const chapterDate = (0, moment_1.default)(chapterObject.attributes.publishAt).fromNow();
         const getOccurrences = (array, value) => {
             let count = 0;
             array.forEach((v) => v === value && count++);
             return count;
         };
         const chapterCount = getOccurrences(base, entry.id);
-        const info = `${chapterCount} Update${chapterCount != 1 ? "s" : ""}\n${chapterName}`;
+        const info = `${chapterCount} Update${chapterCount != 1 ? "s" : ""} • ${chapterDate}\n${chapterName}`;
         entry.info = [info];
     });
     return highlights;
@@ -1000,7 +1051,7 @@ async function getMDUserStatuses() {
 }
 exports.getMDUserStatuses = getMDUserStatuses;
 
-},{"../constants":1,"../network":14,"../parser/pagedResponse":17,"../utils":19,"@suwatte/daisuke":20,"he":undefined,"lodash":undefined,"moment":undefined}],13:[function(require,module,exports){
+},{"../constants":1,"../network":17,"../parser/pagedResponse":20,"../utils":22,"@suwatte/daisuke":23,"he":undefined,"lodash":undefined,"moment":undefined}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertMimasRec = exports.getMimasRecommendations = void 0;
@@ -1022,7 +1073,7 @@ const convertMimasRec = ({ contentId: id, title, coverImage: cover, }) => ({
 });
 exports.convertMimasRec = convertMimasRec;
 
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (Buffer){(function (){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1109,7 +1160,7 @@ async function POST(path, config) {
 exports.POST = POST;
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./constants":1,"@suwatte/daisuke":20,"buffer":84}],15:[function(require,module,exports){
+},{"./constants":1,"@suwatte/daisuke":23,"buffer":88}],18:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseChapterData = exports.getChapters = void 0;
@@ -1216,7 +1267,7 @@ const parseChapterData = async (json) => {
 };
 exports.parseChapterData = parseChapterData;
 
-},{"../constants":1,"../network":14,"../utils":19,"@suwatte/daisuke":20,"he":undefined}],16:[function(require,module,exports){
+},{"../constants":1,"../network":17,"../utils":22,"@suwatte/daisuke":23,"he":undefined}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseContent = void 0;
@@ -1413,7 +1464,7 @@ const parseContent = async ({ data }, contentId) => {
 };
 exports.parseContent = parseContent;
 
-},{"../constants":1,"../misc/md":12,"../utils":19,"@suwatte/daisuke":20,"he":undefined,"lodash":undefined}],17:[function(require,module,exports){
+},{"../constants":1,"../misc/md":15,"../utils":22,"@suwatte/daisuke":23,"he":undefined,"lodash":undefined}],20:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parsePagedResponse = void 0;
@@ -1453,7 +1504,7 @@ async function parsePagedResponse(json, fetchCovers = false) {
 }
 exports.parsePagedResponse = parsePagedResponse;
 
-},{"../constants":1,"../misc/md":12,"he":undefined}],18:[function(require,module,exports){
+},{"../constants":1,"../misc/md":15,"he":undefined}],21:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MDStore = exports.PREF_KEYS = void 0;
@@ -1558,7 +1609,7 @@ class MDStore {
 }
 exports.MDStore = MDStore;
 
-},{"./utils":19}],19:[function(require,module,exports){
+},{"./utils":22}],22:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoverQualityOptions = exports.languageCode = exports.languageLabel = exports.languages = exports.getURLSuffixFor = void 0;
@@ -1843,7 +1894,7 @@ exports.CoverQualityOptions = [
     },
 ];
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1863,25 +1914,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./runners"), exports);
 __exportStar(require("./types"), exports);
 
-},{"./runners":43,"./types":73}],21:[function(require,module,exports){
+},{"./runners":47,"./types":77}],24:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],22:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],23:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],24:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],25:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],26:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],27:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],28:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],29:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],26:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],27:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],28:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],29:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],30:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],31:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],32:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],33:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1905,8 +1958,9 @@ __exportStar(require("./LibrarySync"), exports);
 __exportStar(require("./StreamContextProvider"), exports);
 __exportStar(require("./ContextMenuHandler"), exports);
 __exportStar(require("./GroupedUpdateProvider"), exports);
+__exportStar(require("./ImageRedrawHandler"), exports);
 
-},{"./ChapterEvent":22,"./ContentEvent":23,"./ContextMenuHandler":24,"./GroupedUpdateProvider":25,"./LibrarySync":26,"./ProgressSync":27,"./StreamContextProvider":28}],30:[function(require,module,exports){
+},{"./ChapterEvent":25,"./ContentEvent":26,"./ContextMenuHandler":27,"./GroupedUpdateProvider":28,"./ImageRedrawHandler":29,"./LibrarySync":30,"./ProgressSync":31,"./StreamContextProvider":32}],34:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1926,11 +1980,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./handlers"), exports);
 __exportStar(require("./ContentSource"), exports);
 
-},{"./ContentSource":21,"./handlers":29}],31:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],32:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],33:[function(require,module,exports){
+},{"./ContentSource":24,"./handlers":33}],35:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],36:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],37:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1950,7 +2004,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./ContentTracker"), exports);
 __exportStar(require("./AdvancedTracker"), exports);
 
-},{"./AdvancedTracker":31,"./ContentTracker":32}],34:[function(require,module,exports){
+},{"./AdvancedTracker":35,"./ContentTracker":36}],38:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BasicAuthenticationUIIdentifier = void 0;
@@ -1960,19 +2014,19 @@ var BasicAuthenticationUIIdentifier;
     BasicAuthenticationUIIdentifier[BasicAuthenticationUIIdentifier["USERNAME"] = 1] = "USERNAME";
 })(BasicAuthenticationUIIdentifier || (exports.BasicAuthenticationUIIdentifier = BasicAuthenticationUIIdentifier = {}));
 
-},{}],35:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],36:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],37:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],38:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],39:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],40:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],41:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],40:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],41:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],42:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],43:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],44:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],45:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1997,7 +2051,7 @@ __exportStar(require("./PageProvider"), exports);
 __exportStar(require("./Setup"), exports);
 __exportStar(require("./PageResolver"), exports);
 
-},{"./Authentication":34,"./DirectoryHandler":35,"./ImageRequest":36,"./PageProvider":37,"./PageResolver":38,"./Preferences":39,"./Setup":40}],42:[function(require,module,exports){
+},{"./Authentication":38,"./DirectoryHandler":39,"./ImageRequest":40,"./PageProvider":41,"./PageResolver":42,"./Preferences":43,"./Setup":44}],46:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2022,7 +2076,7 @@ var RunnerEnvironment;
     RunnerEnvironment[RunnerEnvironment["TRACKER"] = 1] = "TRACKER";
 })(RunnerEnvironment || (exports.RunnerEnvironment = RunnerEnvironment = {}));
 
-},{"./extensions":41}],43:[function(require,module,exports){
+},{"./extensions":45}],47:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2043,14 +2097,14 @@ __exportStar(require("./ContentSource"), exports);
 __exportStar(require("./Runner"), exports);
 __exportStar(require("./ContentTracker"), exports);
 
-},{"./ContentSource":30,"./ContentTracker":33,"./Runner":42}],44:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],45:[function(require,module,exports){
+},{"./ContentSource":34,"./ContentTracker":37,"./Runner":46}],48:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],49:[function(require,module,exports){
 "use strict";
 // Picker
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],46:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UIStepper = exports.UIButton = exports.UIDatePicker = exports.UITextField = exports.UIToggle = exports.UIMultiPicker = exports.UIPicker = void 0;
@@ -2070,7 +2124,7 @@ exports.UIButton = UIButton;
 const UIStepper = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.STEPPER }));
 exports.UIStepper = UIStepper;
 
-},{"./UIElements":47}],47:[function(require,module,exports){
+},{"./UIElements":51}],51:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UIComponentType = void 0;
@@ -2085,7 +2139,7 @@ var UIComponentType;
     UIComponentType[UIComponentType["DATEPICKER"] = 6] = "DATEPICKER";
 })(UIComponentType || (exports.UIComponentType = UIComponentType = {}));
 
-},{}],48:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2107,9 +2161,9 @@ __exportStar(require("./UIElements"), exports);
 __exportStar(require("./UIDefinitions"), exports);
 __exportStar(require("./UIElementBuilders"), exports);
 
-},{"./Form":44,"./UIDefinitions":45,"./UIElementBuilders":46,"./UIElements":47}],49:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],50:[function(require,module,exports){
+},{"./Form":48,"./UIDefinitions":49,"./UIElementBuilders":50,"./UIElements":51}],53:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],54:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefinedLanguages = void 0;
@@ -2125,19 +2179,19 @@ var DefinedLanguages;
     DefinedLanguages["PORTUGUESE"] = "pt_BR";
 })(DefinedLanguages || (exports.DefinedLanguages = DefinedLanguages = {}));
 
-},{}],51:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],52:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],53:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],54:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],55:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],56:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],57:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],56:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],57:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],58:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],59:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],60:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],61:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.PublicationStatus = void 0;
@@ -2178,13 +2232,13 @@ var ContentType;
     ContentType[ContentType["NOVEL"] = 4] = "NOVEL";
 })(ContentType || (exports.ContentType = ContentType = {}));
 
-},{}],58:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],59:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],60:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],63:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],64:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],65:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProviderLinkType = void 0;
@@ -2196,9 +2250,9 @@ var ProviderLinkType;
     ProviderLinkType[ProviderLinkType["PATREON"] = 3] = "PATREON";
 })(ProviderLinkType || (exports.ProviderLinkType = ProviderLinkType = {}));
 
-},{}],62:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],63:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],67:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2230,7 +2284,7 @@ __exportStar(require("./BooleanState"), exports);
 __exportStar(require("./ContentProgressState"), exports);
 __exportStar(require("./GroupedUpdatesResponse"), exports);
 
-},{"./BooleanState":49,"./Chapter":50,"./ChapterData":51,"./Collection":52,"./Content":53,"./ContentProgressState":54,"./ContextMenu":55,"./DeepLinkContext":56,"./Enums":57,"./GroupedUpdatesResponse":58,"./Highlight":59,"./Property":60,"./Provider":61,"./ReaderContext":62}],64:[function(require,module,exports){
+},{"./BooleanState":53,"./Chapter":54,"./ChapterData":55,"./Collection":56,"./Content":57,"./ContentProgressState":58,"./ContextMenu":59,"./DeepLinkContext":60,"./Enums":61,"./GroupedUpdatesResponse":62,"./Highlight":63,"./Property":64,"./Provider":65,"./ReaderContext":66}],68:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthMethod = void 0;
@@ -2242,11 +2296,11 @@ var AuthMethod;
     AuthMethod[AuthMethod["OAUTH"] = 3] = "OAUTH";
 })(AuthMethod || (exports.AuthMethod = AuthMethod = {}));
 
-},{}],65:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],66:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],67:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],70:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],71:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CatalogRating = void 0;
@@ -2269,7 +2323,7 @@ var CatalogRating;
     CatalogRating[CatalogRating["NSFW"] = 2] = "NSFW";
 })(CatalogRating || (exports.CatalogRating = CatalogRating = {}));
 
-},{}],68:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2291,9 +2345,9 @@ __exportStar(require("./RunnerInfo"), exports);
 __exportStar(require("./PagedResult"), exports);
 __exportStar(require("./ContextProvider"), exports);
 
-},{"./Authentication":64,"./ContextProvider":65,"./PagedResult":66,"./RunnerInfo":67}],69:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],70:[function(require,module,exports){
+},{"./Authentication":68,"./ContextProvider":69,"./PagedResult":70,"./RunnerInfo":71}],73:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],74:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FilterType = void 0;
@@ -2325,9 +2379,9 @@ var FilterType;
     FilterType[FilterType["INFO"] = 5] = "INFO";
 })(FilterType || (exports.FilterType = FilterType = {}));
 
-},{}],71:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],72:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],76:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2348,7 +2402,7 @@ __exportStar(require("./DirectoryConfig"), exports);
 __exportStar(require("./DirectoryRequest"), exports);
 __exportStar(require("./DirectoryFilter"), exports);
 
-},{"./DirectoryConfig":69,"./DirectoryFilter":70,"./DirectoryRequest":71}],73:[function(require,module,exports){
+},{"./DirectoryConfig":73,"./DirectoryFilter":74,"./DirectoryRequest":75}],77:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2376,7 +2430,7 @@ __exportStar(require("./page"), exports);
 const Generate = (v) => v;
 exports.Generate = Generate;
 
-},{"./UI":48,"./content":63,"./core":68,"./directory":72,"./networking":80,"./page":81,"./tracker":82}],74:[function(require,module,exports){
+},{"./UI":52,"./content":67,"./core":72,"./directory":76,"./networking":84,"./page":85,"./tracker":86}],78:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NetworkClientBuilder = void 0;
@@ -2498,11 +2552,11 @@ class NetworkClientBuilder {
 }
 exports.NetworkClientBuilder = NetworkClientBuilder;
 
-},{}],75:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],76:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],77:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],80:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],81:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -2520,11 +2574,11 @@ const name = (base, known) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.name = name;
 
-},{}],78:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],79:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"dup":21}],80:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],83:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24}],84:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -2548,7 +2602,7 @@ __exportStar(require("./Response"), exports);
 __exportStar(require("./Transformer"), exports);
 __exportStar(require("./Error"), exports);
 
-},{"./Builder":74,"./Client":75,"./Error":76,"./Request":77,"./Response":78,"./Transformer":79}],81:[function(require,module,exports){
+},{"./Builder":78,"./Client":79,"./Error":80,"./Request":81,"./Response":82,"./Transformer":83}],85:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SectionStyle = void 0;
@@ -2564,7 +2618,7 @@ var SectionStyle;
     SectionStyle[SectionStyle["STANDARD_GRID"] = 7] = "STANDARD_GRID";
 })(SectionStyle || (exports.SectionStyle = SectionStyle = {}));
 
-},{}],82:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrackStatus = void 0;
@@ -2578,7 +2632,7 @@ var TrackStatus;
     TrackStatus["REREADING"] = "REREADING";
 })(TrackStatus || (exports.TrackStatus = TrackStatus = {}));
 
-},{}],83:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -2730,7 +2784,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],84:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * The buffer module from node.js, for the browser.
@@ -4511,7 +4565,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"base64-js":83,"buffer":84,"ieee754":85}],85:[function(require,module,exports){
+},{"base64-js":87,"buffer":88,"ieee754":89}],89:[function(require,module,exports){
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
@@ -4598,5 +4652,5 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}]},{},[9])(9)
+},{}]},{},[12])(12)
 });
