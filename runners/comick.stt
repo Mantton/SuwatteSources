@@ -253,7 +253,7 @@ class Target {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.5,
+        version: 0.51,
         website: "https://comick.app/home",
         supportedLanguages: [],
         thumbnail: "comick.png",
@@ -557,16 +557,17 @@ const MangaToContent = (data, contentId) => {
     const adultContent = (matureContent ?? false) || (hentai ?? false);
     const muGenres = mu_comics?.mu_comic_categories?.map((v) => v.mu_categories);
     const properties = [];
-    // Base Genres
-    properties.push({
-        id: "genres",
-        title: "Genres",
-        tags: ckGenres.map((v) => ({
-            id: v.slug,
-            title: v.name,
-            adultContent: false,
-        })),
-    });
+    if (ckGenres) {
+        properties.push({
+            id: "genres",
+            title: "Genres",
+            tags: ckGenres.map((v) => ({
+                id: v.slug,
+                title: v.name,
+                adultContent: false,
+            })),
+        });
+    }
     // MU Tags
     if (muGenres) {
         properties.push({
@@ -583,7 +584,9 @@ const MangaToContent = (data, contentId) => {
     let recommendedReadingMode = daisuke_1.ReadingMode.PAGED_MANGA;
     const longStripId = "long-strip";
     const fullColorId = "full-color";
-    const mapped = ckGenres.map((v) => v.slug);
+    const mapped = ckGenres?.map((v) => v.slug) ??
+        muGenres?.map((v) => v.slug) ??
+        [];
     if (mapped.includes(longStripId)) {
         recommendedReadingMode = daisuke_1.ReadingMode.WEBTOON;
     }
