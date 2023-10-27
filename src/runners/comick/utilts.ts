@@ -124,17 +124,17 @@ export const MangaToContent = (data: any, contentId: string): Content => {
 
   const properties: Property[] = [];
 
-  // Base Genres
-  properties.push({
-    id: "genres",
-    title: "Genres",
-    tags: ckGenres.map((v: Base) => ({
-      id: v.slug,
-      title: v.name,
-      adultContent: false,
-    })),
-  });
-
+  if (ckGenres) {
+    properties.push({
+      id: "genres",
+      title: "Genres",
+      tags: ckGenres.map((v: Base) => ({
+        id: v.slug,
+        title: v.name,
+        adultContent: false,
+      })),
+    });
+  }
   // MU Tags
   if (muGenres) {
     properties.push({
@@ -152,7 +152,10 @@ export const MangaToContent = (data: any, contentId: string): Content => {
   let recommendedReadingMode = ReadingMode.PAGED_MANGA;
   const longStripId = "long-strip";
   const fullColorId = "full-color";
-  const mapped = ckGenres.map((v: Base) => v.slug);
+  const mapped =
+    ckGenres?.map((v: Base) => v.slug) ??
+    muGenres?.map((v: any) => v.slug) ??
+    [];
 
   if (mapped.includes(longStripId)) {
     recommendedReadingMode = ReadingMode.WEBTOON;
