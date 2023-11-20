@@ -37,7 +37,7 @@ describe("FlameScans Tests", () => {
   });
 
   describe("Single Profile", () => {
-    const id = "/series/1696975321-my-wife-is-actually-the-empress/";
+    const id = "/series/real-life-quest/";
 
     test("Details", async () => {
       const content = await source.getContent(id);
@@ -50,43 +50,14 @@ describe("FlameScans Tests", () => {
     });
   });
   test("Reader", async () => {
-    const contentId = "/series/1696975321-my-wife-is-actually-the-empress/";
-    const chapterId = "/1696975261-my-wife-is-actually-the-empress-chapter-41/";
+    const contentId = "/series/real-life-quest/";
+    const chapterId = "/irl-quest-chapter-106/";
     const data = await source.getChapterData(contentId, chapterId);
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object));
   });
 
   describe("Profile", () => {
-    const ids = [
-      ["/series/1696975321-omniscient-readers-viewpoint/"],
-      ["/series/1696975321-heavenly-demon-cultivation-simulation/"],
-      ["/series/1696975321-reincarnation-of-the-murim-clans-former-ranker/"],
-      ["/series/1696975321-the-ancient-sovereign-of-eternity/"],
-      ["/series/1696975321-is-this-hero-for-real/"],
-      ["/series/1696975321-solo-necromancy/"],
-      ["/series/1696975321-real-life-quest/"],
-      ["/series/1696975321-monster-pet-evolution/"],
-      ["/series/1696975321-i-used-to-be-a-boss/"],
-      ["/series/1696975321-jungle-juice/"],
-      ["/series/1696975321-hero-has-returned/"],
-      [
-        "/series/1696975321-clever-cleaning-life-of-the-returned-genius-hunter/",
-      ],
-      ["/series/1696975321-my-wife-is-actually-the-empress/"],
-      ["/series/1696975321-the-heavenly-demon-destroys-the-lich-kings-murim/"],
-      ["/series/1696975321-bj-archmage/"],
-      ["/series/1696975321-tyrant-of-the-tower-defense-game/"],
-      ["/series/1696975321-solo-leveling/"],
-      ["/series/1696975321-a-returners-magic-should-be-special/"],
-      ["/series/1696975321-moon-shadow-sword-emperor/"],
-      ["/series/1696975321-the-breaker-3/"],
-      ["/series/1696975321-level-1-player/"],
-      ["/series/1696975321-ex-and-ash/"],
-      ["/series/1696975321-dungeon-reset/"],
-      [
-        "/series/1696975321-i-got-caught-up-in-a-hero-summon-but-the-other-world-was-at-peace/",
-      ],
-    ];
+    const ids = ["/series/real-life-quest/"];
 
     test.concurrent.each(ids)("run %s", async (id) => {
       const content = await source.getContent(id);

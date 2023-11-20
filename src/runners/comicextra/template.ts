@@ -14,7 +14,7 @@ import moment from "moment";
 
 export class ComicExtra extends TachiParsedHttpSource {
   name = "ComicExtra";
-  baseUrl = "https://comicextra.net";
+  baseUrl = "https://comicextra.me";
   lang = "en-US";
   supportsLatest = true;
 

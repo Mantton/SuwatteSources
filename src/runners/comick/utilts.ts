@@ -88,7 +88,7 @@ export const MangaToHighlight = (manga: MangaExcerpt): Highlight => {
 
 type Base = { name: string; slug: string };
 export const MangaToContent = (data: any, contentId: string): Content => {
-  const { comic, artists, authors, genres: ckGenres, matureContent } = data;
+  const { comic, artists, authors, matureContent } = data;
   const {
     title,
     links,
@@ -105,6 +105,7 @@ export const MangaToContent = (data: any, contentId: string): Content => {
     status: ckStatus,
     cover_url: cover,
     translation_completed,
+    md_comic_md_genres: mdGenres,
   } = comic;
   const creators: string[] = artists
     .map((v: Base) => v.name)
@@ -124,13 +125,13 @@ export const MangaToContent = (data: any, contentId: string): Content => {
 
   const properties: Property[] = [];
 
-  if (ckGenres) {
+  if (mdGenres) {
     properties.push({
       id: "genres",
       title: "Genres",
-      tags: ckGenres.map((v: Base) => ({
-        id: v.slug,
-        title: v.name,
+      tags: mdGenres.map(({ md_genres }: any) => ({
+        id: md_genres.slug,
+        title: md_genres.name,
         adultContent: false,
       })),
     });
@@ -153,8 +154,8 @@ export const MangaToContent = (data: any, contentId: string): Content => {
   const longStripId = "long-strip";
   const fullColorId = "full-color";
   const mapped =
-    ckGenres?.map((v: Base) => v.slug) ??
-    muGenres?.map((v: any) => v.slug) ??
+    properties?.[0].tags.map((v) => v.id) ??
+    properties?.[1].tags.map((v) => v.id) ??
     [];
 
   if (mapped.includes(longStripId)) {

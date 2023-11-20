@@ -3,17 +3,17 @@ import { TachiBuilder } from "../../template/tachiyomi";
 import { MangaThemesiaTemplate } from "../../template/mangathemesia";
 
 const info: RunnerInfo = {
-  id: "flamescans",
-  name: "Flame Scans",
+  id: "flamecomics",
+  name: "Flame Comics",
   thumbnail: "flamescans.png",
-  version: 0.1,
-  website: "https://flamescans.org",
+  version: 0.2,
+  website: "https://flamecomics.com",
 };
 
 class Template extends MangaThemesiaTemplate {
-  baseUrl = "https://flamescans.org";
+  baseUrl = "https://flamecomics.com";
   lang = "en_us";
-  name = "Flame Scans";
+  name = "Flame Comics";
 
   protected mangaUrlDirectory = "/series";
 }
