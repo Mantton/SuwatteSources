@@ -5,16 +5,16 @@ exports.Target = void 0;
 const tachiyomi_1 = require("../../template/tachiyomi");
 const mangathemesia_1 = require("../../template/mangathemesia");
 const info = {
-    id: "flamescans",
-    name: "Flame Scans",
+    id: "flamecomics",
+    name: "Flame Comics",
     thumbnail: "flamescans.png",
-    version: 0.1,
-    website: "https://flamescans.org",
+    version: 0.2,
+    website: "https://flamecomics.com",
 };
 class Template extends mangathemesia_1.MangaThemesiaTemplate {
-    baseUrl = "https://flamescans.org";
+    baseUrl = "https://flamecomics.com";
     lang = "en_us";
-    name = "Flame Scans";
+    name = "Flame Comics";
     mangaUrlDirectory = "/series";
 }
 exports.Target = new tachiyomi_1.TachiBuilder(info, Template);

@@ -8,7 +8,7 @@ const info = {
     id: "comicextra",
     name: "ComicExtra",
     thumbnail: "comicextra.png",
-    version: 0.1,
+    version: 0.11,
 };
 exports.Target = new tachiyomi_1.TachiBuilder(info, template_1.ComicExtra);
 
@@ -24,7 +24,7 @@ const tachiyomi_1 = require("../../template/tachiyomi");
 const moment_1 = __importDefault(require("moment"));
 class ComicExtra extends tachiyomi_1.TachiParsedHttpSource {
     name = "ComicExtra";
-    baseUrl = "https://comicextra.net";
+    baseUrl = "https://comicextra.me";
     lang = "en-US";
     supportsLatest = true;
     popularMangaSelector = () => "div.cartoon-box:has(> div.mb-right)";

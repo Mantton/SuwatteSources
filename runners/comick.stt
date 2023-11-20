@@ -253,7 +253,7 @@ class Target {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.51,
+        version: 0.52,
         website: "https://comick.app/home",
         supportedLanguages: [],
         thumbnail: "comick.png",
@@ -543,8 +543,8 @@ const MangaToHighlight = (manga) => {
 };
 exports.MangaToHighlight = MangaToHighlight;
 const MangaToContent = (data, contentId) => {
-    const { comic, artists, authors, genres: ckGenres, matureContent } = data;
-    const { title, links, hentai, user_follow_count, follow_rank, comment_count, follow_count, desc: summary, year, bayesian_rating, md_titles, mu_comics, status: ckStatus, cover_url: cover, translation_completed, } = comic;
+    const { comic, artists, authors, matureContent } = data;
+    const { title, links, hentai, user_follow_count, follow_rank, comment_count, follow_count, desc: summary, year, bayesian_rating, md_titles, mu_comics, status: ckStatus, cover_url: cover, translation_completed, md_comic_md_genres: mdGenres, } = comic;
     const creators = artists
         .map((v) => v.name)
         .concat(authors.map((v) => v.name));
@@ -557,13 +557,13 @@ const MangaToContent = (data, contentId) => {
     const adultContent = (matureContent ?? false) || (hentai ?? false);
     const muGenres = mu_comics?.mu_comic_categories?.map((v) => v.mu_categories);
     const properties = [];
-    if (ckGenres) {
+    if (mdGenres) {
         properties.push({
             id: "genres",
             title: "Genres",
-            tags: ckGenres.map((v) => ({
-                id: v.slug,
-                title: v.name,
+            tags: mdGenres.map(({ md_genres }) => ({
+                id: md_genres.slug,
+                title: md_genres.name,
                 adultContent: false,
             })),
         });
@@ -584,8 +584,8 @@ const MangaToContent = (data, contentId) => {
     let recommendedReadingMode = daisuke_1.ReadingMode.PAGED_MANGA;
     const longStripId = "long-strip";
     const fullColorId = "full-color";
-    const mapped = ckGenres?.map((v) => v.slug) ??
-        muGenres?.map((v) => v.slug) ??
+    const mapped = properties?.[0].tags.map((v) => v.id) ??
+        properties?.[1].tags.map((v) => v.id) ??
         [];
     if (mapped.includes(longStripId)) {
         recommendedReadingMode = daisuke_1.ReadingMode.WEBTOON;
