@@ -6,7 +6,7 @@ const info: RunnerInfo = {
   id: "flamecomics",
   name: "Flame Comics",
   thumbnail: "flamescans.png",
-  version: 0.2,
+  version: 0.3,
   website: "https://flamecomics.com",
 };
 
