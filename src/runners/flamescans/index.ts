@@ -15,7 +15,7 @@ class Template extends MangaThemesiaTemplate {
   lang = "en_us";
   name = "Flame Comics";
 
-  protected mangaUrlDirectory = "/series";
+  protected mangaUrlDirectory = "/series/";
 }
 
 export const Target = new TachiBuilder(info, Template);

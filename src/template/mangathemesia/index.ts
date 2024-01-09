@@ -12,8 +12,8 @@ import { CheerioAPI } from "cheerio";
 import moment from "moment";
 
 export abstract class MangaThemesiaTemplate extends TachiParsedHttpSource {
-  protected mangaUrlDirectory = "/manga";
-  protected projectPageString = "/project";
+  protected mangaUrlDirectory = "/manga/";
+  protected projectPageString = "/project/";
   protected searchQueryKey = "title";
   protected dateFormat = "MMMM dd, yyyy";
   supportsLatest = true;
