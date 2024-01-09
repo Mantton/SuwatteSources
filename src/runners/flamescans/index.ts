@@ -6,7 +6,7 @@ const info: RunnerInfo = {
   id: "flamecomics",
   name: "Flame Comics",
   thumbnail: "flamescans.png",
-  version: 0.2,
+  version: 0.3,
   website: "https://flamecomics.com",
 };
 
@@ -15,7 +15,7 @@ class Template extends MangaThemesiaTemplate {
   lang = "en_us";
   name = "Flame Comics";
 
-  protected mangaUrlDirectory = "/series";
+  protected mangaUrlDirectory = "/series/";
 }
 
 export const Target = new TachiBuilder(info, Template);
