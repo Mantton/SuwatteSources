@@ -45,7 +45,7 @@ export class Target
   info: RunnerInfo = {
     id: "app.comick",
     name: "ComicK",
-    version: 0.52,
+    version: 0.53,
     website: "https://comick.cc/home",
     supportedLanguages: [],
     thumbnail: "comick.png",
