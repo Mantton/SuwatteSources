@@ -45,15 +45,15 @@ export class Target
   info: RunnerInfo = {
     id: "app.comick",
     name: "ComicK",
-    version: 0.52,
-    website: "https://comick.app/home",
+    version: 0.53,
+    website: "https://comick.cc/home",
     supportedLanguages: [],
     thumbnail: "comick.png",
     minSupportedAppVersion: "5.0",
   };
 
   private client = new NetworkClient();
-  private API_URL = "https://api.comick.fun";
+  private API_URL = "https://api.comick.cc";
 
   async getContent(contentId: string): Promise<Content> {
     const data = await this.getManga(contentId);
@@ -190,7 +190,7 @@ export class Target
     return {
       url,
       headers: {
-        referer: "https://comic.app/",
+        referer: "https://comick.cc/",
       },
     };
   }
@@ -202,7 +202,7 @@ export class Target
   private homepage: HomePageProps | undefined;
 
   async willResolveSectionsForPage(_link: PageLink): Promise<any> {
-    const { data } = await this.client.get("https://comick.app/home");
+    const { data } = await this.client.get("https://comick.cc/home");
     const str = data
       .split(`<script id="__NEXT_DATA__" type="application/json">`)
       .pop()
@@ -223,8 +223,6 @@ export class Target
         return { items: await this.getUpdateHighlights(true) };
       case "recently_added":
         return { items: this.homepage.news.map(MDComicToHighlight) };
-      case "most_viewed_7":
-        return { items: this.homepage.trending["7"].map(MDComicToHighlight) };
       case "most_viewed_30":
         return { items: this.homepage.trending["30"].map(MDComicToHighlight) };
       case "popular_new_7":
@@ -276,11 +274,12 @@ export class Target
 
   async getUpdateHighlights(hot: boolean) {
     const { data: str } = await this.client.get(
-      "https://api.comick.app/chapter",
+      `${this.API_URL}/chapter`,
       {
         params: {
           page: "1",
           order: hot ? "hot" : "new",
+          tachiyomi: "true",
         },
       }
     );
