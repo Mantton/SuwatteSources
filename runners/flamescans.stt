@@ -8,14 +8,14 @@ const info = {
     id: "flamecomics",
     name: "Flame Comics",
     thumbnail: "flamescans.png",
-    version: 0.2,
+    version: 0.3,
     website: "https://flamecomics.com",
 };
 class Template extends mangathemesia_1.MangaThemesiaTemplate {
     baseUrl = "https://flamecomics.com";
     lang = "en_us";
     name = "Flame Comics";
-    mangaUrlDirectory = "/series";
+    mangaUrlDirectory = "/series/";
 }
 exports.Target = new tachiyomi_1.TachiBuilder(info, Template);
 
@@ -30,8 +30,8 @@ const daisuke_1 = require("@suwatte/daisuke");
 const tachiyomi_1 = require("../tachiyomi");
 const moment_1 = __importDefault(require("moment"));
 class MangaThemesiaTemplate extends tachiyomi_1.TachiParsedHttpSource {
-    mangaUrlDirectory = "/manga";
-    projectPageString = "/project";
+    mangaUrlDirectory = "/manga/";
+    projectPageString = "/project/";
     searchQueryKey = "title";
     dateFormat = "MMMM dd, yyyy";
     supportsLatest = true;
