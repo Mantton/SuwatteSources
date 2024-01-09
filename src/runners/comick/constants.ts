@@ -188,11 +188,6 @@ export const EXPLORE_COLLECTIONS: PageSection[] = [
     style: SectionStyle.DEFAULT,
   },
   {
-    id: "most_viewed_7",
-    title: "Most Viewed Titles This Week",
-    style: SectionStyle.DEFAULT,
-  },
-  {
     id: "most_viewed_30",
     title: "Most Viewed Titles This Month",
     style: SectionStyle.GALLERY,
