@@ -184,11 +184,6 @@ exports.EXPLORE_COLLECTIONS = [
         style: daisuke_1.SectionStyle.DEFAULT,
     },
     {
-        id: "most_viewed_7",
-        title: "Most Viewed Titles This Week",
-        style: daisuke_1.SectionStyle.DEFAULT,
-    },
-    {
         id: "most_viewed_30",
         title: "Most Viewed Titles This Month",
         style: daisuke_1.SectionStyle.GALLERY,
@@ -253,14 +248,14 @@ class Target {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.52,
-        website: "https://comick.app/home",
+        version: 0.53,
+        website: "https://comick.cc/home",
         supportedLanguages: [],
         thumbnail: "comick.png",
         minSupportedAppVersion: "5.0",
     };
     client = new NetworkClient();
-    API_URL = "https://api.comick.fun";
+    API_URL = "https://api.comick.cc";
     async getContent(contentId) {
         const data = await this.getManga(contentId);
         const content = (0, utilts_1.MangaToContent)(data, contentId);
@@ -383,7 +378,7 @@ class Target {
         return {
             url,
             headers: {
-                referer: "https://comic.app/",
+                referer: "https://comick.cc/",
             },
         };
     }
@@ -395,7 +390,7 @@ class Target {
     }
     homepage;
     async willResolveSectionsForPage(_link) {
-        const { data } = await this.client.get("https://comick.app/home");
+        const { data } = await this.client.get("https://comick.cc/home");
         const str = data
             .split(`<script id="__NEXT_DATA__" type="application/json">`)
             .pop()
@@ -412,8 +407,6 @@ class Target {
                 return { items: await this.getUpdateHighlights(true) };
             case "recently_added":
                 return { items: this.homepage.news.map(utilts_1.MDComicToHighlight) };
-            case "most_viewed_7":
-                return { items: this.homepage.trending["7"].map(utilts_1.MDComicToHighlight) };
             case "most_viewed_30":
                 return { items: this.homepage.trending["30"].map(utilts_1.MDComicToHighlight) };
             case "popular_new_7":
@@ -456,10 +449,11 @@ class Target {
         throw new Error("Unknown Section ID");
     }
     async getUpdateHighlights(hot) {
-        const { data: str } = await this.client.get("https://api.comick.app/chapter", {
+        const { data: str } = await this.client.get(`${this.API_URL}/chapter`, {
             params: {
                 page: "1",
                 order: hot ? "hot" : "new",
+                tachiyomi: "true",
             },
         });
         const data = JSON.parse(str)?.map((v) => (0, utilts_1.MDComicToHighlight)(v.md_comics));
@@ -593,7 +587,7 @@ const MangaToContent = (data, contentId) => {
     else if (mapped.includes(fullColorId)) {
         recommendedReadingMode = daisuke_1.ReadingMode.PAGED_COMIC;
     }
-    const webUrl = `https://comick.app/comic/${contentId}`;
+    const webUrl = `https://comick.cc/comic/${contentId}`;
     const status = convertStatus(ckStatus ?? 99);
     const genTags = [];
     if (year)
