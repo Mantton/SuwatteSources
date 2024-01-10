@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.STTPackage = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GlobalStore = exports.PUBLICATION_STATUS = exports.LANGUAGES = exports.CONTENT_RATINGS = exports.DEMOGRAPHICS = exports.RESULT_LIMIT = exports.LAST_SEASONAL_LIST_ID = exports.SEASONAL_LIST_ID = exports.ADULT_TAG_IDS = exports.COVER_URL = exports.API_URL = void 0;
+exports.GlobalStore = exports.PUBLICATION_STATUS = exports.LANGUAGES = exports.CONTENT_RATINGS = exports.DEMOGRAPHICS = exports.RESULT_LIMIT = exports.STAFF_PICKS_LIST_ID = exports.LAST_SEASONAL_LIST_ID = exports.SEASONAL_LIST_ID = exports.ADULT_TAG_IDS = exports.COVER_URL = exports.API_URL = void 0;
 const store_1 = require("./store");
 exports.API_URL = "https://api.mangadex.org";
 exports.COVER_URL = "https://uploads.mangadex.org/covers";
@@ -10,8 +10,9 @@ exports.ADULT_TAG_IDS = [
     "97893a4c-12af-4dac-b6be-0dffb353568e",
     "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
 ];
-exports.SEASONAL_LIST_ID = "1b9f88f8-9880-464d-9ed9-59b7e36392e2";
-exports.LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
+exports.SEASONAL_LIST_ID = "907b6e91-b511-4095-927f-30227ccadfdc";
+exports.LAST_SEASONAL_LIST_ID = "1b9f88f8-9880-464d-9ed9-59b7e36392e2";
+exports.STAFF_PICKS_LIST_ID = "805ba886-dd99-4aa4-b460-4bd7c7b71352";
 exports.RESULT_LIMIT = 30;
 exports.DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
 exports.CONTENT_RATINGS = [
@@ -526,7 +527,7 @@ const utils_1 = require("./utils");
 exports.info = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.8,
+    version: 1.81,
     website: "https://mangadex.org",
     supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
         ? v.languageCode
@@ -626,6 +627,12 @@ const getHomePageSections = async () => {
             title: "Popular New Titles",
             style: daisuke_1.SectionStyle.GALLERY,
         },
+        {
+            id: "staff_picks",
+            title: "Staff Picks",
+            subtitle: "Curated Gems: The MD Team's Favorite Manga Selections",
+            style: daisuke_1.SectionStyle.GALLERY,
+        },
     ];
     // Seasonal Lists
     if (injectSeasonal) {
@@ -634,6 +641,12 @@ const getHomePageSections = async () => {
                 id: "seasonal",
                 title: "Seasonal List",
                 subtitle: "Titles from this anime season.",
+                style: daisuke_1.SectionStyle.GALLERY,
+            },
+            {
+                id: "prev_seasonal",
+                title: "Previous Seasonal List",
+                subtitle: "Titles from the previous anime season.",
                 style: daisuke_1.SectionStyle.GALLERY,
             },
         ]);
@@ -667,8 +680,12 @@ const resolveHomepageSection = async (_link, section) => {
             const { highlights: items, title: updatedTitle } = await (0, md_1.getCollectionForList)(constants_1.SEASONAL_LIST_ID);
             return { items, updatedTitle };
         }
-        case "seasonal_last": {
+        case "prev_seasonal": {
             const { highlights: items, title: updatedTitle } = await (0, md_1.getCollectionForList)(constants_1.LAST_SEASONAL_LIST_ID);
+            return { items, updatedTitle };
+        }
+        case "staff_picks": {
+            const { highlights: items, title: updatedTitle } = await (0, md_1.getCollectionForList)(constants_1.STAFF_PICKS_LIST_ID);
             return { items, updatedTitle };
         }
         // Get
