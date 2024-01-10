@@ -9,6 +9,7 @@ import {
   GlobalStore,
   LAST_SEASONAL_LIST_ID,
   SEASONAL_LIST_ID,
+  STAFF_PICKS_LIST_ID,
 } from "../constants";
 import {
   getCollectionForList,
@@ -72,6 +73,12 @@ export const getHomePageSections = async () => {
       title: "Popular New Titles",
       style: SectionStyle.GALLERY,
     },
+    {
+      id: "staff_picks",
+      title: "Staff Picks",
+      subtitle: "Curated Gems: The MD Team's Favorite Manga Selections",
+      style: SectionStyle.GALLERY,
+    },
   ];
 
   // Seasonal Lists
@@ -82,6 +89,12 @@ export const getHomePageSections = async () => {
           id: "seasonal",
           title: "Seasonal List",
           subtitle: "Titles from this anime season.",
+          style: SectionStyle.GALLERY,
+        },
+        {
+          id: "prev_seasonal",
+          title: "Previous Seasonal List",
+          subtitle: "Titles from the previous anime season.",
           style: SectionStyle.GALLERY,
         },
       ]
@@ -127,12 +140,16 @@ export const resolveHomepageSection = async (
       return { items, updatedTitle };
     }
 
-    case "seasonal_last": {
+    case "prev_seasonal": {
       const { highlights: items, title: updatedTitle } =
         await getCollectionForList(LAST_SEASONAL_LIST_ID);
       return { items, updatedTitle };
     }
-
+    case "staff_picks": {
+      const { highlights: items, title: updatedTitle } =
+        await getCollectionForList(STAFF_PICKS_LIST_ID);
+      return { items, updatedTitle };
+    }
     // Get
     case "recentlyUpdated":
       return {

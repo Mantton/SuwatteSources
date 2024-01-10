@@ -8,8 +8,9 @@ export const ADULT_TAG_IDS = [
   "97893a4c-12af-4dac-b6be-0dffb353568e",
   "5bd0e105-4481-44ca-b6e7-7544da56b1a3",
 ];
-export const SEASONAL_LIST_ID = "1b9f88f8-9880-464d-9ed9-59b7e36392e2";
-export const LAST_SEASONAL_LIST_ID = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9";
+export const SEASONAL_LIST_ID = "907b6e91-b511-4095-927f-30227ccadfdc";
+export const LAST_SEASONAL_LIST_ID = "1b9f88f8-9880-464d-9ed9-59b7e36392e2";
+export const STAFF_PICKS_LIST_ID = "805ba886-dd99-4aa4-b460-4bd7c7b71352";
 export const RESULT_LIMIT = 30;
 export const DEMOGRAPHICS = ["shounen", "shoujo", "seinen", "josei", "none"];
 export const CONTENT_RATINGS = [
