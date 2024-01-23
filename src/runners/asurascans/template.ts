@@ -8,6 +8,8 @@ export class Template extends MangaThemesiaTemplate {
   lang = "en";
   name = "Asura Scans";
 
+  dateFormat = "MMMM DD, yyyy";
+
   seriesDescriptionSelector =
     "div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))";
   seriesArtistSelector =
