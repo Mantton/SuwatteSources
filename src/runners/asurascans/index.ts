@@ -14,7 +14,7 @@ import { load } from "cheerio";
 const info: RunnerInfo = {
   id: "asurascans",
   name: "Asura Scans",
-  version: 0.1,
+  version: 0.2,
   thumbnail: "asurascan.png",
 };
 
