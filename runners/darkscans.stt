@@ -456,6 +456,7 @@ class ChapterRecognition {
     NUMBER_PATTERN = "([0-9]+)(\\.[0-9]+)?(\\.?[a-z]+)?";
     basic = new RegExp(`(ch\\.) *${this.NUMBER_PATTERN}`, "i");
     number = new RegExp(this.NUMBER_PATTERN);
+    preview = /preview/i;
     unwanted = /\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+/;
     unwantedWhiteSpace = /\s(?=extra|special|omake)/;
     parseChapterNumber(mangaTitle, chapterName, chapterNumber) {
@@ -476,6 +477,10 @@ class ChapterRecognition {
         const numberMatch = name.match(this.number);
         if (numberMatch) {
             return this.getChapterNumberFromMatch(numberMatch);
+        }
+        const previewMatch = name.match(this.preview);
+        if (previewMatch) {
+            return 0;
         }
         return chapterNumber !== undefined
             ? chapterNumber

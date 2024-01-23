@@ -9,7 +9,7 @@ const cheerio_1 = require("cheerio");
 const info = {
     id: "asurascans",
     name: "Asura Scans",
-    version: 0.1,
+    version: 0.2,
     thumbnail: "asurascan.png",
 };
 class Target extends tachiyomi_1.TachiBuilder {
@@ -139,6 +139,7 @@ class Template extends mangathemesia_1.MangaThemesiaTemplate {
     baseUrl = "https://asuratoon.com";
     lang = "en";
     name = "Asura Scans";
+    dateFormat = "MMMM DD, yyyy";
     seriesDescriptionSelector = "div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))";
     seriesArtistSelector = ".fmed b:contains(artist)+span, .infox span:contains(artist)";
     seriesAuthorSelector = ".fmed b:contains(author)+span, .infox span:contains(author)";
@@ -320,6 +321,7 @@ class ChapterRecognition {
     NUMBER_PATTERN = "([0-9]+)(\\.[0-9]+)?(\\.?[a-z]+)?";
     basic = new RegExp(`(ch\\.) *${this.NUMBER_PATTERN}`, "i");
     number = new RegExp(this.NUMBER_PATTERN);
+    preview = /preview/i;
     unwanted = /\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+/;
     unwantedWhiteSpace = /\s(?=extra|special|omake)/;
     parseChapterNumber(mangaTitle, chapterName, chapterNumber) {
@@ -340,6 +342,10 @@ class ChapterRecognition {
         const numberMatch = name.match(this.number);
         if (numberMatch) {
             return this.getChapterNumberFromMatch(numberMatch);
+        }
+        const previewMatch = name.match(this.preview);
+        if (previewMatch) {
+            return 0;
         }
         return chapterNumber !== undefined
             ? chapterNumber
