@@ -2,6 +2,7 @@ export class ChapterRecognition {
   private readonly NUMBER_PATTERN: string = "([0-9]+)(\\.[0-9]+)?(\\.?[a-z]+)?";
   private basic = new RegExp(`(ch\\.) *${this.NUMBER_PATTERN}`, "i");
   private number = new RegExp(this.NUMBER_PATTERN);
+  private preview = /preview/i;
   private unwanted = /\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+/;
   private unwantedWhiteSpace = /\s(?=extra|special|omake)/;
 
@@ -32,6 +33,11 @@ export class ChapterRecognition {
     const numberMatch = name.match(this.number);
     if (numberMatch) {
       return this.getChapterNumberFromMatch(numberMatch);
+    }
+
+    const previewMatch = name.match(this.preview);
+    if (previewMatch) {
+      return 0;
     }
 
     return chapterNumber !== undefined
