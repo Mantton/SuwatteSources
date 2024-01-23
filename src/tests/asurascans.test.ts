@@ -36,7 +36,7 @@ describe("Asura Scans Tests", () => {
       expect(data.results.length).toBeGreaterThan(1);
     });
   });
-  const id = "/manga/2122552102-return-of-the-unrivaled-spear-knight/";
+  const id = "/manga/4622438374-player-who-returned-10000-years-later/";
 
   test("Profile", async () => {
     const content = await source.getContent(id);
@@ -51,7 +51,7 @@ describe("Asura Scans Tests", () => {
 
   test("Reader", async () => {
     const chapterId =
-      "/2122552102-return-of-the-unrivaled-spear-knight-chapter-110/";
+      "/1398222385-player-who-returned-10000-years-later-chapter-1/";
     const data = await source.getChapterData(id, chapterId);
     expect(ChapterDataSchema.parse(data)).toEqual(expect.any(Object));
   });
