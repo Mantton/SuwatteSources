@@ -234,7 +234,7 @@ export class Parser {
     if (!script) throw new Error("Could not find script with image data.");
 
     const imgHttpLisString = script
-      .split("const imgHttpLis = ")
+      .split("const imgHttps = ")
       .pop()
       ?.split(";")?.[0]
       .trim();
