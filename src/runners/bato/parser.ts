@@ -256,15 +256,7 @@ export class Parser {
       enc.Utf8
     );
 
-    if (!imgAccListString) throw new Error("Invalid Acc List String");
-
     const imgAccList: string[] = JSON.parse(imgAccListString);
-
-    console.info(imgAccList)
-
-    // if (!Array.isArray(imgAccList) || imgAccList.length == 0)
-    //   throw new Error("Acc List Is Invalid");
-
     const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`);
 
     return urls.map((url) => ({ url }));
