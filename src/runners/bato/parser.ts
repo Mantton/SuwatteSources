@@ -234,7 +234,7 @@ export class Parser {
     if (!script) throw new Error("Could not find script with image data.");
 
     const imgHttpLisString = script
-      .split("const imgHttpLis = ")
+      .split("const imgHttps = ")
       .pop()
       ?.split(";")?.[0]
       .trim();
@@ -256,13 +256,7 @@ export class Parser {
       enc.Utf8
     );
 
-    if (!imgAccListString) throw new Error("Invalid Acc List String");
-
     const imgAccList: string[] = JSON.parse(imgAccListString);
-
-    if (!Array.isArray(imgAccList) || imgAccList.length == 0)
-      throw new Error("Acc List Is Invalid");
-
     const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`);
 
     return urls.map((url) => ({ url }));
