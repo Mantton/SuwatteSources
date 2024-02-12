@@ -596,7 +596,7 @@ class Target {
     info = {
         id: "to.bato",
         name: "Bato",
-        version: 0.3,
+        version: 0.4,
         website: "https://bato.to",
         supportedLanguages: [],
         thumbnail: "bato.png",
@@ -846,7 +846,7 @@ class Parser {
         if (!script)
             throw new Error("Could not find script with image data.");
         const imgHttpLisString = script
-            .split("const imgHttpLis = ")
+            .split("const imgHttps = ")
             .pop()
             ?.split(";")?.[0]
             .trim();
@@ -863,11 +863,7 @@ class Parser {
             throw new Error("Bad State");
         const evaluatedPass = eval(batoPass).toString();
         const imgAccListString = crypto_js_1.AES.decrypt(batoWord, evaluatedPass).toString(crypto_js_1.enc.Utf8);
-        if (!imgAccListString)
-            throw new Error("Invalid Acc List String");
         const imgAccList = JSON.parse(imgAccListString);
-        if (!Array.isArray(imgAccList) || imgAccList.length == 0)
-            throw new Error("Acc List Is Invalid");
         const urls = imgHttpList.map((v, i) => `${v}?${imgAccList[i]}`);
         return urls.map((url) => ({ url }));
     }
