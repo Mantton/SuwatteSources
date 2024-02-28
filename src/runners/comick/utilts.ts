@@ -163,7 +163,7 @@ export const MangaToContent = (data: any, contentId: string): Content => {
   } else if (mapped.includes(fullColorId)) {
     recommendedReadingMode = ReadingMode.PAGED_COMIC;
   }
-  const webUrl = `https://comick.cc/comic/${contentId}`;
+  const webUrl = `https://comick.io/comic/${contentId}`;
   const status = convertStatus(ckStatus ?? 99);
 
   const genTags: string[] = [];
