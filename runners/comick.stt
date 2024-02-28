@@ -248,14 +248,14 @@ class Target {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.53,
-        website: "https://comick.cc/home",
+        version: 0.54,
+        website: "https://comick.io/home",
         supportedLanguages: [],
         thumbnail: "comick.png",
         minSupportedAppVersion: "5.0",
     };
     client = new NetworkClient();
-    API_URL = "https://api.comick.cc";
+    API_URL = "https://api.comick.io";
     async getContent(contentId) {
         const data = await this.getManga(contentId);
         const content = (0, utilts_1.MangaToContent)(data, contentId);
@@ -378,7 +378,7 @@ class Target {
         return {
             url,
             headers: {
-                referer: "https://comick.cc/",
+                referer: "https://comick.io/",
             },
         };
     }
@@ -390,7 +390,7 @@ class Target {
     }
     homepage;
     async willResolveSectionsForPage(_link) {
-        const { data } = await this.client.get("https://comick.cc/home");
+        const { data } = await this.client.get("https://comick.io/home");
         const str = data
             .split(`<script id="__NEXT_DATA__" type="application/json">`)
             .pop()
@@ -587,7 +587,7 @@ const MangaToContent = (data, contentId) => {
     else if (mapped.includes(fullColorId)) {
         recommendedReadingMode = daisuke_1.ReadingMode.PAGED_COMIC;
     }
-    const webUrl = `https://comick.cc/comic/${contentId}`;
+    const webUrl = `https://comick.io/comic/${contentId}`;
     const status = convertStatus(ckStatus ?? 99);
     const genTags = [];
     if (year)
