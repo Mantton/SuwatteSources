@@ -46,14 +46,14 @@ export class Target
     id: "app.comick",
     name: "ComicK",
     version: 0.53,
-    website: "https://comick.cc/home",
+    website: "https://comick.io/home",
     supportedLanguages: [],
     thumbnail: "comick.png",
     minSupportedAppVersion: "5.0",
   };
 
   private client = new NetworkClient();
-  private API_URL = "https://api.comick.cc";
+  private API_URL = "https://api.comick.io";
 
   async getContent(contentId: string): Promise<Content> {
     const data = await this.getManga(contentId);
@@ -190,7 +190,7 @@ export class Target
     return {
       url,
       headers: {
-        referer: "https://comick.cc/",
+        referer: "https://comick.io/",
       },
     };
   }
@@ -202,7 +202,7 @@ export class Target
   private homepage: HomePageProps | undefined;
 
   async willResolveSectionsForPage(_link: PageLink): Promise<any> {
-    const { data } = await this.client.get("https://comick.cc/home");
+    const { data } = await this.client.get("https://comick.io/home");
     const str = data
       .split(`<script id="__NEXT_DATA__" type="application/json">`)
       .pop()
