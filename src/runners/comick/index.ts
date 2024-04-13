@@ -53,7 +53,7 @@ export class Target
   };
 
   private client = new NetworkClient();
-  private API_URL = "https://api.comick.io";
+  private API_URL = "https://api.comick.fun";
 
   async getContent(contentId: string): Promise<Content> {
     const data = await this.getManga(contentId);
