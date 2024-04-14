@@ -248,14 +248,14 @@ class Target {
     info = {
         id: "app.comick",
         name: "ComicK",
-        version: 0.54,
+        version: 0.55,
         website: "https://comick.io/home",
         supportedLanguages: [],
         thumbnail: "comick.png",
         minSupportedAppVersion: "5.0",
     };
     client = new NetworkClient();
-    API_URL = "https://api.comick.io";
+    API_URL = "https://api.comick.fun";
     async getContent(contentId) {
         const data = await this.getManga(contentId);
         const content = (0, utilts_1.MangaToContent)(data, contentId);
