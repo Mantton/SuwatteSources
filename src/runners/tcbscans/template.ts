@@ -14,7 +14,7 @@ import {
 
 export class TCBScans extends TachiParsedHttpSource {
   name = "TCB Scans";
-  baseUrl = "https://onepiecechapters.com";
+  baseUrl = "https://tcbscans.me";
   lang = "en";
   supportsLatest = false;
 
