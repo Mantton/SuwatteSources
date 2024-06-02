@@ -6,6 +6,6 @@ const info: RunnerInfo = {
   id: "tcbscans",
   name: "TCB Scans",
   thumbnail: "tcb.png",
-  version: 0.1,
+  version: 0.2,
 };
 export const Target = new TachiBuilder(info, TCBScans);
