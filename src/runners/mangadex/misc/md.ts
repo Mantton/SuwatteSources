@@ -191,38 +191,44 @@ export async function getMDSearchResults(
     params["order[followedCount]"] = "desc";
   }
 
-  // for (const filter of query.filters ?? []) {
-  //   const included = filter.included ?? [];
-  //   const excluded = filter.excluded ?? [];
-  //   switch (filter.id) {
-  //     case "demographic":
-  //       params.publicationDemographic = included;
-  //       break;
-  //     case "content_rating":
-  //       params.contentRating =
-  //         included.length == 0
-  //           ? ["safe", "suggestive", "erotica", "pornographic"]
-  //           : included;
-  //       break;
-  //     case "lang":
-  //     case "language":
-  //       params.originalLanguage = included;
-  //       break;
-  //     case "pb_status":
-  //     case "status":
-  //       params.status = included;
-  //       break;
-  //     case "author":
-  //     case "credits":
-  //       params.authors = included;
-  //       break;
-  //     default:
-  //       params.includedTags = included;
-  //       params.excludedTags = excluded;
+  console.log(query);
 
-  //       break;
-  //   }
-  // }
+  for (const key in query.filters ?? {}) {
+    const filter = query.filters[key];
+    if (!filter) {
+      break;
+    }
+    const included = filter.included ?? [];
+    const excluded = filter.excluded ?? [];
+    switch (key) {
+      case "demographic":
+        params.publicationDemographic = included;
+        break;
+      case "content_rating":
+        params.contentRating =
+          included.length == 0
+            ? ["safe", "suggestive", "erotica", "pornographic"]
+            : included;
+        break;
+      case "lang":
+      case "language":
+        params.originalLanguage = included;
+        break;
+      case "pb_status":
+      case "status":
+        params.status = included;
+        break;
+      case "author":
+      case "credits":
+        params.authors = included;
+        break;
+      default:
+        params.includedTags = included;
+        params.excludedTags = excluded;
+
+        break;
+    }
+  }
   const response = await GET("/manga", { params });
 
   return parsePagedResponse(response);
