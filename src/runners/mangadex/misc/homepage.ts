@@ -101,20 +101,20 @@ export const getHomePageSections = async () => {
     );
   }
 
-  // Mimas Recommendations
-  if (injectMimasRecs) {
-    const ids = await GlobalStore.getMimasTargets();
+  // // Mimas Recommendations
+  // if (injectMimasRecs) {
+  //   const ids = await GlobalStore.getMimasTargets();
 
-    const recommended = ids.map(
-      (v): PageSection => ({
-        id: `mimas|${v}`,
-        title: "Recommendation",
-        style: SectionStyle.DEFAULT,
-      })
-    );
+  //   const recommended = ids.map(
+  //     (v): PageSection => ({
+  //       id: `mimas|${v}`,
+  //       title: "Recommendation",
+  //       style: SectionStyle.DEFAULT,
+  //     })
+  //   );
 
-    sections.push(...recommended);
-  }
+  //   sections.push(...recommended);
+  // }
 
   const shuffled = shuffle(sections);
   shuffled.push({
