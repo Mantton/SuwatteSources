@@ -498,7 +498,7 @@ const utils_1 = require("./utils");
 exports.info = {
     name: "MangaDex",
     id: "org.mangadex",
-    version: 1.81,
+    version: 1.82,
     website: "https://mangadex.org",
     supportedLanguages: utils_1.languages.map((v) => v.languageCode.includes("-")
         ? v.languageCode
@@ -1075,6 +1075,7 @@ exports.POST = exports.GET = exports.isTokenExpired = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
 const constants_1 = require("./constants");
 const client = new daisuke_1.NetworkClientBuilder()
+    .setRateLimit(5, 1.25)
     .addRequestInterceptor(AuthInterceptor)
     .build();
 async function AuthInterceptor(request) {
