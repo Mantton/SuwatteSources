@@ -6,6 +6,7 @@ import {
 import { API_URL } from "./constants";
 
 const client = new NetworkClientBuilder()
+  .setRateLimit(5, 1.25)
   .addRequestInterceptor(AuthInterceptor)
   .build();
 
