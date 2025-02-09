@@ -88,7 +88,7 @@ var AJAX_DIRECTORY;
     AJAX_DIRECTORY["COMPLETED"] = "completed";
     AJAX_DIRECTORY["TOP_RATED"] = "rating";
     AJAX_DIRECTORY["NEW"] = "new";
-})(AJAX_DIRECTORY = exports.AJAX_DIRECTORY || (exports.AJAX_DIRECTORY = {}));
+})(AJAX_DIRECTORY || (exports.AJAX_DIRECTORY = AJAX_DIRECTORY = {}));
 exports.EXPLORE_SECTIONS = [
     {
         id: AJAX_DIRECTORY.POPULAR_AT,

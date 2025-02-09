@@ -522,7 +522,7 @@ exports.Target = {
 },{"./impl":6,"./impl/directoryHandler":5,"./utils":22,"@suwatte/daisuke":23}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSearchSorters = void 0;
+exports.getSearchSorters = getSearchSorters;
 async function getSearchSorters() {
     const data = {
         followedCount: "Popular",
@@ -539,7 +539,6 @@ async function getSearchSorters() {
         title,
     }));
 }
-exports.getSearchSorters = getSearchSorters;
 
 },{}],14:[function(require,module,exports){
 "use strict";
@@ -709,7 +708,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMDUserStatuses = exports.getMDReadingStatus = exports.getStatusFlagForReadingFlag = exports.isSignedIn = exports.clearTokens = exports.getPopularNewTitles = exports.getCollectionForList = exports.buildFilters = exports.getMDSearchResults = exports.getMDUpdates = exports.getMDList = exports.getMDStatistics = exports.getMDRelatedCollections = exports.getMDCovers = void 0;
+exports.getMDCovers = getMDCovers;
+exports.getMDRelatedCollections = getMDRelatedCollections;
+exports.getMDStatistics = getMDStatistics;
+exports.getMDList = getMDList;
+exports.getMDUpdates = getMDUpdates;
+exports.getMDSearchResults = getMDSearchResults;
+exports.buildFilters = buildFilters;
+exports.getCollectionForList = getCollectionForList;
+exports.getPopularNewTitles = getPopularNewTitles;
+exports.clearTokens = clearTokens;
+exports.isSignedIn = isSignedIn;
+exports.getStatusFlagForReadingFlag = getStatusFlagForReadingFlag;
+exports.getMDReadingStatus = getMDReadingStatus;
+exports.getMDUserStatuses = getMDUserStatuses;
 const daisuke_1 = require("@suwatte/daisuke");
 const constants_1 = require("../constants");
 const network_1 = require("../network");
@@ -736,7 +748,6 @@ async function getMDCovers(ids) {
     }
     return results;
 }
-exports.getMDCovers = getMDCovers;
 // Gets related titles for provided ids
 async function getMDRelatedCollections(ids) {
     const response = await (0, network_1.GET)("/manga", {
@@ -748,7 +759,6 @@ async function getMDRelatedCollections(ids) {
     const paged = await (0, pagedResponse_1.parsePagedResponse)(response);
     return paged.results;
 }
-exports.getMDRelatedCollections = getMDRelatedCollections;
 // Gets the stats for the provided ids
 async function getMDStatistics(ids) {
     const response = await (0, network_1.GET)("/statistics/manga", {
@@ -767,7 +777,6 @@ async function getMDStatistics(ids) {
     };
     return ids.reduce((a, v) => ({ ...a, [v]: getValue(v) }), {});
 }
-exports.getMDStatistics = getMDStatistics;
 // Fetches an MD List
 async function getMDList(listId, pageNumber = 1) {
     const { data } = await (0, network_1.GET)(`/list/${listId}`);
@@ -788,7 +797,6 @@ async function getMDList(listId, pageNumber = 1) {
         highlights: (await (0, pagedResponse_1.parsePagedResponse)(page)).results,
     };
 }
-exports.getMDList = getMDList;
 // Fetches Updates from MD
 async function getMDUpdates(page) {
     const contentRating = await constants_1.GlobalStore.getContentRatings();
@@ -834,7 +842,6 @@ async function getMDUpdates(page) {
     });
     return highlights;
 }
-exports.getMDUpdates = getMDUpdates;
 // Fetches Search results from MD
 async function getMDSearchResults(query, overrides = {}) {
     const page = query.page ?? 1;
@@ -891,7 +898,6 @@ async function getMDSearchResults(query, overrides = {}) {
     const response = await (0, network_1.GET)("/manga", { params });
     return (0, pagedResponse_1.parsePagedResponse)(response);
 }
-exports.getMDSearchResults = getMDSearchResults;
 async function buildFilters() {
     const filters = [];
     const { data } = await (0, network_1.GET)(`/manga/tag`);
@@ -958,12 +964,10 @@ async function buildFilters() {
     });
     return filters;
 }
-exports.buildFilters = buildFilters;
 async function getCollectionForList(id) {
     const list = await getMDList(id);
     return { highlights: list.highlights, title: list.title };
 }
-exports.getCollectionForList = getCollectionForList;
 async function getPopularNewTitles() {
     const date = (0, moment_1.default)().subtract({ month: 1 }).toDate();
     const contentRating = await constants_1.GlobalStore.getContentRatings();
@@ -980,12 +984,10 @@ async function getPopularNewTitles() {
     });
     return (0, pagedResponse_1.parsePagedResponse)(response);
 }
-exports.getPopularNewTitles = getPopularNewTitles;
 async function clearTokens() {
     await SecureStore.remove("session");
     await SecureStore.remove("refresh");
 }
-exports.clearTokens = clearTokens;
 async function isSignedIn() {
     const session = await SecureStore.string("session");
     const refresh = await SecureStore.string("refresh");
@@ -998,7 +1000,6 @@ async function isSignedIn() {
     }
     return true;
 }
-exports.isSignedIn = isSignedIn;
 async function getStatusFlagForReadingFlag(flag) {
     const READING_STATUS = {
         reading: daisuke_1.ReadingFlag.READING,
@@ -1011,7 +1012,6 @@ async function getStatusFlagForReadingFlag(flag) {
     return (Object.keys(READING_STATUS).find((key) => READING_STATUS[key] === flag) ??
         "reading");
 }
-exports.getStatusFlagForReadingFlag = getStatusFlagForReadingFlag;
 // Authenticated User
 function getMDReadingStatus(str) {
     switch (str) {
@@ -1032,7 +1032,6 @@ function getMDReadingStatus(str) {
     }
     return daisuke_1.ReadingFlag.UNKNOWN;
 }
-exports.getMDReadingStatus = getMDReadingStatus;
 async function getMDUserStatuses() {
     try {
         const response = await (0, network_1.GET)(`$/manga/status`);
@@ -1043,12 +1042,12 @@ async function getMDUserStatuses() {
     }
     return {};
 }
-exports.getMDUserStatuses = getMDUserStatuses;
 
 },{"../constants":1,"../network":17,"../parser/pagedResponse":20,"../utils":22,"@suwatte/daisuke":23,"he":undefined,"lodash":undefined,"moment":undefined}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertMimasRec = exports.getMimasRecommendations = void 0;
+exports.convertMimasRec = void 0;
+exports.getMimasRecommendations = getMimasRecommendations;
 async function getMimasRecommendations(id) {
     const MIMAS_URL = "https://mimas.mantton.com";
     const client = new NetworkClient();
@@ -1059,7 +1058,6 @@ async function getMimasRecommendations(id) {
         target: data.target,
     };
 }
-exports.getMimasRecommendations = getMimasRecommendations;
 const convertMimasRec = ({ contentId: id, title, coverImage: cover, }) => ({
     id,
     title,
@@ -1071,7 +1069,9 @@ exports.convertMimasRec = convertMimasRec;
 (function (Buffer){(function (){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.POST = exports.GET = exports.isTokenExpired = void 0;
+exports.isTokenExpired = isTokenExpired;
+exports.GET = GET;
+exports.POST = POST;
 const daisuke_1 = require("@suwatte/daisuke");
 const constants_1 = require("./constants");
 const client = new daisuke_1.NetworkClientBuilder()
@@ -1139,20 +1139,17 @@ function isTokenExpired(token) {
     return (Date.now() >=
         JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).exp * 1000);
 }
-exports.isTokenExpired = isTokenExpired;
 async function GET(path, config) {
     const url = `${constants_1.API_URL}${path}`;
     const { data: response } = await client.get(url, config);
     const data = JSON.parse(response);
     return data;
 }
-exports.GET = GET;
 async function POST(path, config) {
     const { data: response } = await client.post(`${constants_1.API_URL}${path}`, config);
     const data = JSON.parse(response);
     return data;
 }
-exports.POST = POST;
 
 }).call(this)}).call(this,require("buffer").Buffer)
 },{"./constants":1,"@suwatte/daisuke":23,"buffer":88}],18:[function(require,module,exports){
@@ -1462,7 +1459,7 @@ exports.parseContent = parseContent;
 },{"../constants":1,"../misc/md":15,"../utils":22,"@suwatte/daisuke":23,"he":undefined,"lodash":undefined}],20:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parsePagedResponse = void 0;
+exports.parsePagedResponse = parsePagedResponse;
 const he_1 = require("he");
 const md_1 = require("../misc/md");
 const constants_1 = require("../constants");
@@ -1497,7 +1494,6 @@ async function parsePagedResponse(json, fetchCovers = false) {
         totalResultCount: json.total,
     };
 }
-exports.parsePagedResponse = parsePagedResponse;
 
 },{"../constants":1,"../misc/md":15,"he":undefined}],21:[function(require,module,exports){
 "use strict";

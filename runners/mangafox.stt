@@ -210,7 +210,7 @@ class Template extends tachiyomi_1.TachiParsedHttpSource {
             .toArray()
             .map((v) => {
             const elem = document(v);
-            return "https:" + elem.attr("data-original") ?? "";
+            return "https:" + elem.attr("data-original");
         });
     }
     async imageRequest(url) {
