@@ -6,7 +6,8 @@ import {
   DirectoryRequest,
   PagedResult,
 } from "@suwatte/daisuke";
-import { Cheerio, AnyNode, CheerioAPI, load } from "cheerio";
+import { Cheerio, CheerioAPI, load } from "cheerio";
+import type { AnyNode } from "domhandler";
 import { TachiHttpSource } from "./HttpSource";
 import { ChapterRecognition } from "../ChapterRecognition";
 export type CheerioElement = Cheerio<AnyNode>;

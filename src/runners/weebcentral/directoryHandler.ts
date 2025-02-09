@@ -10,7 +10,8 @@ import {
   ExcludableMultiSelectProp,
 } from "@suwatte/daisuke";
 import { HOST_URL } from ".";
-import { CheerioAPI, Element, load } from "cheerio";
+import { CheerioAPI, load } from "cheerio";
+import type { Element } from "domhandler";
 
 const FETCH_LIMIT = 24;
 

@@ -3,7 +3,8 @@ import {
   NetworkRequest,
   PublicationStatus,
 } from "@suwatte/daisuke";
-import { AnyNode, Cheerio, CheerioAPI } from "cheerio";
+import { Cheerio, CheerioAPI } from "cheerio";
+import type { AnyNode } from "domhandler";
 import moment from "moment";
 import {
   CANCELLED_STATUS_LIST,

@@ -9,7 +9,8 @@ import {
   PublicationStatus,
   Tag,
 } from "@suwatte/daisuke";
-import { CheerioAPI, Element, load } from "cheerio";
+import { CheerioAPI, load } from "cheerio";
+import type { Element } from "domhandler";
 import moment from "moment";
 import { ADULT_IDS, FilterResult } from "./constants";
 

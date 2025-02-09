@@ -9,7 +9,9 @@ import {
   PublicationStatus,
   ReadingMode,
 } from "@suwatte/daisuke";
-import { load, Element } from "cheerio";
+import { load } from "cheerio";
+import type { Element } from "domhandler";
+
 import { decode, encode } from "he";
 import moment from "moment";
 import { getAllGenreTags } from "./constants";

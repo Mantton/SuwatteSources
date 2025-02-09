@@ -12,7 +12,8 @@ import {
   ChapterPage,
 } from "@suwatte/daisuke";
 import { HOST_URL } from ".";
-import { CheerioAPI, load, Element } from "cheerio";
+import { CheerioAPI, load } from "cheerio";
+import type { Element } from "domhandler";
 import moment from "moment";
 import { ChapterRecognition } from "../../template/tachiyomi";
 
