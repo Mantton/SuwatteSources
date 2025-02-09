@@ -163,7 +163,7 @@ export class Template extends TachiParsedHttpSource {
       .toArray()
       .map((v) => {
         const elem = document(v);
-        return "https:" + elem.attr("data-original") ?? "";
+        return "https:" + elem.attr("data-original");
       });
   }
 

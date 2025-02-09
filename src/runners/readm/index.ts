@@ -36,7 +36,7 @@ export class Target extends TachiBuilder implements PageLinkResolver {
       .map((v): Highlight => {
         const element = $(v);
         const cover =
-          this.source.baseUrl + element.find("img").first().attr("src") ?? "";
+          this.source.baseUrl + element.find("img").first().attr("src");
         const id =
           element
             .find("a")
@@ -56,8 +56,7 @@ export class Target extends TachiBuilder implements PageLinkResolver {
         const id = element.find("a").first().attr("href") ?? "";
         const title = element.find("a").first().attr("title") ?? "";
         const cover =
-          this.source.baseUrl + element.find("img").first().attr("data-src") ??
-          "";
+          this.source.baseUrl + element.find("img").first().attr("data-src");
 
         return { id, title, cover };
       });
@@ -83,8 +82,7 @@ export class Target extends TachiBuilder implements PageLinkResolver {
           const id = element.find(".poster-media a").first().attr("href") ?? "";
           const title = element.find("img").first().attr("alt") ?? "";
           const cover =
-            this.source.baseUrl +
-              element.find("img").first().attr("data-src") ?? "";
+            this.source.baseUrl + element.find("img").first().attr("data-src");
 
           return { id, title, cover };
         });

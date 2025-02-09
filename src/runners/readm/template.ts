@@ -35,7 +35,7 @@ export class Template extends TachiParsedHttpSource {
   }
 
   popularMangaFromElement(element: CheerioElement): Highlight {
-    const cover = this.baseUrl + element.find("img").attr("src") ?? "";
+    const cover = this.baseUrl + element.find("img").attr("src");
     const title = element.find("div.subject-title a").first().text().trim();
     const id = element.find("div.subject-title a").attr("href") ?? "";
     return { id, title, cover };
@@ -54,7 +54,7 @@ export class Template extends TachiParsedHttpSource {
     return "ul.latest-updates > li";
   }
   latestUpdatesFromElement(element: CheerioElement): Highlight {
-    const cover = this.baseUrl + element.find("img").attr("data-src") ?? "";
+    const cover = this.baseUrl + element.find("img").attr("data-src");
     const title = element.find("h2 a").first().text().trim();
     const id = element.find("h2 a").first().attr("href") ?? "";
     return { id, title, cover };
@@ -111,7 +111,7 @@ export class Template extends TachiParsedHttpSource {
   // * Details
   mangaDetailsParse(document: CheerioAPI): Content {
     const cover =
-      this.baseUrl + document("img.series-profile-thumb").attr("src") ?? "";
+      this.baseUrl + document("img.series-profile-thumb").attr("src");
     const title = document("h1.page-title").text().trim();
     const author = document("span#first_episode a").text().trim();
     const artist = document("span#last_episode a").text().trim();
@@ -175,7 +175,7 @@ export class Template extends TachiParsedHttpSource {
     return document("div.ch-images img")
       .toArray()
       .map((v) => {
-        return this.baseUrl + document(v).attr("src") ?? "";
+        return this.baseUrl + document(v).attr("src");
       });
   }
 }
