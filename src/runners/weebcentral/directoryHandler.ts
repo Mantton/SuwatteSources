@@ -112,9 +112,13 @@ const parseDirectoryResponse = ($: CheerioAPI): PagedResult => {
 };
 
 const parseDirectoryItem = ($: CheerioAPI, element: Element): Highlight => {
-  const title = $("div > a", element).first().text().trim();
+  const title = $("section:nth-of-type(2)  a", element).first().text().trim();
   const id =
-    $("div > a", element).first().attr("href")?.split("/").at(-2) ?? "";
+    $("section:nth-of-type(2) a", element)
+      .first()
+      .attr("href")
+      ?.split("/")
+      .at(-2) ?? "";
   const cover = $("img", element).first().attr("src") ?? "";
 
   return { id, title, cover };

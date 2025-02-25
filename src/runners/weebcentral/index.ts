@@ -13,7 +13,7 @@ export const HOST_URL = "https://weebcentral.com";
 export const info: RunnerInfo = {
   name: "Weeb Central",
   id: "aegir.weebcentral",
-  version: 1,
+  version: 1.01,
   website: HOST_URL,
   supportedLanguages: ["en_us"],
   thumbnail: "weebcentral.png",
