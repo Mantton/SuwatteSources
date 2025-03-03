@@ -12,7 +12,7 @@ export class Target extends MadaraTemplate implements ContentSource {
     id: "com.toonily",
     name: "Toonily",
     thumbnail: "toonily.png",
-    version: 1.5,
+    version: 1.51,
     website: "https://toonily.com",
     supportedLanguages: ["EN_US"],
     minSupportedAppVersion: "6.0",
@@ -26,7 +26,7 @@ export class Target extends MadaraTemplate implements ContentSource {
     super({
       ...DEFAULT_CONTEXT,
       baseUrl: "https://toonily.com",
-      contentPath: "webtoon",
+      contentPath: "serie",
       tagSelector: ".wp-manga-tags-list > a",
       filterNonMangaItems: false,
       chapterUseAJAX: true,
