@@ -13,7 +13,7 @@ export const HOST_URL = "https://weebcentral.com";
 export const info: RunnerInfo = {
   name: "Weeb Central",
   id: "aegir.weebcentral",
-  version: 1.01,
+  version: 1.02,
   website: HOST_URL,
   supportedLanguages: ["en_us"],
   thumbnail: "weebcentral.png",
@@ -25,7 +25,9 @@ export const WCImageInterceptor: ImageRequestHandler = {
     return {
       url: imageURL,
       headers: {
-        Accept: "image/avif,image/webp,*/*",
+        Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        Referer: "https://weebcentral.com/"
       },
     };
   },

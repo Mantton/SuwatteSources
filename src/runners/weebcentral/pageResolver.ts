@@ -36,7 +36,7 @@ async function buildHomePageSections(): Promise<PageSection[]> {
   // Hot Updates
   const hot_updates: PageSection = (() => {
     const SELECTOR =
-      "body > main > section:nth-of-type(1) > section  article.md\\:hidden";
+      "body > main > section:nth-of-type(2) > section  article.md\\:hidden";
     const items = $(SELECTOR).toArray();
     const highlights: Highlight[] = items.map((item) => {
       const el = $(item);
@@ -73,7 +73,7 @@ async function buildHomePageSections(): Promise<PageSection[]> {
 
   // Admin Recommendations
   const admin_recs: PageSection = (() => {
-    const SELECTOR = "body > main > section:nth-child(3) .glide__track li > a";
+    const SELECTOR = "body > main > section:nth-child(4) .glide__track li > a";
     const items = $(SELECTOR).toArray();
     const highlights: Highlight[] = items.map((item) => {
       const el = $(item);
@@ -99,7 +99,7 @@ async function buildHomePageSections(): Promise<PageSection[]> {
   // Recently Added
   const recently_added: PageSection = (() => {
     const SELECTOR =
-      "body > main > section:nth-child(2) > section:nth-child(2) > section:nth-child(3) a";
+      "body > main > section:nth-child(3) > section:nth-child(2) > section:nth-child(3) a";
     const items = $(SELECTOR).toArray();
     const highlights: Highlight[] = items.map((item) => {
       const el = $(item);
@@ -173,7 +173,7 @@ async function buildHomePageSections(): Promise<PageSection[]> {
   // Recently Added
   const latest_updates: PageSection = (() => {
     const SELECTOR =
-      "body > main > section:nth-child(2) > section:nth-child(1) article";
+      "body > main > section:nth-child(3) > section:nth-child(1) article";
     const items = $(SELECTOR).toArray();
     const highlights: Highlight[] = items.map((item) => {
       const el = $(item);
