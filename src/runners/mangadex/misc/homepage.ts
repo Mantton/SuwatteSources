@@ -6,9 +6,11 @@ import {
   SectionStyle,
 } from "@suwatte/daisuke";
 import {
+  FEATURED_LIST_ID,
   GlobalStore,
   LAST_SEASONAL_LIST_ID,
   SEASONAL_LIST_ID,
+  SELF_PUBLISHED_LIST_ID,
   STAFF_PICKS_LIST_ID,
 } from "../constants";
 import {
@@ -17,33 +19,23 @@ import {
   getMDUpdates,
   getPopularNewTitles,
 } from "./md";
-import { sample } from "lodash";
 import { getSearchSorters } from "./directory";
-import { convertMimasRec, getMimasRecommendations } from "./mimas";
+import { GET } from "../network";
+import { parsePagedResponse } from "../parser/pagedResponse";
+import moment from "moment";
 
 export const getHomePageSections = async () => {
-  const shuffle = <T>(array: T[]) => {
-    let currentIndex = array.length,
-      temporaryValue,
-      randomIndex;
-
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-  };
-  const injectMimasRecs = await GlobalStore.getMimasEnabled();
-  const injectSeasonal = await GlobalStore.getSeasonal();
   const sections: PageSection[] = [
+    {
+      id: "featured",
+      title: "Featured Titles",
+      style: SectionStyle.GALLERY,
+    },
+    {
+      id: "popular_new",
+      title: "Popular New Titles",
+      style: SectionStyle.INFO,
+    },
     {
       id: "followedCount",
       title: "Popular Titles...",
@@ -51,78 +43,53 @@ export const getHomePageSections = async () => {
       style: SectionStyle.INFO,
     },
     {
+      id: "seasonal",
+      title: "Seasonal List",
+      subtitle: "Titles from the Summer 2025 anime season.",
+      style: SectionStyle.GALLERY,
+    },
+    {
+      id: "prev_seasonal",
+      title: "Seasonal List",
+      subtitle: "Titles from the Winter 2025 anime season.",
+      style: SectionStyle.DEFAULT,
+    },
+    {
       id: "createdAt",
       title: "Recently Added",
       style: SectionStyle.DEFAULT,
     },
-
     {
       id: "rating",
       title: "Highly Rated Titles",
       subtitle: "Masterpieces",
       style: SectionStyle.INFO,
     },
+
     {
-      id: "relevance",
-      title: "Relevant Titles",
-      subtitle: "This sort option makes no fucking sense.",
+      id: "staff_picks",
+      title: "MD Staff Picks",
+      subtitle: "Curated Gems: The MD Team's Favorite Manga Selections",
       style: SectionStyle.DEFAULT,
     },
     {
-      id: "popular_new",
-      title: "Popular New Titles",
-      style: SectionStyle.GALLERY,
+      id: "self_published",
+      title: "Self Published",
+      style: SectionStyle.INFO,
     },
     {
-      id: "staff_picks",
-      title: "Staff Picks",
-      subtitle: "Curated Gems: The MD Team's Favorite Manga Selections",
-      style: SectionStyle.GALLERY,
+      id: "added_this_week",
+      title: "New This Week",
+      style: SectionStyle.INFO,
+    },
+    {
+      id: "recentlyUpdated",
+      title: "Latest Updates",
+      style: SectionStyle.PADDED_LIST,
     },
   ];
 
-  // Seasonal Lists
-  if (injectSeasonal) {
-    sections.push(
-      ...[
-        {
-          id: "seasonal",
-          title: "Seasonal List",
-          subtitle: "Titles from this anime season.",
-          style: SectionStyle.GALLERY,
-        },
-        {
-          id: "prev_seasonal",
-          title: "Previous Seasonal List",
-          subtitle: "Titles from the previous anime season.",
-          style: SectionStyle.GALLERY,
-        },
-      ]
-    );
-  }
-
-  // // Mimas Recommendations
-  // if (injectMimasRecs) {
-  //   const ids = await GlobalStore.getMimasTargets();
-
-  //   const recommended = ids.map(
-  //     (v): PageSection => ({
-  //       id: `mimas|${v}`,
-  //       title: "Recommendation",
-  //       style: SectionStyle.DEFAULT,
-  //     })
-  //   );
-
-  //   sections.push(...recommended);
-  // }
-
-  const shuffled = shuffle(sections);
-  shuffled.push({
-    id: "recentlyUpdated",
-    title: "Latest Updates",
-    style: SectionStyle.PADDED_LIST,
-  });
-  return shuffled;
+  return sections;
 };
 
 export const resolveHomepageSection = async (
@@ -150,47 +117,47 @@ export const resolveHomepageSection = async (
         await getCollectionForList(STAFF_PICKS_LIST_ID);
       return { items, updatedTitle };
     }
+    case "featured": {
+      const { highlights: items, title: updatedTitle } =
+        await getCollectionForList(FEATURED_LIST_ID);
+      return { items, updatedTitle };
+    }
+    case "self_published": {
+      const { highlights: items, title: updatedTitle } =
+        await getCollectionForList(SELF_PUBLISHED_LIST_ID);
+      return { items, updatedTitle };
+    }
     // Get
     case "recentlyUpdated":
       return {
         items: await getMDUpdates(1),
       };
+    case "added_this_week":
+      let date = moment().subtract(1, "week").format("YYYY-MM-DDTHH:mm:ss");
+      const location = `/manga?includes[]=cover_art&includes[]=artist&includes[]=author&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive&hasAvailableChapters=true&createdAtSince=${date}`;
+      const response = await GET(location);
+      let result = await parsePagedResponse(response);
+      return { items: result.results };
     default:
-      if (section.includes("mimas")) {
-        const id = section.split("|").pop();
-        if (!id) throw new Error("Improper Config");
-        const name =
-          sample(["More Like", "Because you read", "Similar to"]) ??
-          "More Like";
+      const sort = (await getSearchSorters()).find((v) => v.id === section)?.id;
+      const content_ratings = await GlobalStore.getContentRatings();
+      const query: DirectoryRequest = {
+        page: 1,
+        filters: { content_rating: { included: content_ratings } },
+        ...(sort && {
+          sort: {
+            id: sort,
+            ascending: false,
+          },
+        }),
+      };
 
-        const { target, recs } = await getMimasRecommendations(id);
-        return {
-          items: [convertMimasRec(target), ...recs.map(convertMimasRec)],
-          updatedTitle: `${name} "${target.title}"`,
-        };
-      } else {
-        const sort = (await getSearchSorters()).find(
-          (v) => v.id === section
-        )?.id;
-        const content_ratings = await GlobalStore.getContentRatings();
-        const query: DirectoryRequest = {
-          page: 1,
-          filters: { content_rating: { included: content_ratings } },
-          ...(sort && {
-            sort: {
-              id: sort,
-              ascending: false,
-            },
-          }),
-        };
-
-        const overrides = {
-          limit: 20,
-          getStats: ["followedCount", "rating"].includes(section),
-        };
-        return {
-          items: (await getMDSearchResults(query, overrides)).results,
-        };
-      }
+      const overrides = {
+        limit: 20,
+        getStats: ["followedCount", "rating"].includes(section),
+      };
+      return {
+        items: (await getMDSearchResults(query, overrides)).results,
+      };
   }
 };

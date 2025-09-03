@@ -191,8 +191,6 @@ export async function getMDSearchResults(
     params["order[followedCount]"] = "desc";
   }
 
-  console.log(query);
-
   for (const key in query.filters ?? {}) {
     const filter = query.filters[key];
     if (!filter) {

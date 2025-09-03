@@ -1,6 +1,5 @@
 import { CatalogRating, ContentSource, RunnerInfo } from "@suwatte/daisuke";
 import {
-  MDBasicAuthProvider,
   MDContentSource,
   MDPageLinkResolver,
   MDPreferenceProvider,
@@ -14,7 +13,7 @@ import { languages } from "./utils";
 export const info: RunnerInfo = {
   name: "MangaDex",
   id: "org.mangadex",
-  version: 1.82,
+  version: 1.9,
   website: "https://mangadex.org",
   supportedLanguages: languages.map((v) =>
     v.languageCode.includes("-")
@@ -32,7 +31,6 @@ export const Target: ContentSource = {
   ...MDDirectoryHandler,
   ...MDPageLinkResolver,
   ...MDPreferenceProvider,
-  ...MDBasicAuthProvider,
   ...MDLibraryEventHandler,
   ...MDContentSyncHandler,
   ...MDProgressStateHandler,

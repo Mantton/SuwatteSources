@@ -4,10 +4,8 @@ import { CoverQualityOptions, languages } from "../utils";
 import {
   Form,
   RunnerPreferenceProvider,
-  UIButton,
   UIMultiPicker,
   UIPicker,
-  UIStepper,
   UIToggle,
 } from "@suwatte/daisuke";
 import { GlobalStore } from "../constants";
@@ -70,52 +68,6 @@ export const MDPreferenceProvider: RunnerPreferenceProvider = {
               options: ratingOptions,
               value: await GlobalStore.getContentRatings(),
               didChange: GlobalStore.setContentRatings,
-            }),
-            UIToggle({
-              id: PREF_KEYS.showSeasonal,
-              title: "Show Seasonal Lists",
-              value: await GlobalStore.getSeasonal(),
-              didChange: GlobalStore.setSeasonal,
-            }),
-          ],
-        },
-        // * MIMAS
-        {
-          header: "Mimas Recommendations",
-          children: [
-            UIToggle({
-              id: PREF_KEYS.mimasEnabled,
-              title: "Enable Recommendations",
-              value: await GlobalStore.getMimasEnabled(),
-              didChange: GlobalStore.setMimasEnabled,
-            }),
-            UIStepper({
-              id: PREF_KEYS.mimasLimit,
-              title: "Limit",
-              upperBound: 10,
-              value: await GlobalStore.getMimasLimit(),
-              didChange: GlobalStore.setMimasLimit,
-            }),
-            UIButton({
-              id: "mimas_clear",
-              title: "Clear Current Recommendations",
-              isDestructive: true,
-              systemImage: "trash",
-              action: GlobalStore.clearMimasTargets,
-            }),
-          ],
-        },
-        // * AUTH
-        {
-          header: "Authentication",
-          children: [
-            UIButton({
-              id: "force_sign_out",
-              title: "Force Sign Out",
-              isDestructive: true,
-              async action() {
-                //
-              },
             }),
           ],
         },
