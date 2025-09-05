@@ -8,7 +8,7 @@ const info = {
     id: "tcbscans",
     name: "TCB Scans",
     thumbnail: "tcb.png",
-    version: 0.2,
+    version: 0.3,
 };
 exports.Target = new tachiyomi_1.TachiBuilder(info, template_1.TCBScans);
 
@@ -19,7 +19,7 @@ exports.TCBScans = void 0;
 const tachiyomi_1 = require("../../template/tachiyomi");
 class TCBScans extends tachiyomi_1.TachiParsedHttpSource {
     name = "TCB Scans";
-    baseUrl = "https://tcbscans.me";
+    baseUrl = "https://tcbonepiecechapters.com";
     lang = "en";
     supportsLatest = false;
     // Popular
