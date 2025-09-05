@@ -2,318 +2,378 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Target = void 0;
-const daisuke_1 = require("@suwatte/daisuke");
 const tachiyomi_1 = require("../../template/tachiyomi");
 const template_1 = require("./template");
-const cheerio_1 = require("cheerio");
 const info = {
     id: "asurascans",
     name: "Asura Scans",
     version: 0.2,
+    website: "https://asuracomic.net",
     thumbnail: "asurascan.png",
 };
-class Target extends tachiyomi_1.TachiBuilder {
-    constructor() {
-        super(info, template_1.Template);
-    }
-    async getSectionsForPage(link) {
-        if (link.id !== "home")
-            throw new Error("Accessing invalid page");
-        return this.getHomePage();
-    }
-    resolvePageSection(_, __) {
-        throw new Error("Method not used");
-    }
-    async getHomePage() {
-        const client = this.source.client;
-        const { data: response } = await client.get(this.source.baseUrl);
-        const $ = (0, cheerio_1.load)(response);
-        const cleanImage = (val) => val.match(/(https:\/\/asuratoon\.com\/[^']+)/)?.[1] ?? val;
-        const trendingWeekly = $(".slide-item")
-            .toArray()
-            .map((val) => {
-            const element = $(val);
-            const cover = cleanImage(element.find("img").attr("src") ?? "");
-            const info = element.find(".title > .ellipsis");
-            const title = info.text().trim();
-            const id = this.source.getUrlWithoutDomain(info.find("a").attr("href") ?? "");
-            const genres = $(".extra-category > a")
-                .toArray()
-                .map((v) => $(v).text().trim())
-                .join(", ");
-            return { id, title, cover, info: [genres] };
-        });
-        const trendingDaily = $(".listupd > .bs")
-            .toArray()
-            .map((val) => {
-            const element = $(val);
-            const id = this.source.getUrlWithoutDomain(element.find("a").attr("href") ?? "");
-            const title = element.find(".tt").text().trim();
-            const cover = cleanImage(element.find("img").attr("src") ?? "");
-            return { id, title, cover };
-        });
-        const parsePopList = (selector) => $(selector)
-            .toArray()
-            .map((val) => {
-            const element = $(val);
-            const id = this.source.getUrlWithoutDomain(element.find("a.series").attr("href") ?? "");
-            const cover = cleanImage(element.find(".series img").attr("src") ?? "");
-            const title = element.find("h2").text().trim();
-            const genres = element
-                .find("span > a")
-                .toArray()
-                .map((v) => $(v).text().trim())
-                .join(", ");
-            return { id, cover, title, info: [genres] };
-        });
-        const popularWeekly = parsePopList(".wpop-weekly li");
-        const popularMonthly = parsePopList(".wpop-monthly li");
-        const popularAllTime = parsePopList(".wpop-alltime li");
-        const latestUpdates = $(".listupd .utao")
-            .toArray()
-            .map((val) => {
-            const element = $(val);
-            const id = this.source.getUrlWithoutDomain(element.find("a.series").attr("href") ?? "");
-            const title = element.find("h4").text().trim();
-            const cover = element.find(".imgu img").attr("src") ?? "";
-            const latestChapter = `${element
-                .find("ul > li > a")
-                .first()
-                .text()
-                .trim()} • ${element.find("ul > li > span").first().text().trim()}`;
-            return {
-                id,
-                title,
-                cover,
-                info: [latestChapter],
-            };
-        });
-        return [
-            {
-                id: "trending_weekly",
-                title: "Trending Weekly",
-                items: trendingWeekly,
-                style: daisuke_1.SectionStyle.GALLERY,
-            },
-            {
-                id: "trending_daily",
-                title: "Trending Daily",
-                items: trendingDaily,
-            },
-            {
-                id: "popular_weekly",
-                title: "Popular Titles This Week",
-                items: popularWeekly,
-            },
-            {
-                id: "popular_monthly",
-                title: "Monthly Picks",
-                items: popularMonthly,
-                style: daisuke_1.SectionStyle.INFO,
-            },
-            {
-                id: "popular_at",
-                title: "Must Reads",
-                subtitle: "All time favorites, binge-worthy, thrilling stories",
-                items: popularAllTime,
-                style: daisuke_1.SectionStyle.GALLERY,
-            },
-            {
-                id: "latest",
-                title: "Latest Updates",
-                items: latestUpdates,
-                style: daisuke_1.SectionStyle.PADDED_LIST,
-                viewMoreLink: { request: { page: 1, sort: { id: "latest" } } },
-            },
-        ];
-    }
-}
-exports.Target = Target;
+exports.Target = new tachiyomi_1.TachiBuilder(info, template_1.Template);
 
-},{"../../template/tachiyomi":6,"./template":2,"@suwatte/daisuke":12,"cheerio":undefined}],2:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Template = void 0;
-const mangathemesia_1 = require("../../template/mangathemesia");
-class Template extends mangathemesia_1.MangaThemesiaTemplate {
-    baseUrl = "https://asuratoon.com";
-    lang = "en";
-    name = "Asura Scans";
-    dateFormat = "MMMM DD, yyyy";
-    seriesDescriptionSelector = "div.desc p, div.entry-content p, div[itemprop=description]:not(:has(p))";
-    seriesArtistSelector = ".fmed b:contains(artist)+span, .infox span:contains(artist)";
-    seriesAuthorSelector = ".fmed b:contains(author)+span, .infox span:contains(author)";
-    pageSelector = "div.rdminimal > img, div.rdminimal > p > img, div.rdminimal > a > img, div.rdminimal > p > a > img, " +
-        "div.rdminimal > noscript > img, div.rdminimal > p > noscript > img, div.rdminimal > a > noscript > img, div.rdminimal > p > a > noscript > img";
-    searchMangaRequest(request) {
-        const req = super.searchMangaRequest(request);
-        if (!request.query)
-            return req;
-        const url = `${this.baseUrl}/page/${request.page}/`;
-        const params = req.params ?? {};
-        delete params.page;
-        delete params.title;
-        params["s"] = request.query;
-        return { url, params };
-    }
-    pageListParse(document) {
-        const elements = document(this.pageSelector)
-            .toArray()
-            .map((v) => document(v))
-            .map((v) => v.attr("src") ?? "");
-        return elements;
-    }
-}
-exports.Template = Template;
-
-},{"../../template/mangathemesia":3}],3:[function(require,module,exports){
+},{"../../template/tachiyomi":5,"./template":2}],2:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MangaThemesiaTemplate = void 0;
+exports.Template = void 0;
 const daisuke_1 = require("@suwatte/daisuke");
-const tachiyomi_1 = require("../tachiyomi");
+const tachiyomi_1 = require("../../template/tachiyomi");
+const cheerio_1 = require("cheerio");
 const moment_1 = __importDefault(require("moment"));
-class MangaThemesiaTemplate extends tachiyomi_1.TachiParsedHttpSource {
-    mangaUrlDirectory = "/manga/";
-    projectPageString = "/project/";
-    searchQueryKey = "title";
-    dateFormat = "MMMM dd, yyyy";
+class Template extends tachiyomi_1.TachiParsedHttpSource {
+    baseUrl = "https://asuracomic.net";
+    lang = "en";
+    name = "Asura Scans";
     supportsLatest = true;
-    imageSrc(element) {
-        return (element.attr("data-lazy-src") ??
-            element.attr("data-src") ??
-            element.attr("src") ??
-            "");
+    headers() {
+        return { Referer: `${this.baseUrl}/` };
     }
-    // * Search
+    // Cache for remote filter options
+    cachedFilters;
+    // Search / Directory
     searchMangaSelector() {
-        return ".utao .uta .imgu, .listupd .bs .bsx, .listo .bs .bsx";
+        return "div.grid > a[href]";
     }
     searchMangaNextPageSelector() {
-        return "div.pagination .next, div.hpage .r";
+        return "div.flex > a.flex.bg-themecolor:contains(Next)";
     }
     searchMangaFromElement(element) {
-        const cover = this.imageSrc(element.find("img"));
-        const title = element.find("a").attr("title") ?? element.text().trim();
-        const id = this.getUrlWithoutDomain(element.find("a").attr("href") ?? "");
-        return { id, cover, title };
+        let id = this.getUrlWithoutDomain(element.attr("href") ?? "");
+        if (id && !id.startsWith("/"))
+            id = "/" + id;
+        const title = element.find("div.block > span.block").text().trim() ||
+            element.text().trim();
+        const cover = element.find("img").attr("src") ?? "";
+        return { id, title, cover };
     }
     searchMangaRequest(request) {
-        const url = `${this.baseUrl}/${this.mangaUrlDirectory.substring(1)}`;
-        const params = {
-            title: request.query,
-            page: request.page,
-        };
-        params.order = request.sort?.id ?? "popular";
-        const res = { url, params };
-        return res;
-    }
-    // * Popular
-    popularMangaRequest(page) {
-        return this.searchMangaRequest({ page, sort: { id: "popular" } });
-    }
-    parsePopularManga(html) {
-        return this.parseSearchManga(html, { page: 0 });
+        const url = `${this.baseUrl}/series`;
+        const params = { page: request.page };
+        if (request.query)
+            params["name"] = request.query;
+        // Order support (rating, update, latest, asc, desc). Default rating per extension
+        params["order"] = request.sort?.id ?? "rating";
+        // Basic defaults to match extension
+        const filters = request.filters ?? {};
+        const genres = filters.genres ?? "";
+        const status = filters.status ?? "-1";
+        const types = filters.types ?? "-1";
+        params["genres"] = Array.isArray(genres) ? genres.join(",") : genres;
+        params["status"] = status;
+        params["types"] = Array.isArray(types) ? types.join(",") : types;
+        return { url, params };
     }
     popularMangaSelector() {
-        throw new Error("Method not used.");
+        return this.searchMangaSelector();
     }
-    popularMangaFromElement(_) {
-        throw new Error("Method not used.");
+    popularMangaFromElement(element) {
+        return this.searchMangaFromElement(element);
     }
-    // * Latest
-    latestUpdatesRequest(page) {
-        return this.searchMangaRequest({ page, sort: { id: "popular" } });
+    popularMangaNextPageSelector() {
+        return this.searchMangaNextPageSelector();
     }
-    parseLatestManga(html) {
-        return this.parseSearchManga(html, { page: 0 });
-    }
-    latestUpdatesSelector() {
-        throw new Error("Method not used.");
-    }
-    latestUpdatesFromElement(_) {
-        throw new Error("Method not used.");
-    }
-    // * Content
-    seriesDetailsSelector = "div.bigcontent, div.animefull, div.main-info, div.postbody";
-    seriesTitleSelector = "h1.entry-title";
-    seriesArtistSelector = ".infotable tr:contains(artist) td:last-child, .tsinfo .imptdt:contains(artist) i, .fmed b:contains(artist)+span, span:contains(artist)";
-    seriesAuthorSelector = ".infotable tr:contains(author) td:last-child, .tsinfo .imptdt:contains(author) i, .fmed b:contains(author)+span, span:contains(author)";
-    seriesDescriptionSelector = ".desc, .entry-content[itemprop=description]";
-    seriesAltNameSelector = ".alternative, .wd-full:contains(alt) span, .alter, .seriestualt";
-    seriesGenreSelector = "div.gnr a, .mgen a, .seriestugenre a, span:contains(genre)";
-    seriesTypeSelector = ".infotable tr:contains(type) td:last-child, .tsinfo .imptdt:contains(type) i, .tsinfo .imptdt:contains(type) a, .fmed b:contains(type)+span, span:contains(type) a, a[href*=type\\=]";
-    seriesStatusSelector = ".infotable tr:contains(status) td:last-child, .tsinfo .imptdt:contains(status) i, .fmed b:contains(status)+span span:contains(status)";
-    seriesThumbnailSelector = ".infomanga > div[itemprop=image] img, .thumb img";
-    mangaDetailsParse(document) {
-        const body = document(this.seriesDetailsSelector);
-        const title = body.find(this.seriesTitleSelector).first().text().trim() ?? "";
-        const artist = body.find(this.seriesArtistSelector).text().trim();
-        const author = body.find(this.seriesAuthorSelector).text().trim();
-        const summary = body.find(this.seriesDescriptionSelector).text().trim() + "\n";
-        const cover = this.imageSrc(body.find(this.seriesThumbnailSelector));
-        const info = [author, artist].filter((v) => !!v);
-        const status = this.parseStatus(body.find(this.seriesStatusSelector).text().trim().toLowerCase());
-        return { title, summary, cover, info, status };
-    }
-    // * Chapter
-    chapterListSelector() {
-        return "div.bxcl li, div.cl li, #chapterlist li, ul li:has(div.chbox):has(div.eph-num)";
-    }
-    chapterFromElement(element) {
-        const urlElements = element.find("a").first();
-        const url = this.getUrlWithoutDomain(urlElements.attr("href") ?? "");
-        let title = element.find(".lch a, .chapternum").text().trim();
-        if (!title)
-            title = urlElements.first().text().trim();
-        let date = new Date();
-        const dateStr = element.find(".chapterdate").first().text().trim();
-        if (dateStr) {
-            date = (0, moment_1.default)(dateStr, this.dateFormat).toDate();
-        }
+    popularMangaRequest(page) {
         return {
-            chapterId: url,
-            date,
-            title,
+            url: `${this.baseUrl}/series`,
+            params: { genres: "", status: "-1", types: "-1", order: "rating", page },
         };
     }
-    // * Page List
-    pageSelector = "div#readerarea img";
-    pageListParse(document) {
-        const htmlPages = document(this.pageSelector)
-            .toArray()
-            .map((elem) => this.imageSrc(document(elem)))
-            .filter((v) => !!v);
-        if (htmlPages.length)
-            return htmlPages;
-        const html = document.html();
-        const regex = /"images"\s*:\s*(\[.*?])/;
-        const imageListJSON = html.match(regex)?.[1] ?? "";
-        if (!imageListJSON) {
-            console.warn("Empty List");
-            return [];
-        }
-        const pages = JSON.parse(imageListJSON);
-        return pages;
+    latestUpdatesSelector() {
+        return this.searchMangaSelector();
     }
-    // * Helpers
+    latestUpdatesFromElement(element) {
+        return this.searchMangaFromElement(element);
+    }
+    latestUpdatesNextPageSelector() {
+        return this.searchMangaNextPageSelector();
+    }
+    latestUpdatesRequest(page) {
+        return {
+            url: `${this.baseUrl}/series`,
+            params: { genres: "", status: "-1", types: "-1", order: "update", page },
+        };
+    }
+    // Details
+    mangaDetailsParse(document) {
+        const title = document("span.text-xl.font-bold, h3.truncate").first().text().trim() ||
+            "";
+        const cover = document("img[alt=poster]").attr("src") ?? "";
+        const summary = document("span.font-medium.text-sm").first().text().trim();
+        const getInfoVal = (label) => {
+            const block = document("div.grid > div")
+                .toArray()
+                .find((el) => {
+                const first = document(el).find("h3").toArray()[0];
+                const txt = first ? document(first).text().trim().toLowerCase() : "";
+                return txt.includes(label.toLowerCase());
+            });
+            if (!block)
+                return "";
+            const h3s = document(block).find("h3").toArray();
+            if (h3s.length > 1)
+                return document(h3s[1]).text().trim();
+            return "";
+        };
+        const author = getInfoVal("author");
+        const artist = getInfoVal("artist");
+        const type = getInfoVal("type");
+        const statusText = getInfoVal("status");
+        const tags = document("div[class^=space] > div.flex > button.text-white")
+            .toArray()
+            .map((e) => document(e).text().trim())
+            .filter(Boolean);
+        const genres = [type, ...tags].filter(Boolean).join(", ");
+        const status = this.parseStatus(statusText);
+        const info = [author, artist].filter(Boolean);
+        return {
+            title,
+            cover,
+            summary,
+            status,
+            info,
+            recommendedPanelMode: daisuke_1.ReadingMode.WEBTOON,
+        };
+    }
     parseStatus(val) {
-        if (["ongoing", "publishing"].includes(val))
-            return daisuke_1.PublicationStatus.ONGOING;
-        if (val === "hiatus")
+        const v = (val || "").toLowerCase();
+        if (v === "hiatus")
             return daisuke_1.PublicationStatus.HIATUS;
-        if (val === "completed")
+        if (v === "completed")
             return daisuke_1.PublicationStatus.COMPLETED;
-        if (["dropped", "cancelled"].includes(val))
+        if (v === "dropped")
             return daisuke_1.PublicationStatus.CANCELLED;
+        if (v === "ongoing" || v === "season end")
+            return daisuke_1.PublicationStatus.ONGOING;
+        return undefined;
+    }
+    // Chapters
+    chapterListSelector() {
+        return "div.scrollbar-thumb-themecolor > div.group";
+    }
+    parseChapterList(html) {
+        const $ = (0, cheerio_1.load)(html);
+        const title = this.mangaDetailsParse($).title;
+        return $(this.chapterListSelector())
+            .toArray()
+            .filter((el) => $(el).find("svg").length === 0) // hide premium
+            .map((el, idx) => {
+            const data = this.chapterFromElement($(el));
+            return this.generateChapter(data, idx, title);
+        });
+    }
+    chapterFromElement(element) {
+        const a = element.find("a").first();
+        let url = this.getUrlWithoutDomain(a.attr("href") ?? "");
+        if (url && !url.startsWith("/"))
+            url = "/" + url;
+        if (url.startsWith("/") && !url.startsWith("/series/")) {
+            url = "/series" + url;
+        }
+        const chNumber = element.find("h3").first().text().trim();
+        const chTitle = element
+            .find("h3 > span")
+            .toArray()
+            .map((e) => element.find(e).text().trim())
+            .join(" ");
+        const title = chTitle ? `${chNumber} - ${chTitle}` : chNumber;
+        const rawDate = element.find("h3 + h3").first().text().trim();
+        const clean = rawDate.replace(/(\d+)(st|nd|rd|th)/gi, "$1");
+        const date = (0, moment_1.default)(clean, "MMMM D YYYY").toDate();
+        return { chapterId: url, title, date };
+    }
+    // Pages
+    pageListParse(document) {
+        // 1) Try __NEXT_DATA__ JSON structure if present
+        const nextDataRaw = document("script#__NEXT_DATA__").text();
+        if (nextDataRaw) {
+            try {
+                const json = JSON.parse(nextDataRaw);
+                const extractFromObject = (obj) => {
+                    if (!obj || typeof obj !== "object")
+                        return undefined;
+                    if (Array.isArray(obj.pages)) {
+                        const urls = this.normalizeImageArray(obj.pages);
+                        if (urls.length)
+                            return urls;
+                    }
+                    if (Array.isArray(obj.images)) {
+                        const urls = this.normalizeImageArray(obj.images);
+                        if (urls.length)
+                            return urls;
+                    }
+                    for (const key of Object.keys(obj)) {
+                        const val = obj[key];
+                        const res = extractFromObject(val);
+                        if (res && res.length)
+                            return res;
+                    }
+                    return undefined;
+                };
+                const urls = extractFromObject(json) ?? [];
+                if (urls.length)
+                    return urls;
+            }
+            catch {
+                // fallthrough
+            }
+        }
+        // 2) NEXT stream payload fallback (escaped strings)
+        const scriptsData = document("script")
+            .toArray()
+            .map((e) => document(e).text())
+            .filter((t) => t.includes("self.__next_f.push"))
+            .map((t) => {
+            const fq = t.indexOf('"');
+            const lq = t.lastIndexOf('"');
+            if (fq >= 0 && lq > fq)
+                return t.substring(fq + 1, lq);
+            return t;
+        })
+            .join("");
+        const match = scriptsData.match(/\"pages\"\s*:\s*(\[.*?])/);
+        if (match) {
+            const raw = match[1];
+            const unescaped = raw.replace(/\\(.)/g, "$1");
+            try {
+                const pages = JSON.parse(unescaped);
+                return pages.sort((a, b) => a.order - b.order).map((p) => p.url);
+            }
+            catch {
+                // continue
+            }
+        }
+        // 3) Generic HTML regex fallbacks for images/pages arrays
+        const html = document.html() || "";
+        const tryPatterns = [
+            /\"images\"\s*:\s*(\[.*?])/s,
+            /\"pages\"\s*:\s*(\[.*?])/s,
+        ];
+        for (const pattern of tryPatterns) {
+            const m = html.match(pattern);
+            if (m) {
+                const raw = m[1];
+                const unescaped = raw.replace(/\\(.)/g, "$1");
+                try {
+                    const arr = JSON.parse(unescaped);
+                    const urls = this.normalizeImageArray(arr);
+                    if (urls.length)
+                        return urls;
+                }
+                catch {
+                    try {
+                        const arr = JSON.parse(raw);
+                        const urls = this.normalizeImageArray(arr);
+                        if (urls.length)
+                            return urls;
+                    }
+                    catch {
+                        // continue
+                    }
+                }
+            }
+        }
+        // 4) Last resort: collect all image tags
+        const fallbackImgs = document("img")
+            .toArray()
+            .map((e) => document(e).attr("src") ?? "");
+        return fallbackImgs.filter((u) => /^https?:\/\//.test(u));
+    }
+    normalizeImageArray(arr) {
+        if (!Array.isArray(arr))
+            return [];
+        if (arr.every((v) => typeof v === "string")) {
+            return arr.filter((u) => /^https?:\/\//.test(u));
+        }
+        const urls = arr
+            .map((v) => (v && typeof v === "object" ? (v.url ?? v.src ?? "") : ""))
+            .filter((u) => typeof u === "string" && /^https?:\/\//.test(u));
+        return urls;
+    }
+    // Sorting & Filters
+    async getSortOptions() {
+        return [
+            { id: "rating", title: "Rating" },
+            { id: "update", title: "Latest Updates" },
+            { id: "latest", title: "Latest Added" },
+            { id: "asc", title: "A-Z" },
+            { id: "desc", title: "Z-A" },
+        ];
+    }
+    async getFilterList() {
+        const { genres, statuses, types } = await this.fetchFilters();
+        return [
+            {
+                id: "status",
+                title: "Status",
+                type: daisuke_1.FilterType.SELECT,
+                options: [{ id: "-1", title: "Any" }, ...statuses],
+            },
+            {
+                id: "types",
+                title: "Type",
+                type: daisuke_1.FilterType.MULTISELECT,
+                options: types,
+            },
+            {
+                id: "genres",
+                title: "Genres",
+                type: daisuke_1.FilterType.MULTISELECT,
+                options: genres,
+            },
+        ];
+    }
+    async fetchFilters() {
+        if (this.cachedFilters)
+            return this.cachedFilters;
+        const url = "https://gg.asuracomic.net/api/series/filters";
+        const { data } = await this.client.request({
+            url,
+            headers: this.headers(),
+        });
+        try {
+            const json = JSON.parse(data);
+            const genres = (json.genres ?? [])
+                .filter((g) => typeof g?.id === "number" && g.id > 0)
+                .map((g) => ({ id: String(g.id), title: String(g.name ?? "") }));
+            const statuses = (json.statuses ?? []).map((s) => ({
+                id: String(s.id),
+                title: String(s.name ?? ""),
+            }));
+            const types = (json.types ?? []).map((t) => ({
+                id: String(t.id),
+                title: String(t.name ?? ""),
+            }));
+            this.cachedFilters = { genres, statuses, types };
+            return this.cachedFilters;
+        }
+        catch {
+            // Fallback to minimal defaults if parsing fails
+            const fallback = {
+                genres: [],
+                statuses: [
+                    { id: "1", title: "Ongoing" },
+                    { id: "2", title: "Completed" },
+                    { id: "3", title: "Hiatus" },
+                    { id: "4", title: "Dropped" },
+                ],
+                types: [
+                    { id: "1", title: "Manga" },
+                    { id: "2", title: "Manhwa" },
+                    { id: "3", title: "Manhua" },
+                ],
+            };
+            this.cachedFilters = fallback;
+            return fallback;
+        }
     }
 }
-exports.MangaThemesiaTemplate = MangaThemesiaTemplate;
+exports.Template = Template;
 
-},{"../tachiyomi":6,"@suwatte/daisuke":12,"moment":undefined}],4:[function(require,module,exports){
+},{"../../template/tachiyomi":5,"@suwatte/daisuke":11,"cheerio":undefined,"moment":undefined}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChapterRecognition = void 0;
@@ -391,7 +451,7 @@ class ChapterRecognition {
 }
 exports.ChapterRecognition = ChapterRecognition;
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TachiBuilder = void 0;
@@ -465,7 +525,7 @@ class TachiBuilder {
 }
 exports.TachiBuilder = TachiBuilder;
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -486,7 +546,7 @@ __exportStar(require("./TachiBuilder"), exports);
 __exportStar(require("./source"), exports);
 __exportStar(require("./ChapterRecognition"), exports);
 
-},{"./ChapterRecognition":4,"./TachiBuilder":5,"./source":11}],7:[function(require,module,exports){
+},{"./ChapterRecognition":3,"./TachiBuilder":4,"./source":10}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TachiCatalogSource = void 0;
@@ -495,7 +555,7 @@ class TachiCatalogSource extends Source_1.TachiSource {
 }
 exports.TachiCatalogSource = TachiCatalogSource;
 
-},{"./Source":10}],8:[function(require,module,exports){
+},{"./Source":9}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TachiHttpSource = void 0;
@@ -585,7 +645,7 @@ class TachiHttpSource extends CatalogSource_1.TachiCatalogSource {
 }
 exports.TachiHttpSource = TachiHttpSource;
 
-},{"./CatalogSource":7,"@suwatte/daisuke":12}],9:[function(require,module,exports){
+},{"./CatalogSource":6,"@suwatte/daisuke":11}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TachiParsedHttpSource = void 0;
@@ -671,7 +731,7 @@ class TachiParsedHttpSource extends HttpSource_1.TachiHttpSource {
 }
 exports.TachiParsedHttpSource = TachiParsedHttpSource;
 
-},{"./HttpSource":8,"cheerio":undefined}],10:[function(require,module,exports){
+},{"./HttpSource":7,"cheerio":undefined}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TachiSource = void 0;
@@ -704,7 +764,7 @@ class TachiSource {
 }
 exports.TachiSource = TachiSource;
 
-},{"../ChapterRecognition":4}],11:[function(require,module,exports){
+},{"../ChapterRecognition":3}],10:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -726,7 +786,7 @@ __exportStar(require("./CatalogSource"), exports);
 __exportStar(require("./HttpSource"), exports);
 __exportStar(require("./ParsedHttpSource"), exports);
 
-},{"./CatalogSource":7,"./HttpSource":8,"./ParsedHttpSource":9,"./Source":10}],12:[function(require,module,exports){
+},{"./CatalogSource":6,"./HttpSource":7,"./ParsedHttpSource":8,"./Source":9}],11:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -746,27 +806,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./runners"), exports);
 __exportStar(require("./types"), exports);
 
-},{"./runners":36,"./types":66}],13:[function(require,module,exports){
+},{"./runners":35,"./types":65}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],14:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],15:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],16:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],17:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],18:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],19:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],20:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],21:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],22:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],14:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],15:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],16:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],17:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],18:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],19:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],20:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],21:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -792,7 +852,7 @@ __exportStar(require("./ContextMenuHandler"), exports);
 __exportStar(require("./GroupedUpdateProvider"), exports);
 __exportStar(require("./ImageRedrawHandler"), exports);
 
-},{"./ChapterEvent":14,"./ContentEvent":15,"./ContextMenuHandler":16,"./GroupedUpdateProvider":17,"./ImageRedrawHandler":18,"./LibrarySync":19,"./ProgressSync":20,"./StreamContextProvider":21}],23:[function(require,module,exports){
+},{"./ChapterEvent":13,"./ContentEvent":14,"./ContextMenuHandler":15,"./GroupedUpdateProvider":16,"./ImageRedrawHandler":17,"./LibrarySync":18,"./ProgressSync":19,"./StreamContextProvider":20}],22:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -812,11 +872,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./handlers"), exports);
 __exportStar(require("./ContentSource"), exports);
 
-},{"./ContentSource":13,"./handlers":22}],24:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],25:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],26:[function(require,module,exports){
+},{"./ContentSource":12,"./handlers":21}],23:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],24:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],25:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -836,7 +896,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./ContentTracker"), exports);
 __exportStar(require("./AdvancedTracker"), exports);
 
-},{"./AdvancedTracker":24,"./ContentTracker":25}],27:[function(require,module,exports){
+},{"./AdvancedTracker":23,"./ContentTracker":24}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BasicAuthenticationUIIdentifier = void 0;
@@ -846,19 +906,19 @@ var BasicAuthenticationUIIdentifier;
     BasicAuthenticationUIIdentifier[BasicAuthenticationUIIdentifier["USERNAME"] = 1] = "USERNAME";
 })(BasicAuthenticationUIIdentifier || (exports.BasicAuthenticationUIIdentifier = BasicAuthenticationUIIdentifier = {}));
 
-},{}],28:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],29:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],30:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],31:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],32:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],33:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],34:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],28:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],29:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],30:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],31:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],32:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],33:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -883,7 +943,7 @@ __exportStar(require("./PageProvider"), exports);
 __exportStar(require("./Setup"), exports);
 __exportStar(require("./PageResolver"), exports);
 
-},{"./Authentication":27,"./DirectoryHandler":28,"./ImageRequest":29,"./PageProvider":30,"./PageResolver":31,"./Preferences":32,"./Setup":33}],35:[function(require,module,exports){
+},{"./Authentication":26,"./DirectoryHandler":27,"./ImageRequest":28,"./PageProvider":29,"./PageResolver":30,"./Preferences":31,"./Setup":32}],34:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -908,7 +968,7 @@ var RunnerEnvironment;
     RunnerEnvironment[RunnerEnvironment["TRACKER"] = 1] = "TRACKER";
 })(RunnerEnvironment || (exports.RunnerEnvironment = RunnerEnvironment = {}));
 
-},{"./extensions":34}],36:[function(require,module,exports){
+},{"./extensions":33}],35:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -929,14 +989,14 @@ __exportStar(require("./ContentSource"), exports);
 __exportStar(require("./Runner"), exports);
 __exportStar(require("./ContentTracker"), exports);
 
-},{"./ContentSource":23,"./ContentTracker":26,"./Runner":35}],37:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],38:[function(require,module,exports){
+},{"./ContentSource":22,"./ContentTracker":25,"./Runner":34}],36:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],37:[function(require,module,exports){
 "use strict";
 // Picker
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],39:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UIStepper = exports.UIButton = exports.UIDatePicker = exports.UITextField = exports.UIToggle = exports.UIMultiPicker = exports.UIPicker = void 0;
@@ -956,7 +1016,7 @@ exports.UIButton = UIButton;
 const UIStepper = (props) => (Object.assign(Object.assign({}, props), { type: UIElements_1.UIComponentType.STEPPER }));
 exports.UIStepper = UIStepper;
 
-},{"./UIElements":40}],40:[function(require,module,exports){
+},{"./UIElements":39}],39:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UIComponentType = void 0;
@@ -971,7 +1031,7 @@ var UIComponentType;
     UIComponentType[UIComponentType["DATEPICKER"] = 6] = "DATEPICKER";
 })(UIComponentType || (exports.UIComponentType = UIComponentType = {}));
 
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -993,9 +1053,9 @@ __exportStar(require("./UIElements"), exports);
 __exportStar(require("./UIDefinitions"), exports);
 __exportStar(require("./UIElementBuilders"), exports);
 
-},{"./Form":37,"./UIDefinitions":38,"./UIElementBuilders":39,"./UIElements":40}],42:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],43:[function(require,module,exports){
+},{"./Form":36,"./UIDefinitions":37,"./UIElementBuilders":38,"./UIElements":39}],41:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefinedLanguages = void 0;
@@ -1011,19 +1071,19 @@ var DefinedLanguages;
     DefinedLanguages["PORTUGUESE"] = "pt_BR";
 })(DefinedLanguages || (exports.DefinedLanguages = DefinedLanguages = {}));
 
-},{}],44:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],45:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],46:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],47:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],48:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],49:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],50:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],44:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],45:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],46:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],47:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],48:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContentType = exports.ReadingFlag = exports.ReadingMode = exports.PublicationStatus = void 0;
@@ -1064,13 +1124,13 @@ var ContentType;
     ContentType[ContentType["NOVEL"] = 4] = "NOVEL";
 })(ContentType || (exports.ContentType = ContentType = {}));
 
-},{}],51:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],52:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],53:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],54:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],51:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],52:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],53:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProviderLinkType = void 0;
@@ -1082,9 +1142,9 @@ var ProviderLinkType;
     ProviderLinkType[ProviderLinkType["PATREON"] = 3] = "PATREON";
 })(ProviderLinkType || (exports.ProviderLinkType = ProviderLinkType = {}));
 
-},{}],55:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],56:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],55:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1116,7 +1176,7 @@ __exportStar(require("./BooleanState"), exports);
 __exportStar(require("./ContentProgressState"), exports);
 __exportStar(require("./GroupedUpdatesResponse"), exports);
 
-},{"./BooleanState":42,"./Chapter":43,"./ChapterData":44,"./Collection":45,"./Content":46,"./ContentProgressState":47,"./ContextMenu":48,"./DeepLinkContext":49,"./Enums":50,"./GroupedUpdatesResponse":51,"./Highlight":52,"./Property":53,"./Provider":54,"./ReaderContext":55}],57:[function(require,module,exports){
+},{"./BooleanState":41,"./Chapter":42,"./ChapterData":43,"./Collection":44,"./Content":45,"./ContentProgressState":46,"./ContextMenu":47,"./DeepLinkContext":48,"./Enums":49,"./GroupedUpdatesResponse":50,"./Highlight":51,"./Property":52,"./Provider":53,"./ReaderContext":54}],56:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthMethod = void 0;
@@ -1128,11 +1188,11 @@ var AuthMethod;
     AuthMethod[AuthMethod["OAUTH"] = 3] = "OAUTH";
 })(AuthMethod || (exports.AuthMethod = AuthMethod = {}));
 
-},{}],58:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],59:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],60:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],58:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],59:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CatalogRating = void 0;
@@ -1155,7 +1215,7 @@ var CatalogRating;
     CatalogRating[CatalogRating["NSFW"] = 2] = "NSFW";
 })(CatalogRating || (exports.CatalogRating = CatalogRating = {}));
 
-},{}],61:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1177,9 +1237,9 @@ __exportStar(require("./RunnerInfo"), exports);
 __exportStar(require("./PagedResult"), exports);
 __exportStar(require("./ContextProvider"), exports);
 
-},{"./Authentication":57,"./ContextProvider":58,"./PagedResult":59,"./RunnerInfo":60}],62:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],63:[function(require,module,exports){
+},{"./Authentication":56,"./ContextProvider":57,"./PagedResult":58,"./RunnerInfo":59}],61:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],62:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FilterType = void 0;
@@ -1211,9 +1271,9 @@ var FilterType;
     FilterType[FilterType["INFO"] = 5] = "INFO";
 })(FilterType || (exports.FilterType = FilterType = {}));
 
-},{}],64:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],65:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],64:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1234,7 +1294,7 @@ __exportStar(require("./DirectoryConfig"), exports);
 __exportStar(require("./DirectoryRequest"), exports);
 __exportStar(require("./DirectoryFilter"), exports);
 
-},{"./DirectoryConfig":62,"./DirectoryFilter":63,"./DirectoryRequest":64}],66:[function(require,module,exports){
+},{"./DirectoryConfig":61,"./DirectoryFilter":62,"./DirectoryRequest":63}],65:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1262,7 +1322,7 @@ __exportStar(require("./page"), exports);
 const Generate = (v) => v;
 exports.Generate = Generate;
 
-},{"./UI":41,"./content":56,"./core":61,"./directory":65,"./networking":73,"./page":74,"./tracker":75}],67:[function(require,module,exports){
+},{"./UI":40,"./content":55,"./core":60,"./directory":64,"./networking":72,"./page":73,"./tracker":74}],66:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NetworkClientBuilder = void 0;
@@ -1384,11 +1444,11 @@ class NetworkClientBuilder {
 }
 exports.NetworkClientBuilder = NetworkClientBuilder;
 
-},{}],68:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],69:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],70:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],68:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],69:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1406,11 +1466,11 @@ const name = (base, known) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.name = name;
 
-},{}],71:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],72:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],73:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],71:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],72:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -1434,7 +1494,7 @@ __exportStar(require("./Response"), exports);
 __exportStar(require("./Transformer"), exports);
 __exportStar(require("./Error"), exports);
 
-},{"./Builder":67,"./Client":68,"./Error":69,"./Request":70,"./Response":71,"./Transformer":72}],74:[function(require,module,exports){
+},{"./Builder":66,"./Client":67,"./Error":68,"./Request":69,"./Response":70,"./Transformer":71}],73:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SectionStyle = void 0;
@@ -1450,7 +1510,7 @@ var SectionStyle;
     SectionStyle[SectionStyle["STANDARD_GRID"] = 7] = "STANDARD_GRID";
 })(SectionStyle || (exports.SectionStyle = SectionStyle = {}));
 
-},{}],75:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrackStatus = void 0;
