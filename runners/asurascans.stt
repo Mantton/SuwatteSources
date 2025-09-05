@@ -7,7 +7,7 @@ const template_1 = require("./template");
 const info = {
     id: "asurascans",
     name: "Asura Scans",
-    version: 0.2,
+    version: 0.33,
     website: "https://asuracomic.net",
     thumbnail: "asurascan.png",
 };
