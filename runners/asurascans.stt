@@ -7,7 +7,7 @@ const template_1 = require("./template");
 const info = {
     id: "asurascans",
     name: "Asura Scans",
-    version: 0.33,
+    version: 0.34,
     website: "https://asuracomic.net",
     thumbnail: "asurascan.png",
 };
@@ -187,6 +187,32 @@ class Template extends tachiyomi_1.TachiParsedHttpSource {
     }
     // Pages
     pageListParse(document) {
+        const scripts = document("script")
+            .toArray()
+            .filter((script) => document(script).text().includes("self.__next_f.push"))
+            .map((script) => document(script).text())
+            .join("");
+        const re = /\\"pages\\":(\[.*?\])/;
+        const pagesJSON = scripts.match(re);
+        if (pagesJSON) {
+            const json = JSON.parse(pagesJSON[1].replaceAll('\\"', '"'));
+            const pages = json.map((value) => {
+                return value.url;
+            });
+            if (pages.length != 0) {
+                return pages;
+            }
+        }
+        const pages = [];
+        for (const image of document('img[alt*="chapter"]').toArray()) {
+            const img = document(image).attr("src") ?? "";
+            if (!img)
+                continue;
+            pages.push(img);
+        }
+        if (pages.length != 0) {
+            return pages;
+        }
         // 1) Try __NEXT_DATA__ JSON structure if present
         const nextDataRaw = document("script#__NEXT_DATA__").text();
         if (nextDataRaw) {
@@ -289,7 +315,7 @@ class Template extends tachiyomi_1.TachiParsedHttpSource {
             return arr.filter((u) => /^https?:\/\//.test(u));
         }
         const urls = arr
-            .map((v) => (v && typeof v === "object" ? (v.url ?? v.src ?? "") : ""))
+            .map((v) => (v && typeof v === "object" ? v.url ?? v.src ?? "" : ""))
             .filter((u) => typeof u === "string" && /^https?:\/\//.test(u));
         return urls;
     }
